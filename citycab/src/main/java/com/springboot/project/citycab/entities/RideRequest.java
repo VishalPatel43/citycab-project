@@ -34,9 +34,22 @@ public class RideRequest {
     @Enumerated(EnumType.STRING)
     private RideRequestStatus rideRequestStatus;
 
+    private Double fare;
+
     @ManyToOne(fetch = FetchType.LAZY) // Many RideRequests can be associated with one Rider
     @JoinColumn(name = "rider_id")
     private Rider rider; // One Rider can have many RideRequests
 
-
+//    @Override
+//    public String toString() {
+//        return "RideRequest{" +
+//                "rideRequestId=" + rideRequestId +
+//                ", pickupLocation=" + pickupLocation +
+//                ", dropOffLocation=" + dropOffLocation +
+//                ", requestedTime=" + requestedTime +
+//                ", paymentMethod=" + paymentMethod +
+//                ", rideRequestStatus=" + rideRequestStatus +
+//                ", rider=" + rider +
+//                '}';
+//    }
 }

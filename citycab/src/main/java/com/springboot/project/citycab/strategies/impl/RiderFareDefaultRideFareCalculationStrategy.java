@@ -1,14 +1,21 @@
 package com.springboot.project.citycab.strategies.impl;
 
-import com.springboot.project.citycab.dto.RideRequestDTO;
+import com.springboot.project.citycab.entities.RideRequest;
+import com.springboot.project.citycab.services.DistanceService;
 import com.springboot.project.citycab.strategies.RideFareCalculationStrategy;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 @Service
+@RequiredArgsConstructor
 public class RiderFareDefaultRideFareCalculationStrategy implements RideFareCalculationStrategy {
 
+    private final DistanceService distanceService;
+
     @Override
-    public double calculateFare(RideRequestDTO rideRequestDTO) {
-        return 0;
+    public double calculateFare(RideRequest rideRequest) {
+        Double distance = distanceService.calculateDistance(rideRequest.getPickupLocation(),
+                rideRequest.getDropOffLocation());
+        return distance * RIDE_FARE_MULTIPLIER;
     }
 }

@@ -5,7 +5,6 @@ import com.springboot.project.citycab.entities.enums.RideRequestStatus;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import org.locationtech.jts.geom.Point;
 
 import java.time.LocalDateTime;
 
@@ -16,15 +15,19 @@ public class RideRequestDTO {
 
     private Long rideRequestId;
 
-    private Point pickupLocation;
+    private PointDTO pickupLocation;
 
-    private Point dropOffLocation;
+    private PointDTO dropOffLocation;
 
     private LocalDateTime requestedTime;
 
     private PaymentMethod paymentMethod;
 
+    private Double fare;
+
     private RideRequestStatus rideRequestStatus;
 
     private RiderDTO rider;
+
+
 }

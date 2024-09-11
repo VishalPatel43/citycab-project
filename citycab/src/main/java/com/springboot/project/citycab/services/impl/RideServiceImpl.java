@@ -1,38 +1,44 @@
 package com.springboot.project.citycab.services.impl;
 
-import com.springboot.project.citycab.dto.DriverDTO;
-import com.springboot.project.citycab.dto.RideDTO;
 import com.springboot.project.citycab.dto.RideRequestDTO;
-import com.springboot.project.citycab.dto.RiderDTO;
-import com.springboot.project.citycab.services.RiderService;
+import com.springboot.project.citycab.entities.Driver;
+import com.springboot.project.citycab.entities.Ride;
+import com.springboot.project.citycab.entities.enums.RideStatus;
+import com.springboot.project.citycab.services.RideService;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 
-import java.util.List;
-
 @Service
-public class RideServiceImpl implements RiderService {
+public class RideServiceImpl implements RideService {
+
     @Override
-    public RideRequestDTO requestRide(RideRequestDTO rideRequestDTO) {
+    public Ride getRideById(Long rideId) {
         return null;
     }
 
     @Override
-    public RideDTO cancelRide(Long rideId) {
+    public void matchWithDrivers(RideRequestDTO rideRequestDTO) {
+
+    }
+
+    @Override
+    public Ride createNewRide(RideRequestDTO rideRequestDTO, Driver driver) {
         return null;
     }
 
     @Override
-    public DriverDTO rateDriver(Long rideId, Integer rating) {
+    public Ride updateRideStatus(Long rideId, RideStatus rideStatus) {
         return null;
     }
 
     @Override
-    public RiderDTO getMyProfile() {
+    public Page<Ride> getAllRidesOfRider(Long riderId, PageRequest pageRequest) {
         return null;
     }
 
     @Override
-    public List<RideDTO> getAllMyRides() {
-        return List.of();
+    public Page<Ride> getAllRidesOfDriver(Long driverId, PageRequest pageRequest) {
+        return null;
     }
 }
