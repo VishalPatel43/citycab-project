@@ -2,15 +2,19 @@ package com.springboot.project.citycab.entities;
 
 import com.springboot.project.citycab.entities.enums.Role;
 import jakarta.persistence.*;
+import lombok.AllArgsConstructor;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 import java.util.Set;
 
-@Getter
-@Setter
 @Entity
 @Table(name = "app_user")
+@AllArgsConstructor
+@NoArgsConstructor
+@Getter
+@Setter
 public class User {
 
     @Id

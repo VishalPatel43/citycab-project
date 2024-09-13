@@ -5,8 +5,11 @@ import com.springboot.project.citycab.dto.RideDTO;
 import com.springboot.project.citycab.dto.RideRequestDTO;
 import com.springboot.project.citycab.dto.RiderDTO;
 import com.springboot.project.citycab.entities.RideRequest;
+import com.springboot.project.citycab.entities.Rider;
+import com.springboot.project.citycab.entities.User;
 import com.springboot.project.citycab.entities.enums.RideRequestStatus;
 import com.springboot.project.citycab.repositories.RideRequestRepository;
+import com.springboot.project.citycab.repositories.RiderRepository;
 import com.springboot.project.citycab.services.RiderService;
 import com.springboot.project.citycab.strategies.DriverMatchingStrategy;
 import com.springboot.project.citycab.strategies.RideFareCalculationStrategy;
@@ -26,6 +29,7 @@ public class RiderServiceImpl implements RiderService {
     private final RideFareCalculationStrategy rideFareCalculationStrategy;
     private final DriverMatchingStrategy driverMatchingStrategy;
     private final RideRequestRepository rideRequestRepository;
+    private final RiderRepository riderRepository;
 
     @Override
     public RideRequestDTO requestRide(RideRequestDTO rideRequestDTO) {
@@ -44,7 +48,6 @@ public class RiderServiceImpl implements RiderService {
         // broadcast the ride request to all drivers
         // find the matching driver
         driverMatchingStrategy.findMatchingDriver(rideRequest);
-
         return modelMapper.map(savedRideRequest, RideRequestDTO.class);
     }
 
@@ -66,5 +69,15 @@ public class RiderServiceImpl implements RiderService {
     @Override
     public List<RideDTO> getAllMyRides() {
         return List.of();
+    }
+
+    @Override
+    public Rider createNewRider(User user) {
+        Rider rider = Rider
+                .builder()
+                .user(user)
+                .rating(0.0)
+                .build();
+        return riderRepository.save(rider);
     }
 }

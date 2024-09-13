@@ -4,6 +4,8 @@ import com.springboot.project.citycab.dto.DriverDTO;
 import com.springboot.project.citycab.dto.RideDTO;
 import com.springboot.project.citycab.dto.RideRequestDTO;
 import com.springboot.project.citycab.dto.RiderDTO;
+import com.springboot.project.citycab.entities.Rider;
+import com.springboot.project.citycab.entities.User;
 
 import java.util.List;
 
@@ -18,4 +20,6 @@ public interface RiderService {
     RiderDTO getMyProfile();
 
     List<RideDTO> getAllMyRides();
+
+    Rider createNewRider(User user);
 }

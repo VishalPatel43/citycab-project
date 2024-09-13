@@ -13,11 +13,6 @@ public class RiderController {
 
     private final RiderService riderService;
 
-    @GetMapping(path = "/test")
-    public ResponseEntity<?> test() {
-        return ResponseEntity.ok("Rider Controller works");
-    }
-
     @PostMapping(path = "/requestRide")
     public ResponseEntity<RideRequestDTO> requestRide(
             @RequestBody RideRequestDTO rideRequestDTO) {
