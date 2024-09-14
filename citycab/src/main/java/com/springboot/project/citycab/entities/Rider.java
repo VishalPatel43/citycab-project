@@ -15,6 +15,7 @@ public class Rider {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long riderId;
 
+    // Why rating in Rider entity?
     private Double rating;
 
     private Boolean available;

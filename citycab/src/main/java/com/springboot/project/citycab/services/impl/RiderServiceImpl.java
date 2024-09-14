@@ -8,11 +8,13 @@ import com.springboot.project.citycab.entities.RideRequest;
 import com.springboot.project.citycab.entities.Rider;
 import com.springboot.project.citycab.entities.User;
 import com.springboot.project.citycab.entities.enums.RideRequestStatus;
+import com.springboot.project.citycab.exceptions.ResourceNotFoundException;
 import com.springboot.project.citycab.repositories.RideRequestRepository;
 import com.springboot.project.citycab.repositories.RiderRepository;
 import com.springboot.project.citycab.services.RiderService;
 import com.springboot.project.citycab.strategies.DriverMatchingStrategy;
 import com.springboot.project.citycab.strategies.RideFareCalculationStrategy;
+import com.springboot.project.citycab.strategies.RideStrategyManager;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -27,8 +29,7 @@ import java.util.List;
 public class RiderServiceImpl implements RiderService {
 
     private final ModelMapper modelMapper;
-    private final RideFareCalculationStrategy rideFareCalculationStrategy;
-    private final DriverMatchingStrategy driverMatchingStrategy;
+    private final RideStrategyManager rideStrategyManager;
     private final RideRequestRepository rideRequestRepository;
     private final RiderRepository riderRepository;
 
@@ -36,20 +37,26 @@ public class RiderServiceImpl implements RiderService {
     @Transactional
     public RideRequestDTO requestRide(RideRequestDTO rideRequestDTO) {
 
+        Rider rider = getCurrentRider();
+
         RideRequest rideRequest = modelMapper.map(rideRequestDTO, RideRequest.class);
 //        log.info("Ride request received: {}", rideRequest);
 //        log.info(rideRequest.toString());
 
         rideRequest.setRideRequestStatus(RideRequestStatus.PENDING);
 
+//        Double fare = rideStrategyManager.rideFareCalculationStrategy().calculateFare(rideRequest);
+        RideFareCalculationStrategy rideFareCalculationStrategy = rideStrategyManager.rideFareCalculationStrategy();
         Double fare = rideFareCalculationStrategy.calculateFare(rideRequest);
         rideRequest.setFare(fare);
 
         RideRequest savedRideRequest = rideRequestRepository.save(rideRequest);
 
+        // Why we use rating of rider to find the driver?
         // broadcast the ride request to all drivers
         // find the matching driver
-        driverMatchingStrategy.findMatchingDriver(rideRequest);
+//        rideStrategyManager.driverMatchingStrategy().findMatchingDriver(rideRequest);
+        DriverMatchingStrategy driverMatchingStrategy = rideStrategyManager.driverMatchingStrategy(rider.getRating());
         return modelMapper.map(savedRideRequest, RideRequestDTO.class);
     }
 
@@ -81,5 +88,18 @@ public class RiderServiceImpl implements RiderService {
                 .rating(0.0)
                 .build();
         return riderRepository.save(rider);
+    }
+
+    // Using Spring Security, we get the context of the current user and get the rider
+    @Override
+    public Rider getCurrentRider() {
+        // TODO: implement Spring Security
+
+        // currently we are returning with riderId = 1
+        return riderRepository
+                .findById(1L)
+                .orElseThrow(
+                        () -> new ResourceNotFoundException("Rider not found with id: 1")
+                );
     }
 }

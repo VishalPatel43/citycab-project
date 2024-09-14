@@ -13,6 +13,12 @@ public class RideFareSurgePricingRideFareCalculationStrategy implements RideFare
     private final DistanceService distanceService;
     private static final double SURGE_FACTOR = 1.5;
 
+    // We can put many conditions here such as for weather, traffic, etc.
+    // various strategies to calculate for the surge pricing
+    // We can also use the third party API to get the surge pricing --> Find Rain and change the surge factor
+    // Night time we can change the surge factor
+    // Availability of the drivers can also change the surge factor
+
     @Override
     public double calculateFare(RideRequest rideRequest) {
 

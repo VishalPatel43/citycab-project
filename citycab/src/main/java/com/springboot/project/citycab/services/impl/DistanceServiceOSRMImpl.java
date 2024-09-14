@@ -17,6 +17,8 @@ public class DistanceServiceOSRMImpl implements DistanceService {
 
     // Link: https://router.project-osrm.org/route/v1/driving/13.388860,52.517037;13.397634,52.529407;13.428555,52.523219?overview=false
     // source, destination, waypoint (calculate with other points) -> latitude,longitude -> 13.388860,52.517037;13.397634,52.529407;13.428555,52.523219
+    // checking source to destination
+    // https://map.project-osrm.org/
 
     // but we need only source and destination (only 1 point)
     private static final String OSRM_API_URL = "https://router.project-osrm.org/route/v1/driving/";
@@ -26,6 +28,7 @@ public class DistanceServiceOSRMImpl implements DistanceService {
 
         // We use RestClient only for this method so don't need to create a separate config for this
         // getX and getY are the latitude and longitude
+        // RestClient --> synchronous method
         try {
             String uri = src.getX() + "," + src.getY() + ";" + dest.getX() + "," + dest.getY();
             OSRMResponseDTO osrmResponseDTO = RestClient.builder()
