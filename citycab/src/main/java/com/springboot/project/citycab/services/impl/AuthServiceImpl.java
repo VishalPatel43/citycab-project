@@ -10,6 +10,7 @@ import com.springboot.project.citycab.exceptions.RuntimeConflictException;
 import com.springboot.project.citycab.repositories.UserRepository;
 import com.springboot.project.citycab.services.AuthService;
 import com.springboot.project.citycab.services.RiderService;
+import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.modelmapper.ModelMapper;
 import org.springframework.stereotype.Service;
@@ -30,6 +31,7 @@ public class AuthServiceImpl implements AuthService {
     }
 
     @Override
+    @Transactional
     public UserDTO singUp(SignUpDTO signUpDTO) {
 
         User user = userRepository.findByEmail(signUpDTO.getEmail()).orElse(null);

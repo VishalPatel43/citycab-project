@@ -13,6 +13,7 @@ import com.springboot.project.citycab.repositories.RiderRepository;
 import com.springboot.project.citycab.services.RiderService;
 import com.springboot.project.citycab.strategies.DriverMatchingStrategy;
 import com.springboot.project.citycab.strategies.RideFareCalculationStrategy;
+import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.modelmapper.ModelMapper;
@@ -32,6 +33,7 @@ public class RiderServiceImpl implements RiderService {
     private final RiderRepository riderRepository;
 
     @Override
+    @Transactional
     public RideRequestDTO requestRide(RideRequestDTO rideRequestDTO) {
 
         RideRequest rideRequest = modelMapper.map(rideRequestDTO, RideRequest.class);

@@ -1,5 +1,6 @@
 package com.springboot.project.citycab.advices;
 
+import com.springboot.project.citycab.exceptions.OSRMServiceException;
 import com.springboot.project.citycab.exceptions.ResourceNotFoundException;
 import com.springboot.project.citycab.exceptions.RuntimeConflictException;
 import org.springframework.context.support.DefaultMessageSourceResolvable;
@@ -37,6 +38,17 @@ public class GlobalExceptionHandler {
         return buildErrorResponseEntity(exception,
                 HttpStatus.CONFLICT,
                 exception.getMessage(), // exception.getLocalizedMessage()
+                request,
+                null
+        );
+    }
+
+    @ExceptionHandler(OSRMServiceException.class)
+    public ResponseEntity<ApiResponse<?>> handleOSRMServiceException(OSRMServiceException exception,
+                                                                     WebRequest request) {
+        return buildErrorResponseEntity(exception,
+                HttpStatus.SERVICE_UNAVAILABLE,  // You can change this status code if needed
+                exception.getMessage(),
                 request,
                 null
         );
