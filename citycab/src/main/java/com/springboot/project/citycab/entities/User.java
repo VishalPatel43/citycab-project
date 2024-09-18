@@ -44,4 +44,15 @@ public class User {
 
 //    @OneToOne(mappedBy = "user")
 //    private Driver driver;
+
+    @Override
+    public String toString() {
+        return "User{" +
+                "userId=" + userId +
+                ", name='" + name + '\'' +
+                ", email='" + email + '\'' +
+                ", password='" + password + '\'' +
+                ", roles=" + roles +
+                '}';
+    }
 }

@@ -11,6 +11,7 @@ public class GeometryUtil {
     public static Point createPoint(PointDTO pointDTO) {
         // 4326 is the SRID (Spatial Reference Identifier) for WGS 84 --> Earth
         GeometryFactory geometryFactory = new GeometryFactory(new PrecisionModel(), 4326);
+
 //        Coordinate coordinate = new Coordinate(pointDTO.getCoordinates()[0],
 //                pointDTO.getCoordinates()[1]
 //        );

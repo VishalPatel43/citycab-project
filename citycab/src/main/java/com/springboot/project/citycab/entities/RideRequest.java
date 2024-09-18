@@ -44,16 +44,16 @@ public class RideRequest {
     @JoinColumn(name = "rider_id")
     private Rider rider; // One Rider can have many RideRequests
 
-//    @Override
-//    public String toString() {
-//        return "RideRequest{" +
-//                "rideRequestId=" + rideRequestId +
-//                ", pickupLocation=" + pickupLocation +
-//                ", dropOffLocation=" + dropOffLocation +
-//                ", requestedTime=" + requestedTime +
-//                ", paymentMethod=" + paymentMethod +
-//                ", rideRequestStatus=" + rideRequestStatus +
-//                ", rider=" + rider +
-//                '}';
-//    }
+    @Override
+    public String toString() {
+        return "RideRequest{" +
+                "rideRequestId=" + rideRequestId +
+                ", pickupLocation=" + pickupLocation +
+                ", dropOffLocation=" + dropOffLocation +
+                ", requestedTime=" + requestedTime +
+                ", paymentMethod=" + paymentMethod +
+                ", rideRequestStatus=" + rideRequestStatus +
+                ", rider=" + rider +
+                '}';
+    }
 }

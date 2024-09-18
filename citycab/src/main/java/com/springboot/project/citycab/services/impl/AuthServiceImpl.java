@@ -10,10 +10,10 @@ import com.springboot.project.citycab.exceptions.RuntimeConflictException;
 import com.springboot.project.citycab.repositories.UserRepository;
 import com.springboot.project.citycab.services.AuthService;
 import com.springboot.project.citycab.services.RiderService;
-import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.modelmapper.ModelMapper;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Set;
 
@@ -21,9 +21,12 @@ import java.util.Set;
 @RequiredArgsConstructor
 public class AuthServiceImpl implements AuthService {
 
-    private final ModelMapper modelMapper;
+    // Repository
     private final UserRepository userRepository;
+    // Service
     private final RiderService riderService;
+    // Mapper
+    private final ModelMapper modelMapper;
 
     @Override
     public String login(String email, String password) {

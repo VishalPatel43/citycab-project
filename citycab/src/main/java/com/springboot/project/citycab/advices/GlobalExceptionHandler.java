@@ -6,6 +6,7 @@ import com.springboot.project.citycab.exceptions.RuntimeConflictException;
 import org.springframework.context.support.DefaultMessageSourceResolvable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.orm.jpa.JpaSystemException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
@@ -54,6 +55,19 @@ public class GlobalExceptionHandler {
         );
     }
 
+    @ExceptionHandler(JpaSystemException.class)
+    public ResponseEntity<ApiResponse<?>> handleJpaSystemException(JpaSystemException exception, WebRequest request) {
+//        String message = "Database error: Invalid endian flag value encountered while executing the statement.";
+
+        return buildErrorResponseEntity(exception,
+                HttpStatus.INTERNAL_SERVER_ERROR,
+//                message,
+                exception.getMessage(),
+                request,
+                null);
+    }
+
+
     @ExceptionHandler(MethodArgumentNotValidException.class)
     public ResponseEntity<ApiResponse<?>> handleInputValidationErrors(MethodArgumentNotValidException exception,
                                                                       WebRequest request) {
@@ -71,6 +85,10 @@ public class GlobalExceptionHandler {
                 errors
         );
     }
+
+    // Create the Different Type of Exception for the different type of throws exception like
+    // RuntimeException for RideRequest cannot be accepted, status is PENDING
+    // RuntimeException for Driver cannot accept ride due to unavailability
 
     @ExceptionHandler(Exception.class)
     public ResponseEntity<ApiResponse<?>> handleInternalServerError(Exception exception,

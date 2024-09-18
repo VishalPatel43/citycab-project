@@ -4,22 +4,23 @@ import com.springboot.project.citycab.dto.DriverDTO;
 import com.springboot.project.citycab.dto.RideDTO;
 import com.springboot.project.citycab.dto.RideRequestDTO;
 import com.springboot.project.citycab.dto.RiderDTO;
+import com.springboot.project.citycab.entities.Driver;
 import com.springboot.project.citycab.entities.RideRequest;
 import com.springboot.project.citycab.entities.Rider;
 import com.springboot.project.citycab.entities.User;
 import com.springboot.project.citycab.entities.enums.RideRequestStatus;
 import com.springboot.project.citycab.exceptions.ResourceNotFoundException;
-import com.springboot.project.citycab.repositories.RideRequestRepository;
 import com.springboot.project.citycab.repositories.RiderRepository;
+import com.springboot.project.citycab.services.RideRequestService;
 import com.springboot.project.citycab.services.RiderService;
 import com.springboot.project.citycab.strategies.DriverMatchingStrategy;
 import com.springboot.project.citycab.strategies.RideFareCalculationStrategy;
 import com.springboot.project.citycab.strategies.RideStrategyManager;
-import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.modelmapper.ModelMapper;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 
@@ -28,20 +29,23 @@ import java.util.List;
 @Slf4j
 public class RiderServiceImpl implements RiderService {
 
-    private final ModelMapper modelMapper;
-    private final RideStrategyManager rideStrategyManager;
-    private final RideRequestRepository rideRequestRepository;
+    // Repository
     private final RiderRepository riderRepository;
+    // Service
+    private final RideRequestService rideRequestService;
+    // Strategy
+    private final RideStrategyManager rideStrategyManager;
+    // Mapper
+    private final ModelMapper modelMapper;
+
 
     @Override
     @Transactional
     public RideRequestDTO requestRide(RideRequestDTO rideRequestDTO) {
 
         Rider rider = getCurrentRider();
-
         RideRequest rideRequest = modelMapper.map(rideRequestDTO, RideRequest.class);
-//        log.info("Ride request received: {}", rideRequest);
-//        log.info(rideRequest.toString());
+        rideRequest.setRider(rider);
 
         rideRequest.setRideRequestStatus(RideRequestStatus.PENDING);
 
@@ -50,13 +54,23 @@ public class RiderServiceImpl implements RiderService {
         Double fare = rideFareCalculationStrategy.calculateFare(rideRequest);
         rideRequest.setFare(fare);
 
-        RideRequest savedRideRequest = rideRequestRepository.save(rideRequest);
+        // For this we have to create the RideRequestService to save the rideRequest
+        RideRequest savedRideRequest = rideRequestService.saveRideRequest(rideRequest);
 
-        // Why we use rating of rider to find the driver?
+        // Why do we use the rating of rider to find the driver?
         // broadcast the ride request to all drivers
         // find the matching driver
 //        rideStrategyManager.driverMatchingStrategy().findMatchingDriver(rideRequest);
-        DriverMatchingStrategy driverMatchingStrategy = rideStrategyManager.driverMatchingStrategy(rider.getRating());
+
+        // TODO: It should be the Driver rating should >= 4.8 rating
+        DriverMatchingStrategy driverMatchingStrategy = rideStrategyManager
+                .driverMatchingStrategy(rider.getRating()); // Here use the avg rating given to the driver by the rider
+        List<Driver> drivers = driverMatchingStrategy.findMatchingDriver(rideRequest);
+
+        // TODO: Send notification to all the drivers about this ride request
+
+
+        // Here we save the ride request and
         return modelMapper.map(savedRideRequest, RideRequestDTO.class);
     }
 
@@ -80,6 +94,7 @@ public class RiderServiceImpl implements RiderService {
         return List.of();
     }
 
+    @Transactional
     @Override
     public Rider createNewRider(User user) {
         Rider rider = Rider

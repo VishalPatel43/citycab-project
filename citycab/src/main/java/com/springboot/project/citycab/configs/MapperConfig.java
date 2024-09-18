@@ -22,6 +22,7 @@ public class MapperConfig {
 
         // context is there is some information about the conversion
         // PointDTO to Point
+
         mapper.typeMap(PointDTO.class, Point.class).setConverter(context -> {
             PointDTO pointDTO = context.getSource();
             return GeometryUtil.createPoint(pointDTO);
