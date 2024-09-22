@@ -1,7 +1,11 @@
 package com.springboot.project.citycab.entities;
 
+import com.fasterxml.jackson.annotation.JsonInclude;
+import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import com.springboot.project.citycab.entities.enums.PaymentMethod;
 import com.springboot.project.citycab.entities.enums.RideStatus;
+import com.springboot.project.citycab.entities.enums.Role;
+import com.springboot.project.citycab.serializers.PointSerializer;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -17,15 +21,18 @@ import java.time.LocalDateTime;
 @NoArgsConstructor
 @Getter
 @Setter
+@JsonInclude(JsonInclude.Include.NON_NULL)  // Ignore null fields
 public class Ride {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long rideId;
 
+    @JsonSerialize(using = PointSerializer.class)  // Use custom serializer
     @Column(columnDefinition = "Geometry(Point, 4326)")
     private Point pickupLocation;
 
+    @JsonSerialize(using = PointSerializer.class)  // Use custom serializer
     @Column(columnDefinition = "Geometry(Point, 4326)")
     private Point dropOffLocation;
 
@@ -45,6 +52,11 @@ public class Ride {
     private LocalDateTime startedAt;
 
     private LocalDateTime endedAt;
+
+    private LocalDateTime cancelledAt;
+
+    @Enumerated(EnumType.STRING)
+    private Role cancelledBy;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "rider_id")

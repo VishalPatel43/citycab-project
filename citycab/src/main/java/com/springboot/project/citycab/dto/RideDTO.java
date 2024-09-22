@@ -1,17 +1,19 @@
 package com.springboot.project.citycab.dto;
 
+import com.fasterxml.jackson.annotation.JsonInclude;
 import com.springboot.project.citycab.entities.enums.PaymentMethod;
 import com.springboot.project.citycab.entities.enums.RideStatus;
+import com.springboot.project.citycab.entities.enums.Role;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import org.locationtech.jts.geom.Point;
 
 import java.time.LocalDateTime;
 
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
+@JsonInclude(JsonInclude.Include.NON_NULL)  // Ignore null fields
 public class RideDTO {
 
     private Long rideId;
@@ -33,6 +35,10 @@ public class RideDTO {
     private LocalDateTime startedAt;
 
     private LocalDateTime endedAt;
+
+    private LocalDateTime cancelledAt;
+
+    private Role cancelledBy;
 
     private DriverDTO driver;
 

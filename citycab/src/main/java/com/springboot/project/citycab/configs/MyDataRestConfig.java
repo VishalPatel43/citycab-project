@@ -25,13 +25,19 @@ public class MyDataRestConfig implements RepositoryRestConfigurer {
                 HttpMethod.PUT
         };
 
+        // Set custom base path for default methods
+        config.setBasePath("/entities");
+
         // Array of all entity classes to expose IDs for and disable HTTP methods
         Class<?>[] entityClasses = {
                 Driver.class,
                 Ride.class,
                 RideRequest.class,
                 Rider.class,
-                User.class
+                User.class,
+                Wallet.class,
+                WalletTransaction.class,
+                Payment.class
         };
 
         // Expose entity IDs

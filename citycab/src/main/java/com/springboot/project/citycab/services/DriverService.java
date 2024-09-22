@@ -4,6 +4,8 @@ import com.springboot.project.citycab.dto.DriverDTO;
 import com.springboot.project.citycab.dto.RideDTO;
 import com.springboot.project.citycab.entities.Driver;
 import org.locationtech.jts.geom.Point;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 
 import java.util.List;
 
@@ -22,7 +24,7 @@ public interface DriverService {
 
     DriverDTO getMyProfile();
 
-    List<RideDTO> getAllMyRides();
+    Page<RideDTO> getAllMyRides(PageRequest pageRequest);
 
     Driver getCurrentDriver();
 
@@ -30,4 +32,5 @@ public interface DriverService {
 
     List<Driver> findTenNearbyTopRatedDrivers(Point pickupLocation);
 
+    Driver updateDriverAvailability(Driver driver, Boolean available);
 }

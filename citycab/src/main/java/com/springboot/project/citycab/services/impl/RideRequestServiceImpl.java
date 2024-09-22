@@ -15,8 +15,8 @@ public class RideRequestServiceImpl implements RideRequestService {
     // Repository
     private final RideRequestRepository rideRequestRepository;
 
-    @Transactional
     @Override
+    @Transactional
     public RideRequest saveRideRequest(RideRequest rideRequest) {
         return rideRequestRepository.save(rideRequest);
     }
@@ -29,8 +29,8 @@ public class RideRequestServiceImpl implements RideRequestService {
                 );
     }
 
-    @Transactional
     @Override
+    @Transactional
     public RideRequest updateRideRequest(RideRequest rideRequest) {
         rideRequestRepository
                 .findById(rideRequest.getRideRequestId())

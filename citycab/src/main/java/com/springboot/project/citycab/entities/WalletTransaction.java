@@ -1,11 +1,9 @@
 package com.springboot.project.citycab.entities;
 
+import com.springboot.project.citycab.entities.enums.TransactionMethod;
 import com.springboot.project.citycab.entities.enums.TransactionType;
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import lombok.*;
 import org.hibernate.annotations.CreationTimestamp;
 
 import java.time.LocalDateTime;
@@ -15,6 +13,7 @@ import java.time.LocalDateTime;
 @NoArgsConstructor
 @Getter
 @Setter
+@Builder
 public class WalletTransaction {
 
     @Id
@@ -26,7 +25,11 @@ public class WalletTransaction {
     @Enumerated(EnumType.STRING)
     private TransactionType transactionType;
 
-    @OneToOne
+    @Enumerated(EnumType.STRING)
+    private TransactionMethod transactionMethod;
+
+    @ManyToOne
+    @JoinColumn(name = "ride_id")
     private Ride ride; // each transaction is associated with a ride
 
     private String transactionId; // UTR number
@@ -36,5 +39,6 @@ public class WalletTransaction {
 
     // One Wallet can have multiple transactions
     @ManyToOne
+    @JoinColumn(name = "wallet_id")
     private Wallet wallet;
 }

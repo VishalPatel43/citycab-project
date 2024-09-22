@@ -1,7 +1,9 @@
 package com.springboot.project.citycab.entities;
 
+import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import com.springboot.project.citycab.entities.enums.PaymentMethod;
 import com.springboot.project.citycab.entities.enums.RideRequestStatus;
+import com.springboot.project.citycab.serializers.PointSerializer;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -23,9 +25,11 @@ public class RideRequest {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long rideRequestId;
 
+    @JsonSerialize(using = PointSerializer.class)  // Use custom serializer
     @Column(columnDefinition = "Geometry(Point, 4326)")
     private Point pickupLocation;
 
+    @JsonSerialize(using = PointSerializer.class)  // Use custom serializer
     @Column(columnDefinition = "Geometry(Point, 4326)")
     private Point dropOffLocation;
 

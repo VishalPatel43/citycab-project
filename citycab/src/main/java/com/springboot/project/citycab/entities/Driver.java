@@ -1,5 +1,7 @@
 package com.springboot.project.citycab.entities;
 
+import com.fasterxml.jackson.databind.annotation.JsonSerialize;
+import com.springboot.project.citycab.serializers.PointSerializer;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -22,6 +24,7 @@ public class Driver {
 
     private Boolean available;
 
+    @JsonSerialize(using = PointSerializer.class)  // Use custom serializer
     @Column(columnDefinition = "Geometry(Point, 4326)")
     private Point currentLocation;
 
@@ -33,4 +36,16 @@ public class Driver {
     // One to One mapping with Vehicle Entity
     // Vehicle Type, Vehicle Number, Vehicle Model, Vehicle Color, etc.
 
+    // Custom getter to serialize the Point as PointDTO
+//    public PointDTO getCurrentLocation() {
+//        if (currentLocation != null) {
+//            return new PointDTO(
+//                    new double[]{
+//                            currentLocation.getX(),
+//                            currentLocation.getY()
+//                    }
+//            );
+//        }
+//        return null;
+//    }
 }

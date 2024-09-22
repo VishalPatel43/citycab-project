@@ -34,6 +34,7 @@ public class Payment {
     private LocalDateTime paymentTime;
 
     @OneToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "ride_id")
     private Ride ride;
 
 }

@@ -4,14 +4,14 @@ import com.springboot.project.citycab.dto.DriverDTO;
 import com.springboot.project.citycab.dto.RideDTO;
 import com.springboot.project.citycab.dto.RideRequestDTO;
 import com.springboot.project.citycab.dto.RiderDTO;
-import com.springboot.project.citycab.entities.Driver;
-import com.springboot.project.citycab.entities.RideRequest;
-import com.springboot.project.citycab.entities.Rider;
-import com.springboot.project.citycab.entities.User;
+import com.springboot.project.citycab.entities.*;
 import com.springboot.project.citycab.entities.enums.RideRequestStatus;
+import com.springboot.project.citycab.entities.enums.RideStatus;
 import com.springboot.project.citycab.exceptions.ResourceNotFoundException;
 import com.springboot.project.citycab.repositories.RiderRepository;
+import com.springboot.project.citycab.services.DriverService;
 import com.springboot.project.citycab.services.RideRequestService;
+import com.springboot.project.citycab.services.RideService;
 import com.springboot.project.citycab.services.RiderService;
 import com.springboot.project.citycab.strategies.DriverMatchingStrategy;
 import com.springboot.project.citycab.strategies.RideFareCalculationStrategy;
@@ -19,6 +19,8 @@ import com.springboot.project.citycab.strategies.RideStrategyManager;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.modelmapper.ModelMapper;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -33,6 +35,8 @@ public class RiderServiceImpl implements RiderService {
     private final RiderRepository riderRepository;
     // Service
     private final RideRequestService rideRequestService;
+    private final RideService rideService;
+    private final DriverService driverService;
     // Strategy
     private final RideStrategyManager rideStrategyManager;
     // Mapper
@@ -75,27 +79,47 @@ public class RiderServiceImpl implements RiderService {
     }
 
     @Override
+    @Transactional
     public RideDTO cancelRide(Long rideId) {
-        return null;
+
+        Rider rider = getCurrentRider();
+        Ride ride = rideService.getRideById(rideId);
+
+        if (!rider.equals(ride.getRider()))
+            throw new RuntimeException(("Rider does not own this ride with id: " + rideId));
+
+        if (!ride.getRideStatus().equals(RideStatus.CONFIRMED))
+            throw new RuntimeException("Ride cannot be cancelled, invalid status: " + ride.getRideStatus());
+
+        Ride savedRide = rideService.updateRideStatus(ride, RideStatus.CANCELLED);
+        driverService.updateDriverAvailability(ride.getDriver(), true);
+
+        return modelMapper.map(savedRide, RideDTO.class);
     }
 
     @Override
+    @Transactional
     public DriverDTO rateDriver(Long rideId, Integer rating) {
         return null;
     }
 
     @Override
     public RiderDTO getMyProfile() {
-        return null;
+        Rider currentRider = getCurrentRider();
+        return modelMapper.map(currentRider, RiderDTO.class);
+    }
+
+    // All the rides of the rider
+    @Override
+    public Page<RideDTO> getAllMyRides(PageRequest pageRequest) {
+        Rider currentRider = getCurrentRider();
+        return rideService
+                .getAllRidesOfRider(currentRider, pageRequest)
+                .map(ride -> modelMapper.map(ride, RideDTO.class));
     }
 
     @Override
-    public List<RideDTO> getAllMyRides() {
-        return List.of();
-    }
-
     @Transactional
-    @Override
     public Rider createNewRider(User user) {
         Rider rider = Rider
                 .builder()

@@ -6,6 +6,8 @@ import com.springboot.project.citycab.dto.RideRequestDTO;
 import com.springboot.project.citycab.dto.RiderDTO;
 import com.springboot.project.citycab.entities.Rider;
 import com.springboot.project.citycab.entities.User;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 
 import java.util.List;
 
@@ -19,7 +21,7 @@ public interface RiderService {
 
     RiderDTO getMyProfile();
 
-    List<RideDTO> getAllMyRides();
+    Page<RideDTO> getAllMyRides(PageRequest pageRequest);
 
     Rider createNewRider(User user);
 

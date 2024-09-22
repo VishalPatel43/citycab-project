@@ -1,9 +1,9 @@
 package com.springboot.project.citycab.services.impl;
 
-import com.springboot.project.citycab.dto.RideRequestDTO;
 import com.springboot.project.citycab.entities.Driver;
 import com.springboot.project.citycab.entities.Ride;
 import com.springboot.project.citycab.entities.RideRequest;
+import com.springboot.project.citycab.entities.Rider;
 import com.springboot.project.citycab.entities.enums.RideRequestStatus;
 import com.springboot.project.citycab.entities.enums.RideStatus;
 import com.springboot.project.citycab.repositories.RideRepository;
@@ -29,7 +29,6 @@ public class RideServiceImpl implements RideService {
     // Mapper
     private final ModelMapper modelMapper;
 
-
     @Override
     public Ride getRideById(Long rideId) {
         return rideRepository.findById(rideId)
@@ -37,12 +36,7 @@ public class RideServiceImpl implements RideService {
     }
 
     @Override
-    public void matchWithDrivers(RideRequestDTO rideRequestDTO) {
-
-    }
-
     @Transactional
-    @Override
     public Ride createNewRide(RideRequest rideRequest, Driver driver) {
         rideRequest.setRideRequestStatus(RideRequestStatus.CONFIRMED);
         rideRequestService.updateRideRequest(rideRequest);
@@ -57,8 +51,8 @@ public class RideServiceImpl implements RideService {
         return rideRepository.save(ride);
     }
 
-    @Transactional
     @Override
+    @Transactional
     public Ride updateRideStatus(Ride ride, RideStatus rideStatus) {
         rideRepository.findById(ride.getRideId())
                 .orElseThrow(() -> new RuntimeException("Ride not found with id: " + ride.getRideId()));
@@ -68,17 +62,17 @@ public class RideServiceImpl implements RideService {
     }
 
     @Override
-    public Page<Ride> getAllRidesOfRider(Long riderId, PageRequest pageRequest) {
-        return null;
+    public Page<Ride> getAllRidesOfRider(Rider rider, PageRequest pageRequest) {
+        return rideRepository.findByRider(rider, pageRequest);
     }
 
     @Override
-    public Page<Ride> getAllRidesOfDriver(Long driverId, PageRequest pageRequest) {
-        return null;
+    public Page<Ride> getAllRidesOfDriver(Driver driver, PageRequest pageRequest) {
+        return rideRepository.findByDriver(driver, pageRequest);
     }
 
+    @Override
     @Transactional
-    @Override
     public Ride updateRide(Ride ride) {
         rideRepository.findById(ride.getRideId())
                 .orElseThrow(() -> new RuntimeException("Ride not found with id: " + ride.getRideId()));
