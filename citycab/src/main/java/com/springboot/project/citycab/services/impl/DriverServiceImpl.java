@@ -11,6 +11,7 @@ import com.springboot.project.citycab.entities.enums.Role;
 import com.springboot.project.citycab.exceptions.ResourceNotFoundException;
 import com.springboot.project.citycab.repositories.DriverRepository;
 import com.springboot.project.citycab.services.DriverService;
+import com.springboot.project.citycab.services.PaymentService;
 import com.springboot.project.citycab.services.RideRequestService;
 import com.springboot.project.citycab.services.RideService;
 import lombok.RequiredArgsConstructor;
@@ -33,6 +34,7 @@ public class DriverServiceImpl implements DriverService {
     // Services
     private final RideRequestService rideRequestService;
     private final RideService rideService;
+    private final PaymentService paymentService;
     // Mapper
     private final ModelMapper modelMapper;
 
@@ -108,10 +110,12 @@ public class DriverServiceImpl implements DriverService {
 
         ride.setStartedAt(LocalDateTime.now());
         ride.setRideStatus(RideStatus.ONGOING);
-//        Ride saveRide = rideService.updateRideStatus(ride, RideStatus.ONGOING);
-        Ride saveRide = rideService.updateRide(ride);
+//        Ride savedRide = rideService.updateRideStatus(ride, RideStatus.ONGOING);
+        Ride savedRide = rideService.updateRide(ride);
 
-        return modelMapper.map(saveRide, RideDTO.class);
+        paymentService.createNewPayment(savedRide);
+
+        return modelMapper.map(savedRide, RideDTO.class);
     }
 
     @Override
@@ -130,6 +134,8 @@ public class DriverServiceImpl implements DriverService {
         Ride savedRide = rideService.updateRideStatus(ride, RideStatus.ENDED);
 
         updateDriverAvailability(driver, true);
+
+        paymentService.processPayment(savedRide);
 
         return modelMapper.map(savedRide, RideDTO.class);
     }

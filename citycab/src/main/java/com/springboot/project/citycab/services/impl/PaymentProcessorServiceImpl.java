@@ -1,0 +1,48 @@
+package com.springboot.project.citycab.services.impl;
+
+import com.springboot.project.citycab.entities.Payment;
+import com.springboot.project.citycab.entities.enums.PaymentStatus;
+import com.springboot.project.citycab.services.PaymentProcessorService;
+import com.springboot.project.citycab.services.PaymentService;
+import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Lazy;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
+@Service
+@RequiredArgsConstructor
+public class PaymentProcessorServiceImpl implements PaymentProcessorService {
+
+    //    private final PaymentRepository paymentRepository;
+    private PaymentService paymentService;
+
+    // Setter injection with @Lazy to avoid circular dependency
+    @Autowired
+    public void setPaymentService(@Lazy PaymentService paymentService) {
+        this.paymentService = paymentService;
+    }
+
+    @Override
+//    @Transactional
+    public void updatePaymentStatus(Payment payment, PaymentStatus status) {
+//        payment.setPaymentStatus(status);
+//        paymentRepository.save(payment);
+        paymentService.updatePaymentStatus(payment, status);
+    }
+
+    /*
+    works fine
+//    private final PaymentRepository paymentRepository;
+//
+//
+//    @Override
+//    @Transactional
+//    public void updatePaymentStatus(Payment payment, PaymentStatus status) {
+//        payment.setPaymentStatus(status);
+//        paymentRepository.save(payment);
+//    }
+
+    */
+
+}

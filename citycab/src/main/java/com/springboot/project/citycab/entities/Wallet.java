@@ -23,7 +23,7 @@ public class Wallet {
     @JoinColumn(name = "user_id")
     private User user;
 
-    private Double balance;
+    private Double balance = 0.0;
 
     @OneToMany(mappedBy = "wallet", fetch = FetchType.LAZY)
     private List<WalletTransaction> transactions;

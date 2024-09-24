@@ -3,10 +3,7 @@ package com.springboot.project.citycab.entities;
 import com.springboot.project.citycab.entities.enums.PaymentMethod;
 import com.springboot.project.citycab.entities.enums.PaymentStatus;
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import lombok.*;
 import org.hibernate.annotations.CreationTimestamp;
 
 import java.time.LocalDateTime;
@@ -16,6 +13,7 @@ import java.time.LocalDateTime;
 @NoArgsConstructor
 @Getter
 @Setter
+@Builder
 public class Payment {
 
     @Id
