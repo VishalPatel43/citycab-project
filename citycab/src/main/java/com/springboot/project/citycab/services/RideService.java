@@ -1,6 +1,7 @@
 package com.springboot.project.citycab.services;
 
 
+import com.springboot.project.citycab.dto.OtpDTO;
 import com.springboot.project.citycab.entities.Driver;
 import com.springboot.project.citycab.entities.Ride;
 import com.springboot.project.citycab.entities.RideRequest;
@@ -24,6 +25,8 @@ public interface RideService {
     Page<Ride> getAllRidesOfRider(Rider rider, PageRequest pageRequest);
 
     Page<Ride> getAllRidesOfDriver(Driver driver, PageRequest pageRequest);
+
+    OtpDTO getOtp(Long rideId);
 
     Ride updateRide(Ride ride);
 }

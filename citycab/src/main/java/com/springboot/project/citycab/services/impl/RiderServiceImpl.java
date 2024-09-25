@@ -1,18 +1,13 @@
 package com.springboot.project.citycab.services.impl;
 
-import com.springboot.project.citycab.dto.DriverDTO;
-import com.springboot.project.citycab.dto.RideDTO;
-import com.springboot.project.citycab.dto.RideRequestDTO;
-import com.springboot.project.citycab.dto.RiderDTO;
+import com.springboot.project.citycab.dto.*;
 import com.springboot.project.citycab.entities.*;
 import com.springboot.project.citycab.entities.enums.RideRequestStatus;
 import com.springboot.project.citycab.entities.enums.RideStatus;
+import com.springboot.project.citycab.entities.enums.Role;
 import com.springboot.project.citycab.exceptions.ResourceNotFoundException;
 import com.springboot.project.citycab.repositories.RiderRepository;
-import com.springboot.project.citycab.services.DriverService;
-import com.springboot.project.citycab.services.RideRequestService;
-import com.springboot.project.citycab.services.RideService;
-import com.springboot.project.citycab.services.RiderService;
+import com.springboot.project.citycab.services.*;
 import com.springboot.project.citycab.strategies.DriverMatchingStrategy;
 import com.springboot.project.citycab.strategies.RideFareCalculationStrategy;
 import com.springboot.project.citycab.strategies.RideStrategyManager;
@@ -24,6 +19,7 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDateTime;
 import java.util.List;
 
 @Service
@@ -37,11 +33,11 @@ public class RiderServiceImpl implements RiderService {
     private final RideRequestService rideRequestService;
     private final RideService rideService;
     private final DriverService driverService;
+    private final CancelRideService cancelRideService;
     // Strategy
     private final RideStrategyManager rideStrategyManager;
     // Mapper
     private final ModelMapper modelMapper;
-
 
     @Override
     @Transactional
@@ -61,11 +57,6 @@ public class RiderServiceImpl implements RiderService {
         // For this we have to create the RideRequestService to save the rideRequest
         RideRequest savedRideRequest = rideRequestService.saveRideRequest(rideRequest);
 
-        // Why do we use the rating of rider to find the driver?
-        // broadcast the ride request to all drivers
-        // find the matching driver
-//        rideStrategyManager.driverMatchingStrategy().findMatchingDriver(rideRequest);
-
         // TODO: It should be the Driver rating should >= 4.8 rating
         DriverMatchingStrategy driverMatchingStrategy = rideStrategyManager
                 .driverMatchingStrategy(rider.getRating()); // Here use the avg rating given to the driver by the rider
@@ -73,14 +64,13 @@ public class RiderServiceImpl implements RiderService {
 
         // TODO: Send notification to all the drivers about this ride request
 
-
         // Here we save the ride request and
         return modelMapper.map(savedRideRequest, RideRequestDTO.class);
     }
 
     @Override
     @Transactional
-    public RideDTO cancelRide(Long rideId) {
+    public RideDTO cancelRide(Long rideId, String reason) {
 
         Rider rider = getCurrentRider();
         Ride ride = rideService.getRideById(rideId);
@@ -91,7 +81,12 @@ public class RiderServiceImpl implements RiderService {
         if (!ride.getRideStatus().equals(RideStatus.CONFIRMED))
             throw new RuntimeException("Ride cannot be cancelled, invalid status: " + ride.getRideStatus());
 
-        Ride savedRide = rideService.updateRideStatus(ride, RideStatus.CANCELLED);
+        Ride savedRide = cancelRideService.cancelRide(
+                ride,
+                reason,
+                Role.RIDER
+        );
+
         driverService.updateDriverAvailability(ride.getDriver(), true);
 
         return modelMapper.map(savedRide, RideDTO.class);
@@ -129,6 +124,11 @@ public class RiderServiceImpl implements RiderService {
         return riderRepository.save(rider);
     }
 
+    @Override
+    public OtpDTO getOtp(Long rideId) {
+        return rideService.getOtp(rideId);
+    }
+
     // Using Spring Security, we get the context of the current user and get the rider
     @Override
     public Rider getCurrentRider() {
@@ -140,5 +140,17 @@ public class RiderServiceImpl implements RiderService {
                 .orElseThrow(
                         () -> new ResourceNotFoundException("Rider not found with id: 1")
                 );
+    }
+
+    @Override
+    public Page<CancelRideDTO> getCancelledRidesByRider(PageRequest pageRequest) {
+        Rider currentRider = getCurrentRider();
+
+        if (currentRider == null)
+            throw new ResourceNotFoundException("Rider not found");
+        // Fetch cancelled rides for the current driver
+        Page<CancelRide> cancelledRides = cancelRideService.getCancelRideByRole(Role.RIDER, pageRequest);
+
+        return cancelledRides.map(cancelRide -> modelMapper.map(cancelRide, CancelRideDTO.class));
     }
 }

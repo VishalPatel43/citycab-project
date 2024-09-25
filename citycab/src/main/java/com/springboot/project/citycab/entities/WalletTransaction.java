@@ -28,7 +28,7 @@ public class WalletTransaction {
     @Enumerated(EnumType.STRING)
     private TransactionMethod transactionMethod;
 
-    @ManyToOne
+    @ManyToOne // // 1 -> Driver --> CREDIT, 2 -> Rider --> DEBIT
     @JoinColumn(name = "ride_id")
     private Ride ride; // each transaction is associated with a ride
 

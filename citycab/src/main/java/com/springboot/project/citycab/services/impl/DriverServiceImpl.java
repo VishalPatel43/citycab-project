@@ -1,7 +1,10 @@
 package com.springboot.project.citycab.services.impl;
 
+import com.springboot.project.citycab.dto.CancelRideDTO;
 import com.springboot.project.citycab.dto.DriverDTO;
 import com.springboot.project.citycab.dto.RideDTO;
+import com.springboot.project.citycab.dto.RiderDTO;
+import com.springboot.project.citycab.entities.CancelRide;
 import com.springboot.project.citycab.entities.Driver;
 import com.springboot.project.citycab.entities.Ride;
 import com.springboot.project.citycab.entities.RideRequest;
@@ -10,10 +13,7 @@ import com.springboot.project.citycab.entities.enums.RideStatus;
 import com.springboot.project.citycab.entities.enums.Role;
 import com.springboot.project.citycab.exceptions.ResourceNotFoundException;
 import com.springboot.project.citycab.repositories.DriverRepository;
-import com.springboot.project.citycab.services.DriverService;
-import com.springboot.project.citycab.services.PaymentService;
-import com.springboot.project.citycab.services.RideRequestService;
-import com.springboot.project.citycab.services.RideService;
+import com.springboot.project.citycab.services.*;
 import lombok.RequiredArgsConstructor;
 import org.locationtech.jts.geom.Point;
 import org.modelmapper.ModelMapper;
@@ -35,6 +35,7 @@ public class DriverServiceImpl implements DriverService {
     private final RideRequestService rideRequestService;
     private final RideService rideService;
     private final PaymentService paymentService;
+    private final CancelRideService cancelRideService;
     // Mapper
     private final ModelMapper modelMapper;
 
@@ -64,7 +65,7 @@ public class DriverServiceImpl implements DriverService {
 
     @Override
     @Transactional
-    public RideDTO cancelRide(Long rideId) {
+    public RideDTO cancelRide(Long rideId, String reason) {
 
         Ride ride = rideService.getRideById(rideId);
 
@@ -79,11 +80,11 @@ public class DriverServiceImpl implements DriverService {
             throw new RuntimeException("Ride cannot be cancelled, invalid status: " + ride.getRideStatus());
 
         // Means Diver accept the ride now, so now he can cancel the ride
-        ride.setRideStatus(RideStatus.CANCELLED);
-        ride.setCancelledAt(LocalDateTime.now());
-        ride.setCancelledBy(Role.DRIVER);
-        Ride updatedRide = rideService.updateRide(ride);
-
+        Ride updatedRide = cancelRideService.cancelRide(
+                ride,
+                reason,
+                Role.DRIVER
+        );
         updateDriverAvailability(driver, true);
 
         return modelMapper.map(updatedRide, RideDTO.class);
@@ -99,10 +100,8 @@ public class DriverServiceImpl implements DriverService {
 
         if (!driver.equals(ride.getDriver()))
             throw new RuntimeException("Driver cannot start the ride as it has not been accepted earlier");
-//            throw new RuntimeException("Driver does not own this ride with id: " + rideId);
 
         if (!ride.getRideStatus().equals(RideStatus.CONFIRMED))
-//            throw new RuntimeException("Ride cannot be started, invalid status: " + ride.getRideStatus());
             throw new RuntimeException("Ride status is not CONFIRMED hence, status: " + ride.getRideStatus());
 
         if (!otp.equals(ride.getOtp()))
@@ -110,7 +109,6 @@ public class DriverServiceImpl implements DriverService {
 
         ride.setStartedAt(LocalDateTime.now());
         ride.setRideStatus(RideStatus.ONGOING);
-//        Ride savedRide = rideService.updateRideStatus(ride, RideStatus.ONGOING);
         Ride savedRide = rideService.updateRide(ride);
 
         paymentService.createNewPayment(savedRide);
@@ -142,7 +140,7 @@ public class DriverServiceImpl implements DriverService {
 
     @Override
     @Transactional
-    public RideDTO rateRider(Long rideId, Integer rating) {
+    public RiderDTO rateRider(Long rideId, Integer rating) {
         return null;
     }
 
@@ -185,5 +183,17 @@ public class DriverServiceImpl implements DriverService {
     public Driver updateDriverAvailability(Driver driver, Boolean available) {
         driver.setAvailable(available);
         return driverRepository.save(driver);
+    }
+
+    @Override
+    public Page<CancelRideDTO> getCancelledRidesByDriver(PageRequest pageRequest) {
+        Driver currentDriver = getCurrentDriver();
+
+        if (currentDriver == null)
+            throw new ResourceNotFoundException("Driver not found");
+        // Fetch cancelled rides for the current driver
+        Page<CancelRide> cancelledRides = cancelRideService.getCancelRideByRole(Role.DRIVER, pageRequest);
+
+        return cancelledRides.map(cancelRide -> modelMapper.map(cancelRide, CancelRideDTO.class));
     }
 }

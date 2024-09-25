@@ -1,5 +1,6 @@
 package com.springboot.project.citycab.entities;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import com.springboot.project.citycab.entities.enums.PaymentMethod;
@@ -53,11 +54,6 @@ public class Ride {
 
     private LocalDateTime endedAt;
 
-    private LocalDateTime cancelledAt;
-
-    @Enumerated(EnumType.STRING)
-    private Role cancelledBy;
-
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "rider_id")
     private Rider rider;
@@ -66,5 +62,9 @@ public class Ride {
     @JoinColumn(name = "driver_id")
     private Driver driver;
 
+    // Cancellation details
+    @JsonIgnore
+    @OneToOne(mappedBy = "ride", cascade = CascadeType.ALL, orphanRemoval = true)
+    private CancelRide cancelRide;  // Reference to CancelRide entity
 
 }

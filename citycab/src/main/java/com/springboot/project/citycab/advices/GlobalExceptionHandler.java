@@ -48,8 +48,8 @@ public class GlobalExceptionHandler {
     public ResponseEntity<ApiResponse<?>> handleOSRMServiceException(OSRMServiceException exception,
                                                                      WebRequest request) {
         return buildErrorResponseEntity(exception,
-                HttpStatus.SERVICE_UNAVAILABLE,  // You can change this status code if needed
-                exception.getMessage(),
+                HttpStatus.SERVICE_UNAVAILABLE, // Use a status code that indicates service unavailability
+                exception.getLocalizedMessage(), // "Error communicating with OSRM service. Please try again later.",
                 request,
                 null
         );

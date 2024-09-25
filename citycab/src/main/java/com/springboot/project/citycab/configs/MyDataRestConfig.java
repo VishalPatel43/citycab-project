@@ -18,6 +18,9 @@ public class MyDataRestConfig implements RepositoryRestConfigurer {
             CorsRegistry cors) {
 
         HttpMethod[] theUnsupportedActions = {
+//                HttpMethod.HEAD,
+//                HttpMethod.OPTIONS,
+//                HttpMethod.TRACE,
 //                HttpMethod.GET,
                 HttpMethod.POST,
                 HttpMethod.PATCH,
@@ -26,7 +29,7 @@ public class MyDataRestConfig implements RepositoryRestConfigurer {
         };
 
         // Set custom base path for default methods
-        config.setBasePath("/entities");
+        config.setBasePath("/restrepo");
 
         // Array of all entity classes to expose IDs for and disable HTTP methods
         Class<?>[] entityClasses = {
@@ -46,7 +49,6 @@ public class MyDataRestConfig implements RepositoryRestConfigurer {
         // Disable HTTP methods for all entity classes in the array
         for (Class<?> entityClass : entityClasses)
             disableHttpMethods(entityClass, config, theUnsupportedActions);
-
 
         /* Configure CORS Mapping */
         cors.addMapping(config.getBasePath() + "/**")

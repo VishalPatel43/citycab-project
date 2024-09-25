@@ -1,9 +1,11 @@
 package com.springboot.project.citycab.controllers;
 
-import com.springboot.project.citycab.dto.RideDTO;
-import com.springboot.project.citycab.dto.RideStartDTO;
+import com.springboot.project.citycab.dto.*;
 import com.springboot.project.citycab.services.DriverService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Sort;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -19,10 +21,55 @@ public class DriverController {
         return ResponseEntity.ok(driverService.acceptRide(rideRequestId));
     }
 
-    @PostMapping(path = "/startRide/{rideRequestId}")
-    public ResponseEntity<RideDTO> startRide(@PathVariable Long rideRequestId,
-                                             @RequestBody RideStartDTO rideStartDTO) {
-        return ResponseEntity.ok(driverService.startRide(rideRequestId, rideStartDTO.getOtp()));
+    @PostMapping(path = "/startRide/{rideId}")
+    public ResponseEntity<RideDTO> startRide(@PathVariable Long rideId,
+                                             @RequestBody OtpDTO rideStartDTO) {
+        return ResponseEntity.ok(driverService.startRide(rideId, rideStartDTO.getOtp()));
+    }
+
+    @PostMapping(path = "/endRide/{rideId}")
+    public ResponseEntity<RideDTO> endRide(@PathVariable Long rideId) {
+        return ResponseEntity.ok(driverService.endRide(rideId));
+    }
+
+    @PostMapping("/cancelRide/{rideId}")
+    public ResponseEntity<RideDTO> cancelRide(@RequestBody MessageDTO messageDTO,
+                                              @PathVariable Long rideId) {
+        return ResponseEntity.ok(driverService.cancelRide(rideId, messageDTO.getReason()));
+    }
+
+    @PostMapping("/rateRider")
+    public ResponseEntity<RiderDTO> rateRider(@RequestBody RatingDTO ratingDto) {
+        return ResponseEntity.ok(driverService.rateRider(ratingDto.getRideId(), ratingDto.getRating()));
+    }
+
+    @GetMapping("/getMyProfile")
+    public ResponseEntity<DriverDTO> getMyProfile() {
+        return ResponseEntity.ok(driverService.getMyProfile());
+    }
+
+    @GetMapping("/getMyRides")
+    public ResponseEntity<Page<RideDTO>> getAllMyRides(
+            @RequestParam(defaultValue = "0") Integer pageOffset,
+            @RequestParam(defaultValue = "10", required = false) Integer pageSize) {
+        PageRequest pageRequest = PageRequest.of(pageOffset, pageSize,
+                Sort.by(Sort.Direction.DESC, "createdTime", "rideId"));
+        return ResponseEntity.ok(driverService.getAllMyRides(pageRequest));
+    }
+
+    @GetMapping("/getCancelledRides")
+    public ResponseEntity<Page<CancelRideDTO>> getCancelledRides(
+            @RequestParam(defaultValue = "0") Integer pageOffset,
+            @RequestParam(defaultValue = "10", required = false) Integer pageSize) {
+        PageRequest pageRequest = PageRequest.of(pageOffset, pageSize,
+                Sort.by(Sort.Direction.ASC, "cancelRideId"));
+        return ResponseEntity.ok(driverService.getCancelledRidesByDriver(pageRequest));
+    }
+
+    @PostMapping("/rateRider/{rideId}/{rating}")
+    public ResponseEntity<RiderDTO> rateRider(@PathVariable Long rideId,
+                                              @PathVariable Integer rating) {
+        return ResponseEntity.ok(driverService.rateRider(rideId, rating));
     }
 
 }

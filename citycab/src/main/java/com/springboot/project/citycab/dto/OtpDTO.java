@@ -7,7 +7,7 @@ import lombok.NoArgsConstructor;
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-public class RideStartDTO {
+public class OtpDTO {
 
         private String otp;
 }

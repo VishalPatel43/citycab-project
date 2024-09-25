@@ -42,8 +42,3 @@ public class CashPaymentStrategy implements PaymentStrategy {
         paymentProcessorService.updatePaymentStatus(payment, PaymentStatus.CONFIRMED);
     }
 }
-
-//10 ratingsCount -> 4.0
-//new rating 4.6
-//updated rating
-//new rating 44.6/11 -> 4.05

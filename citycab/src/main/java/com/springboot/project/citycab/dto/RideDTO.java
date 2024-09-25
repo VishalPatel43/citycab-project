@@ -30,15 +30,11 @@ public class RideDTO {
 
     private Double fare;
 
-    private String otp;
+    private OtpDTO otp;
 
     private LocalDateTime startedAt;
 
     private LocalDateTime endedAt;
-
-    private LocalDateTime cancelledAt;
-
-    private Role cancelledBy;
 
     private DriverDTO driver;
 

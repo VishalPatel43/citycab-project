@@ -4,10 +4,14 @@ import com.springboot.project.citycab.exceptions.OSRMServiceException;
 import com.springboot.project.citycab.services.DistanceService;
 import lombok.Data;
 import org.locationtech.jts.geom.Point;
+import org.springframework.http.HttpStatusCode;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestClient;
 
 import java.util.List;
+
+import static org.springframework.http.HttpHeaders.CONTENT_TYPE;
+import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
 
 @Service
 public class DistanceServiceOSRMImpl implements DistanceService {
@@ -33,20 +37,26 @@ public class DistanceServiceOSRMImpl implements DistanceService {
             String uri = src.getX() + "," + src.getY() + ";" + dest.getX() + "," + dest.getY();
             OSRMResponseDTO osrmResponseDTO = RestClient.builder()
                     .baseUrl(OSRM_API_URL)
+                    .defaultHeader(CONTENT_TYPE, APPLICATION_JSON_VALUE)
+                    .defaultStatusHandler(HttpStatusCode::is5xxServerError, (req, res) -> {
+                        throw new RuntimeException("Server Error with status code: " + res.getStatusCode() +
+                                " and message: " + res.getBody() +
+                                " and text" + res.getStatusText());
+                    })
                     .build()
                     .get()
                     .uri(uri)
                     .retrieve()
                     .body(OSRMResponseDTO.class);
 
-            if (osrmResponseDTO == null)
-                throw new OSRMServiceException("Error getting data from OSRM: Response was null");
-
-            // return shortest distance in km
+//            if (osrmResponseDTO == null)
+//                throw new OSRMServiceException("Error getting data from OSRM: Response was null");
+            if (osrmResponseDTO == null || osrmResponseDTO.getRoutes().isEmpty())
+                throw new OSRMServiceException("Error: No valid route found between the provided points.");
             //  return osrmResponseDTO.getRoutes().get(0).getDistance() / 1000.0;
             return osrmResponseDTO.getRoutes().getFirst().getDistance() / 1000.0; // get first distance from the list
         } catch (Exception e) {
-            throw new RuntimeException("Error getting data from OSRM " + e.getMessage());
+            throw new RuntimeException("Error getting data from OSRM: " + e.getMessage());
         }
     }
 }

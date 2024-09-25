@@ -10,6 +10,9 @@ import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+
+
+// Create this service layer to avoid circular dependency of PaymentService, PaymentStrategy and CashPaymentStrategy/WalletPaymentStrategy
 @Service
 @RequiredArgsConstructor
 public class PaymentProcessorServiceImpl implements PaymentProcessorService {

@@ -4,11 +4,14 @@ import com.springboot.project.citycab.entities.Driver;
 import org.locationtech.jts.geom.Point;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.rest.core.annotation.RepositoryRestResource;
+import org.springframework.data.rest.core.annotation.RestResource;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
 
 @Repository
+//@RepositoryRestResource(exported = false) // This disables the entire repository from being exposed via REST
 public interface DriverRepository extends JpaRepository<Driver, Long> {
 
 
@@ -16,7 +19,7 @@ public interface DriverRepository extends JpaRepository<Driver, Long> {
     // ST_Distance(point1, point2) returns the distance between two points
     // ST_DWithin(point1, 10000)
 
-
+//    @RestResource(exported = false)
     // this query is SQL query not JPQL query
     @Query(value = "SELECT d.*, ST_Distance(d.current_location, :pickupLocation) AS distance " +
             "FROM driver d " + // drivers is the table name
