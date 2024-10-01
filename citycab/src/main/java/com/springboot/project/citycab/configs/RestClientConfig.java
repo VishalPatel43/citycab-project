@@ -1,6 +1,5 @@
 package com.springboot.project.citycab.configs;
 
-import com.springboot.project.citycab.exceptions.OSRMServiceException;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
