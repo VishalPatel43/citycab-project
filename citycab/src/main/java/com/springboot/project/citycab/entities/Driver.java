@@ -3,10 +3,7 @@ package com.springboot.project.citycab.entities;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import com.springboot.project.citycab.serializers.PointSerializer;
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import lombok.*;
 import org.locationtech.jts.geom.Point;
 
 @Entity
@@ -14,15 +11,23 @@ import org.locationtech.jts.geom.Point;
 @NoArgsConstructor
 @Getter
 @Setter
+@Builder
+@Table(indexes = {
+        @Index(name = "idx_driver_vehicle_id", columnList = "vehicleId")
+})
 public class Driver {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long driverId;
 
-    private Double rating;
+    private Double avgRating;
 
     private Boolean available;
+
+    private String vehicleId;
+
+//    private String licenseNumber;
 
     @JsonSerialize(using = PointSerializer.class)  // Use custom serializer
     @Column(columnDefinition = "Geometry(Point, 4326)")
@@ -48,4 +53,17 @@ public class Driver {
 //        }
 //        return null;
 //    }
+
+
+    @Override
+    public String toString() {
+        return "Driver{" +
+                "driverId=" + driverId +
+                ", avgRating=" + avgRating +
+                ", available=" + available +
+                ", vehicleId='" + vehicleId + '\'' +
+                ", currentLocation=" + currentLocation + "\n" +
+                ", user=" + user +
+                '}';
+    }
 }

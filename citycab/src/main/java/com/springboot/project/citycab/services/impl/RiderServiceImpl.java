@@ -19,7 +19,6 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.time.LocalDateTime;
 import java.util.List;
 
 @Service
@@ -34,6 +33,7 @@ public class RiderServiceImpl implements RiderService {
     private final RideService rideService;
     private final DriverService driverService;
     private final CancelRideService cancelRideService;
+    private final RatingService ratingService;
     // Strategy
     private final RideStrategyManager rideStrategyManager;
     // Mapper
@@ -49,7 +49,6 @@ public class RiderServiceImpl implements RiderService {
 
         rideRequest.setRideRequestStatus(RideRequestStatus.PENDING);
 
-//        Double fare = rideStrategyManager.rideFareCalculationStrategy().calculateFare(rideRequest);
         RideFareCalculationStrategy rideFareCalculationStrategy = rideStrategyManager.rideFareCalculationStrategy();
         Double fare = rideFareCalculationStrategy.calculateFare(rideRequest);
         rideRequest.setFare(fare);
@@ -57,14 +56,18 @@ public class RiderServiceImpl implements RiderService {
         // For this we have to create the RideRequestService to save the rideRequest
         RideRequest savedRideRequest = rideRequestService.saveRideRequest(rideRequest);
 
-        // TODO: It should be the Driver rating should >= 4.8 rating
         DriverMatchingStrategy driverMatchingStrategy = rideStrategyManager
-                .driverMatchingStrategy(rider.getRating()); // Here use the avg rating given to the driver by the rider
-        List<Driver> drivers = driverMatchingStrategy.findMatchingDriver(rideRequest);
+                .driverMatchingStrategy();
+
+        List<Driver> drivers = driverMatchingStrategy.findMatchingDriver(savedRideRequest);
+        for (Driver driver : drivers)
+            System.out.println((drivers.indexOf(driver) + 1) + ". " + "Driver: " + driver);
+
+        // TODO: those drivers are notified about the ride request
+        // We can also use the APIs which send the ride information to those drivers
 
         // TODO: Send notification to all the drivers about this ride request
 
-        // Here we save the ride request and
         return modelMapper.map(savedRideRequest, RideRequestDTO.class);
     }
 
@@ -81,7 +84,7 @@ public class RiderServiceImpl implements RiderService {
         if (!ride.getRideStatus().equals(RideStatus.CONFIRMED))
             throw new RuntimeException("Ride cannot be cancelled, invalid status: " + ride.getRideStatus());
 
-        Ride savedRide = cancelRideService.cancelRide(
+        CancelRide cancelRide = cancelRideService.cancelRide(
                 ride,
                 reason,
                 Role.RIDER
@@ -89,14 +92,29 @@ public class RiderServiceImpl implements RiderService {
 
         driverService.updateDriverAvailability(ride.getDriver(), true);
 
-        return modelMapper.map(savedRide, RideDTO.class);
+        RideDTO rideDTO = modelMapper.map(cancelRide.getRide(), RideDTO.class);
+
+        CancelRideDTO cancelRideDTO = modelMapper.map(cancelRide, CancelRideDTO.class);
+        cancelRideDTO.setRide(null);
+        rideDTO.setCancelRide(cancelRideDTO);
+        rideDTO.setRating(null);
+        return rideDTO;
     }
 
     @Override
-    @Transactional
-    public DriverDTO rateDriver(Long rideId, Integer rating) {
-        return null;
+    public DriverDTO submitRating(Long rideId, RatingDTO ratingDTO) {
+        Ride ride = rideService.getRideById(rideId);
+        Rider rider = getCurrentRider();
+
+        if (!rider.equals(ride.getRider()))
+            throw new RuntimeException("Rider is not the owner of this Ride");
+
+        if (!ride.getRideStatus().equals(RideStatus.ENDED))
+            throw new RuntimeException("Ride status is not Ended hence cannot start rating, status: " + ride.getRideStatus());
+
+        return ratingService.rateDriver(ride, ratingDTO);
     }
+
 
     @Override
     public RiderDTO getMyProfile() {
@@ -119,7 +137,7 @@ public class RiderServiceImpl implements RiderService {
         Rider rider = Rider
                 .builder()
                 .user(user)
-                .rating(0.0)
+//                .rating(0.0)
                 .build();
         return riderRepository.save(rider);
     }
@@ -152,5 +170,17 @@ public class RiderServiceImpl implements RiderService {
         Page<CancelRide> cancelledRides = cancelRideService.getCancelRideByRole(Role.RIDER, pageRequest);
 
         return cancelledRides.map(cancelRide -> modelMapper.map(cancelRide, CancelRideDTO.class));
+    }
+
+    @Override
+    public Page<RiderDTO> findRidersByName(String name, PageRequest pageRequest) {
+
+        Page<Rider> riders = riderRepository
+                .findByUserNameContainingIgnoreCase(name, pageRequest);
+        // If no riders are found, throw a custom exception
+        if (riders.isEmpty())
+            throw new ResourceNotFoundException("No riders found with name: " + name);
+
+        return riders.map(rider -> modelMapper.map(rider, RiderDTO.class));
     }
 }

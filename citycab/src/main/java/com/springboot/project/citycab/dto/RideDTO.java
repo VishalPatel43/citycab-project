@@ -1,6 +1,7 @@
 package com.springboot.project.citycab.dto;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
+import com.springboot.project.citycab.entities.CancelRide;
 import com.springboot.project.citycab.entities.enums.PaymentMethod;
 import com.springboot.project.citycab.entities.enums.RideStatus;
 import com.springboot.project.citycab.entities.enums.Role;
@@ -39,4 +40,8 @@ public class RideDTO {
     private DriverDTO driver;
 
     private RiderDTO rider;
+
+    private RatingDTO rating;
+
+    private CancelRideDTO cancelRide;
 }

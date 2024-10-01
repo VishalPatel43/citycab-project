@@ -23,6 +23,12 @@ import java.time.LocalDateTime;
 @Getter
 @Setter
 @JsonInclude(JsonInclude.Include.NON_NULL)  // Ignore null fields
+@Table(indexes = {
+        @Index(name = "idx_ride_rider", columnList = "rider_id"),
+        @Index(name = "idx_ride_driver", columnList = "driver_id")
+})
+// What do u want to access from database on that we create indexes
+// default index by rideId and we add more indexes for rider and driver so we can also search by using rider_id and driver_id
 public class Ride {
 
     @Id
@@ -63,8 +69,32 @@ public class Ride {
     private Driver driver;
 
     // Cancellation details
-    @JsonIgnore
-    @OneToOne(mappedBy = "ride", cascade = CascadeType.ALL, orphanRemoval = true)
-    private CancelRide cancelRide;  // Reference to CancelRide entity
+//    @JsonIgnore
+//    @OneToOne(mappedBy = "ride", cascade = CascadeType.ALL, orphanRemoval = true)
+//    private CancelRide cancelRide;  // Reference to CancelRide entity
 
+    // Rating details
+//    @JsonIgnore
+//    @OneToOne(mappedBy = "ride", cascade = CascadeType.ALL, orphanRemoval = true)
+//    private Rating rating;  // Reference to Rating entity
+
+    @Override
+    public String toString() {
+        return "Ride{" +
+                "rideId=" + rideId +
+                ", pickupLocation=" + pickupLocation +
+                ", dropOffLocation=" + dropOffLocation +
+                ", createdTime=" + createdTime +
+                ", paymentMethod=" + paymentMethod +
+                ", rideStatus=" + rideStatus +
+                ", fare=" + fare +
+                ", otp='" + otp + '\'' +
+                ", startedAt=" + startedAt +
+                ", endedAt=" + endedAt +
+                ", rider=" + rider + "\n" +
+                ", driver=" + driver + "\n" +
+//                ", cancelRide=" + cancelRide + "\n" +
+//                ", rating=" + rating + "\n" +
+                '}';
+    }
 }

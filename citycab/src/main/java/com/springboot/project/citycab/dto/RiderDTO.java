@@ -11,5 +11,5 @@ public class RiderDTO {
 
     private Long riderId;
     private UserDTO user;
-    private Double rating;
+//    private Double rating;
 }

@@ -1,17 +1,31 @@
 package com.springboot.project.citycab.dto;
 
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import jakarta.validation.constraints.Max;
+import jakarta.validation.constraints.Min;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
+import lombok.*;
 
-@Data
-@AllArgsConstructor
+import java.time.LocalDateTime;
+
+@Getter
+@Setter
 @NoArgsConstructor
+@AllArgsConstructor
+@Builder
 public class RatingDTO {
 
     private Long ratingId;
 
-    private Long rideId;
+    //    @NotNull(message = "Rating cannot be null")
+//    @Min(value = 1, message = "Rating must be at least 1")
+//    @Max(value = 5, message = "Rating must be at most 5")
+    private Double driverRating;
 
-    private Integer rating;
+    //    @NotBlank(message = "Comment cannot be blank")
+    private String comment;
+
+    private LocalDateTime ratingDate;
+
+//    private RideDTO ride;
 }

@@ -3,6 +3,7 @@ package com.springboot.project.citycab.services.impl;
 import com.springboot.project.citycab.exceptions.OSRMServiceException;
 import com.springboot.project.citycab.services.DistanceService;
 import lombok.Data;
+import lombok.RequiredArgsConstructor;
 import org.locationtech.jts.geom.Point;
 import org.springframework.http.HttpStatusCode;
 import org.springframework.stereotype.Service;
@@ -14,43 +15,43 @@ import static org.springframework.http.HttpHeaders.CONTENT_TYPE;
 import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
 
 @Service
+@RequiredArgsConstructor
 public class DistanceServiceOSRMImpl implements DistanceService {
+    /*
+     TODO: Implement the method to calculate the distance between two points
+     Call third party service/API OSRM to calculate the distance
 
-    // TODO: Implement the method to calculate the distance between two points
-    // Call third party service/API OSRM to calculate the distance
+     Link: https://router.project-osrm.org/route/v1/driving/13.388860,52.517037;13.397634,52.529407;13.428555,52.523219?overview=false
+     source, destination, waypoint (calculate with other points) -> latitude,longitude -> 13.388860,52.517037;13.397634,52.529407;13.428555,52.523219
+     checking source to destination
+     https://map.project-osrm.org/
 
-    // Link: https://router.project-osrm.org/route/v1/driving/13.388860,52.517037;13.397634,52.529407;13.428555,52.523219?overview=false
-    // source, destination, waypoint (calculate with other points) -> latitude,longitude -> 13.388860,52.517037;13.397634,52.529407;13.428555,52.523219
-    // checking source to destination
-    // https://map.project-osrm.org/
+     but we need only source and destination (only 1 point)
 
-    // but we need only source and destination (only 1 point)
-    private static final String OSRM_API_URL = "https://router.project-osrm.org/route/v1/driving/";
+    **/
+
+    private final RestClient restClient;
 
     @Override
     public double calculateDistance(Point src, Point dest) {
-
-        // We use RestClient only for this method so don't need to create a separate config for this
-        // getX and getY are the latitude and longitude
-        // RestClient --> synchronous method
+        /*
+         * We use RestClient only for this method so don't need to create a separate config for this
+         * getX and getY are the latitude and longitude
+         * RestClient --> synchronous method
+         */
         try {
             String uri = src.getX() + "," + src.getY() + ";" + dest.getX() + "," + dest.getY();
-            OSRMResponseDTO osrmResponseDTO = RestClient.builder()
-                    .baseUrl(OSRM_API_URL)
-                    .defaultHeader(CONTENT_TYPE, APPLICATION_JSON_VALUE)
-                    .defaultStatusHandler(HttpStatusCode::is5xxServerError, (req, res) -> {
-                        throw new RuntimeException("Server Error with status code: " + res.getStatusCode() +
-                                " and message: " + res.getBody() +
-                                " and text" + res.getStatusText());
-                    })
-                    .build()
+            OSRMResponseDTO osrmResponseDTO = restClient
                     .get()
                     .uri(uri)
                     .retrieve()
+                    .onStatus(HttpStatusCode::is4xxClientError, (req, res) -> {
+                        String error = new String(res.getBody().readAllBytes());
+                        System.out.println("Client Error occurred: " + error);
+                        throw new OSRMServiceException("Client Error: Unable to calculate distance. OSRM responded with: " + error);
+                    })
                     .body(OSRMResponseDTO.class);
 
-//            if (osrmResponseDTO == null)
-//                throw new OSRMServiceException("Error getting data from OSRM: Response was null");
             if (osrmResponseDTO == null || osrmResponseDTO.getRoutes().isEmpty())
                 throw new OSRMServiceException("Error: No valid route found between the provided points.");
             //  return osrmResponseDTO.getRoutes().get(0).getDistance() / 1000.0;

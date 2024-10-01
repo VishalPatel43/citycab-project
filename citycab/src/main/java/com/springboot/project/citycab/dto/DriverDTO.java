@@ -11,8 +11,7 @@ public class DriverDTO {
 
     private Long driverId;
     private UserDTO user;
-    private Double rating;
-
+    private Double avgRating;
     private Boolean available;
     private String vehicleId;
 }

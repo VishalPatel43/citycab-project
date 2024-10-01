@@ -25,7 +25,7 @@ public class CancelRideServiceImpl implements CancelRideService {
 
     @Override
     @Transactional
-    public Ride cancelRide(Ride ride, String reason, Role cancelledBy) {
+    public CancelRide cancelRide(Ride ride, String reason, Role cancelledBy) {
 
         if (!ride.getRideStatus().equals(RideStatus.CONFIRMED))
             throw new RuntimeException("Ride cannot be cancelled, invalid status: " + ride.getRideStatus());
@@ -44,14 +44,13 @@ public class CancelRideServiceImpl implements CancelRideService {
                 .build();
 
         CancelRide updateCancelRide = cancelRideRepository.save(cancelRide);
-        ride.setCancelRide(updateCancelRide);
-
-        return rideService.updateRide(ride);
+//        ride.setCancelRide(updateCancelRide);
+        rideService.updateRide(ride);
+        return updateCancelRide;
     }
 
     @Override
     public Page<CancelRide> getCancelRideByRole(Role cancelledBy, PageRequest pageRequest) {
-        // Fetch cancelled rides for the current driver
         return cancelRideRepository.findByCancelledBy(cancelledBy, pageRequest);
     }
 }

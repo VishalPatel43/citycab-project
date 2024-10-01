@@ -9,6 +9,8 @@ import org.springframework.data.domain.Sort;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.Optional;
+
 @RestController
 @RequestMapping(path = "/riders")
 @RequiredArgsConstructor
@@ -28,10 +30,10 @@ public class RiderController {
         return ResponseEntity.ok(riderService.cancelRide(rideId, messageDTO.getReason()));
     }
 
-    @PostMapping(path = "/rateDriver")
-    public ResponseEntity<DriverDTO> rateDriver(@RequestBody RatingDTO ratingDTO) {
-        return ResponseEntity.ok(riderService.rateDriver(ratingDTO.getRideId(), ratingDTO.getRating()));
-    }
+//    @PostMapping(path = "/rateDriver")
+//    public ResponseEntity<DriverDTO> rateDriver(@RequestBody RatingDTO ratingDTO) {
+//        return ResponseEntity.ok(riderService.rateDriver(ratingDTO.getRideId(), ratingDTO.getRating()));
+//    }
 
     @GetMapping(path = "/getMyProfile")
     public ResponseEntity<RiderDTO> getMyProfile() {
@@ -56,13 +58,14 @@ public class RiderController {
         return ResponseEntity.ok(riderService.getCancelledRidesByRider(pageRequest));
     }
 
-    @PostMapping("/rateDriver/{rideId}/{rating}")
-    public ResponseEntity<DriverDTO> rateDriver(@PathVariable Long rideId, @PathVariable Integer rating) {
-        return ResponseEntity.ok(riderService.rateDriver(rideId, rating));
-    }
-
     @GetMapping("/getOtp/{rideId}")
     public ResponseEntity<OtpDTO> getOtp(@PathVariable Long rideId) {
         return ResponseEntity.ok(riderService.getOtp(rideId));
+    }
+
+    @PostMapping("/rateDriver/{rideId}")
+    public ResponseEntity<DriverDTO> rateDriver(@PathVariable Long rideId,
+                                                @RequestBody RatingDTO ratingDTO) {
+        return ResponseEntity.ok(riderService.submitRating(rideId, ratingDTO));
     }
 }

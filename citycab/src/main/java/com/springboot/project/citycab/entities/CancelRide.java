@@ -31,4 +31,14 @@ public class CancelRide {
     @OneToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "ride_id", referencedColumnName = "rideId")
     private Ride ride;  // One-to-one relation with Ride entity, since a ride can only be cancelled once
+
+    @Override
+    public String toString() {
+        return "CancelRide{" +
+                "cancelledAt=" + cancelledAt +
+                ", cancelledBy=" + cancelledBy +
+                ", reason='" + reason + '\'' +
+                ", cancelRideId=" + cancelRideId +
+                '}';
+    }
 }

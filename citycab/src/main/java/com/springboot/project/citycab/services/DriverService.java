@@ -22,7 +22,7 @@ public interface DriverService {
 
     RideDTO endRide(Long rideId);
 
-    RiderDTO rateRider(Long rideId, Integer rating);
+//    RiderDTO rateRider(Long rideId, Integer rating);
 
     DriverDTO getMyProfile();
 
@@ -34,7 +34,17 @@ public interface DriverService {
 
     List<Driver> findTenNearbyTopRatedDrivers(Point pickupLocation);
 
+    List<Driver> findTopRatedDriversWithin2Km(Point pickupLocation);
+
+    List<Driver> findHighestRatedDriversWithin3Km(Point pickupLocation);
+
+    List<Driver> findDriversWithin3To10KmWithLowRating(Point pickupLocation);
+
     Driver updateDriverAvailability(Driver driver, Boolean available);
 
     Page<CancelRideDTO> getCancelledRidesByDriver(PageRequest pageRequest);
+
+    Driver createNewDriver(Driver createDriver);
+
+    Page<DriverDTO> findDriversByName(String name, PageRequest pageRequest);
 }

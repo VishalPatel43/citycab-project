@@ -1,7 +1,10 @@
 package com.springboot.project.citycab.repositories;
 
 import com.springboot.project.citycab.entities.Driver;
+import com.springboot.project.citycab.entities.Rider;
 import org.locationtech.jts.geom.Point;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.rest.core.annotation.RepositoryRestResource;
@@ -14,16 +17,57 @@ import java.util.List;
 //@RepositoryRestResource(exported = false) // This disables the entire repository from being exposed via REST
 public interface DriverRepository extends JpaRepository<Driver, Long> {
 
+    // Find Driver by user's name
+    Page<Driver> findByUserNameContainingIgnoreCase(String name, Pageable pageable);
 
     // Methods in the PostgreSQL/PostGIS database
     // ST_Distance(point1, point2) returns the distance between two points
     // ST_DWithin(point1, 10000)
 
-//    @RestResource(exported = false)
+
+    /**
+     * Primary Condition:
+     * Find available drivers within 0-2 km with avg_rating >= 4.5.
+     * Sorted by avg_rating DESC and distance ASC.
+     */
+    @Query(value = "SELECT d.*, ST_Distance(d.current_location, :pickupLocation) AS distance " +
+            "FROM driver d " +
+            "WHERE d.available = true AND ST_DWithin(d.current_location, :pickupLocation, 2000) " +
+            "AND d.avg_rating >= 4.5 " +
+            "ORDER BY d.avg_rating DESC, distance ASC " +
+            "LIMIT 10", nativeQuery = true)
+    List<Driver> findTopRatedDriversWithin2Km(Point pickupLocation);
+
+    /**
+     * Secondary Condition:
+     * Find available drivers within 0-3 km, sorted by avg_rating DESC and distance ASC.
+     */
+    @Query(value = "SELECT d.*, ST_Distance(d.current_location, :pickupLocation) AS distance " +
+            "FROM driver d " +
+            "WHERE d.available = true AND ST_DWithin(d.current_location, :pickupLocation, 3000) " +
+            "ORDER BY d.avg_rating DESC, distance ASC " +
+            "LIMIT 10", nativeQuery = true)
+    List<Driver> findHighestRatedDriversWithin3Km(Point pickupLocation);
+
+    /**
+     * Tertiary Condition:
+     * Find available drivers within 3-10 km with avg_rating < 4,
+     * sorted by distance ASC and avg_rating DESC.
+     */
+    @Query(value = "SELECT d.*, ST_Distance(d.current_location, :pickupLocation) AS distance " +
+            "FROM driver d " +
+            "WHERE d.available = true AND ST_DWithin(d.current_location, :pickupLocation, 10000) " +
+            "AND NOT ST_DWithin(d.current_location, :pickupLocation, 3000) " +
+            "AND d.avg_rating < 4 " +
+            "ORDER BY distance ASC, d.avg_rating DESC " +
+            "LIMIT 10", nativeQuery = true)
+    List<Driver> findNearestDriversFrom3To10KmWithLowRating(Point pickupLocation);
+
+    //    @RestResource(exported = false)
     // this query is SQL query not JPQL query
     @Query(value = "SELECT d.*, ST_Distance(d.current_location, :pickupLocation) AS distance " +
             "FROM driver d " + // drivers is the table name
-            "WHERE avaible = true AND ST_DWithin(d.current_location, :pickupLocation, 10000) " +
+            "WHERE available = true AND ST_DWithin(d.current_location, :pickupLocation, 10000) " +
             "ORDER BY distance " +
             "LIMIT 10", nativeQuery = true)
     List<Driver> findTenNearestDrivers(Point pickupLocation);
@@ -40,7 +84,7 @@ public interface DriverRepository extends JpaRepository<Driver, Long> {
     @Query(value = "SELECT d.* " +
             "FROM driver d " +
             "WHERE d.available = true AND ST_DWithin(d.current_location, :pickupLocation, 15000) " +
-            "ORDER BY d.rating DESC " +
+            "ORDER BY d.avg_rating DESC " +
             "LIMIT 10", nativeQuery = true)
     List<Driver> findTenNearbyTopRatedDrivers(Point pickupLocation);
 }

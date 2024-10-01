@@ -19,6 +19,11 @@ import java.time.LocalDateTime;
 @NoArgsConstructor
 @Getter
 @Setter
+@Table(
+        indexes = {
+                @Index(name = "idx_ride_request_rider", columnList = "rider_id")
+        }
+)
 public class RideRequest {
 
     @Id
@@ -56,7 +61,7 @@ public class RideRequest {
                 ", dropOffLocation=" + dropOffLocation +
                 ", requestedTime=" + requestedTime +
                 ", paymentMethod=" + paymentMethod +
-                ", rideRequestStatus=" + rideRequestStatus +
+                ", rideRequestStatus=" + rideRequestStatus + "\n" +
                 ", rider=" + rider +
                 '}';
     }

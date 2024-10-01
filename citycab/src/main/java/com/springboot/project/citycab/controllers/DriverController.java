@@ -38,11 +38,6 @@ public class DriverController {
         return ResponseEntity.ok(driverService.cancelRide(rideId, messageDTO.getReason()));
     }
 
-    @PostMapping("/rateRider")
-    public ResponseEntity<RiderDTO> rateRider(@RequestBody RatingDTO ratingDto) {
-        return ResponseEntity.ok(driverService.rateRider(ratingDto.getRideId(), ratingDto.getRating()));
-    }
-
     @GetMapping("/getMyProfile")
     public ResponseEntity<DriverDTO> getMyProfile() {
         return ResponseEntity.ok(driverService.getMyProfile());
@@ -65,11 +60,4 @@ public class DriverController {
                 Sort.by(Sort.Direction.ASC, "cancelRideId"));
         return ResponseEntity.ok(driverService.getCancelledRidesByDriver(pageRequest));
     }
-
-    @PostMapping("/rateRider/{rideId}/{rating}")
-    public ResponseEntity<RiderDTO> rateRider(@PathVariable Long rideId,
-                                              @PathVariable Integer rating) {
-        return ResponseEntity.ok(driverService.rateRider(rideId, rating));
-    }
-
 }

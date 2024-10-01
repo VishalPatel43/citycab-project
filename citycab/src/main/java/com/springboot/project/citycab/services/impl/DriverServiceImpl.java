@@ -1,13 +1,7 @@
 package com.springboot.project.citycab.services.impl;
 
-import com.springboot.project.citycab.dto.CancelRideDTO;
-import com.springboot.project.citycab.dto.DriverDTO;
-import com.springboot.project.citycab.dto.RideDTO;
-import com.springboot.project.citycab.dto.RiderDTO;
-import com.springboot.project.citycab.entities.CancelRide;
-import com.springboot.project.citycab.entities.Driver;
-import com.springboot.project.citycab.entities.Ride;
-import com.springboot.project.citycab.entities.RideRequest;
+import com.springboot.project.citycab.dto.*;
+import com.springboot.project.citycab.entities.*;
 import com.springboot.project.citycab.entities.enums.RideRequestStatus;
 import com.springboot.project.citycab.entities.enums.RideStatus;
 import com.springboot.project.citycab.entities.enums.Role;
@@ -23,6 +17,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 
 @Service
@@ -36,6 +31,7 @@ public class DriverServiceImpl implements DriverService {
     private final RideService rideService;
     private final PaymentService paymentService;
     private final CancelRideService cancelRideService;
+    private final RatingService ratingService;
     // Mapper
     private final ModelMapper modelMapper;
 
@@ -60,7 +56,10 @@ public class DriverServiceImpl implements DriverService {
         Driver updatedDriver = updateDriverAvailability(currentDriver, false);
 
         Ride ride = rideService.createNewRide(rideRequest, updatedDriver);
-        return modelMapper.map(ride, RideDTO.class);
+
+        RideDTO rideDTO = modelMapper.map(ride, RideDTO.class);
+        rideDTO.setRating(null);
+        return rideDTO;
     }
 
     @Override
@@ -80,14 +79,21 @@ public class DriverServiceImpl implements DriverService {
             throw new RuntimeException("Ride cannot be cancelled, invalid status: " + ride.getRideStatus());
 
         // Means Diver accept the ride now, so now he can cancel the ride
-        Ride updatedRide = cancelRideService.cancelRide(
+        CancelRide cancelRide = cancelRideService.cancelRide(
                 ride,
                 reason,
                 Role.DRIVER
         );
         updateDriverAvailability(driver, true);
 
-        return modelMapper.map(updatedRide, RideDTO.class);
+        RideDTO rideDTO = modelMapper.map(cancelRide.getRide(), RideDTO.class);
+        rideDTO.setRating(null);
+
+        CancelRideDTO cancelRideDTO = modelMapper.map(cancelRide, CancelRideDTO.class);
+        cancelRideDTO.setRide(null);
+        rideDTO.setCancelRide(cancelRideDTO);
+
+        return rideDTO;
     }
 
     @Override
@@ -112,8 +118,14 @@ public class DriverServiceImpl implements DriverService {
         Ride savedRide = rideService.updateRide(ride);
 
         paymentService.createNewPayment(savedRide);
+        Rating rating = ratingService.createNewRating(savedRide);
 
-        return modelMapper.map(savedRide, RideDTO.class);
+        RatingDTO ratingDTO = modelMapper.map(rating, RatingDTO.class);
+
+//        savedRide.setRating(rating); // set the rating to the ride for dto
+        RideDTO rideDTO = modelMapper.map(savedRide, RideDTO.class);
+        rideDTO.setRating(ratingDTO);
+        return rideDTO;
     }
 
     @Override
@@ -135,13 +147,12 @@ public class DriverServiceImpl implements DriverService {
 
         paymentService.processPayment(savedRide);
 
-        return modelMapper.map(savedRide, RideDTO.class);
-    }
+        Rating rating = ratingService.getRatingByRide(savedRide);
+        RatingDTO ratingDTO = modelMapper.map(rating, RatingDTO.class);
 
-    @Override
-    @Transactional
-    public RiderDTO rateRider(Long rideId, Integer rating) {
-        return null;
+        RideDTO rideDTO = modelMapper.map(savedRide, RideDTO.class);
+        rideDTO.setRating(ratingDTO);
+        return rideDTO;
     }
 
     @Override
@@ -179,6 +190,21 @@ public class DriverServiceImpl implements DriverService {
     }
 
     @Override
+    public List<Driver> findTopRatedDriversWithin2Km(Point pickupLocation) {
+        return driverRepository.findTopRatedDriversWithin2Km(pickupLocation);
+    }
+
+    @Override
+    public List<Driver> findHighestRatedDriversWithin3Km(Point pickupLocation) {
+        return driverRepository.findHighestRatedDriversWithin3Km(pickupLocation);
+    }
+
+    @Override
+    public List<Driver> findDriversWithin3To10KmWithLowRating(Point pickupLocation) {
+        return driverRepository.findNearestDriversFrom3To10KmWithLowRating(pickupLocation);
+    }
+
+    @Override
     @Transactional
     public Driver updateDriverAvailability(Driver driver, Boolean available) {
         driver.setAvailable(available);
@@ -195,5 +221,22 @@ public class DriverServiceImpl implements DriverService {
         Page<CancelRide> cancelledRides = cancelRideService.getCancelRideByRole(Role.DRIVER, pageRequest);
 
         return cancelledRides.map(cancelRide -> modelMapper.map(cancelRide, CancelRideDTO.class));
+    }
+
+    @Override
+    public Driver createNewDriver(Driver createDriver) {
+        return driverRepository.save(createDriver);
+    }
+
+    @Override
+    public Page<DriverDTO> findDriversByName(String name, PageRequest pageRequest) {
+
+        Page<Driver> drivers = driverRepository
+                .findByUserNameContainingIgnoreCase(name, pageRequest);
+
+        if (drivers.isEmpty())
+            throw new ResourceNotFoundException("No driver found with name: " + name);
+
+        return drivers.map(driver -> modelMapper.map(driver, DriverDTO.class));
     }
 }

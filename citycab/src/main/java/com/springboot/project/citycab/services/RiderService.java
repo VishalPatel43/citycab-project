@@ -6,13 +6,15 @@ import com.springboot.project.citycab.entities.User;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 
+import java.util.Optional;
+
 public interface RiderService {
 
     RideRequestDTO requestRide(RideRequestDTO rideRequestDTO);
 
     RideDTO cancelRide(Long rideId, String reason);
 
-    DriverDTO rateDriver(Long rideId, Integer rating);
+    DriverDTO submitRating(Long rideId, RatingDTO ratingDTO);
 
     RiderDTO getMyProfile();
 
@@ -25,4 +27,7 @@ public interface RiderService {
     Rider getCurrentRider();
 
     Page<CancelRideDTO> getCancelledRidesByRider(PageRequest pageRequest);
+
+    Page<RiderDTO> findRidersByName(String name, PageRequest pageRequest);
+
 }
