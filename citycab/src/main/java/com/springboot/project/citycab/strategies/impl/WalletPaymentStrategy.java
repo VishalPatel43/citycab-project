@@ -5,10 +5,12 @@ import com.springboot.project.citycab.entities.Payment;
 import com.springboot.project.citycab.entities.Rider;
 import com.springboot.project.citycab.entities.enums.PaymentStatus;
 import com.springboot.project.citycab.entities.enums.TransactionMethod;
-import com.springboot.project.citycab.services.PaymentProcessorService;
+import com.springboot.project.citycab.services.PaymentService;
 import com.springboot.project.citycab.services.WalletService;
 import com.springboot.project.citycab.strategies.PaymentStrategy;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -27,7 +29,13 @@ import org.springframework.transaction.annotation.Transactional;
 public class WalletPaymentStrategy implements PaymentStrategy {
 
     private final WalletService walletService;
-    private final PaymentProcessorService paymentProcessorService;
+    private PaymentService paymentService;
+//    private final PaymentProcessorService paymentProcessorService;
+
+    @Autowired
+    public void setPaymentService(@Lazy PaymentService paymentService) {
+        this.paymentService = paymentService;
+    }
 
     @Override
     @Transactional
@@ -45,6 +53,6 @@ public class WalletPaymentStrategy implements PaymentStrategy {
 
         // TODO: add money to the platform wallet
 
-        paymentProcessorService.updatePaymentStatus(payment, PaymentStatus.CONFIRMED);
+        paymentService.updatePaymentStatus(payment, PaymentStatus.CONFIRMED);
     }
 }

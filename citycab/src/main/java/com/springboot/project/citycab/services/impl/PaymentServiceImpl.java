@@ -7,9 +7,10 @@ import com.springboot.project.citycab.exceptions.ResourceNotFoundException;
 import com.springboot.project.citycab.repositories.PaymentRepository;
 import com.springboot.project.citycab.services.PaymentService;
 import com.springboot.project.citycab.strategies.PaymentStrategy;
-import com.springboot.project.citycab.strategies.PaymentStrategyManager;
+import com.springboot.project.citycab.strategies.manager.PaymentStrategyManager;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 @Service
 @RequiredArgsConstructor
@@ -20,6 +21,7 @@ public class PaymentServiceImpl implements PaymentService {
     private final PaymentStrategyManager paymentStrategyManager;
 
     @Override
+    @Transactional
     public void processPayment(Ride ride) {
         Payment payment = paymentRepository.findByRide(ride)
                 .orElseThrow(() -> new ResourceNotFoundException("Payment not found for ride with id: " + ride.getRideId()));
@@ -29,6 +31,7 @@ public class PaymentServiceImpl implements PaymentService {
     }
 
     @Override
+    @Transactional
     public Payment createNewPayment(Ride ride) {
         Payment payment = Payment.builder()
                 .ride(ride)
@@ -40,6 +43,7 @@ public class PaymentServiceImpl implements PaymentService {
     }
 
     @Override
+    @Transactional
     public void updatePaymentStatus(Payment payment, PaymentStatus status) {
         payment.setPaymentStatus(status);
         paymentRepository.save(payment);

@@ -80,6 +80,7 @@ public class WalletServiceImpl implements WalletService {
     }
 
     @Override
+    @Transactional
     public Wallet createNewWallet(User user) {
         Wallet wallet = new Wallet();
         wallet.setUser(user);

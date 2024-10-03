@@ -1,21 +1,18 @@
 package com.springboot.project.citycab.services.impl;
 
-import com.springboot.project.citycab.exceptions.OSRMServiceException;
+import com.springboot.project.citycab.exceptions.DistanceRestClientServiceException;
 import com.springboot.project.citycab.services.DistanceService;
 import lombok.Data;
 import lombok.RequiredArgsConstructor;
 import org.locationtech.jts.geom.Point;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.http.HttpStatusCode;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestClient;
 
 import java.util.List;
 
-import static org.springframework.http.HttpHeaders.CONTENT_TYPE;
-import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
-
 @Service
-@RequiredArgsConstructor
 public class DistanceServiceOSRMImpl implements DistanceService {
     /*
      TODO: Implement the method to calculate the distance between two points
@@ -30,7 +27,12 @@ public class DistanceServiceOSRMImpl implements DistanceService {
 
     **/
 
-    private final RestClient restClient;
+    private final RestClient osrmRestClient;
+
+    // Manually define the constructor with @Qualifier
+    public DistanceServiceOSRMImpl(@Qualifier("distanceServiceOSRM") RestClient osrmRestClient) {
+        this.osrmRestClient = osrmRestClient;
+    }
 
     @Override
     public double calculateDistance(Point src, Point dest) {
@@ -40,24 +42,27 @@ public class DistanceServiceOSRMImpl implements DistanceService {
          * RestClient --> synchronous method
          */
         try {
-            String uri = src.getX() + "," + src.getY() + ";" + dest.getX() + "," + dest.getY();
-            OSRMResponseDTO osrmResponseDTO = restClient
+//            String uri = src.getX() + "," + src.getY() + ";" + dest.getX() + "," + dest.getY();
+            String uri = String.format("%f,%f;%f,%f?overview=false",
+                    src.getX(), src.getY(),
+                    dest.getX(), dest.getY());
+            OSRMResponseDTO osrmResponseDTO = osrmRestClient
                     .get()
                     .uri(uri)
                     .retrieve()
                     .onStatus(HttpStatusCode::is4xxClientError, (req, res) -> {
                         String error = new String(res.getBody().readAllBytes());
                         System.out.println("Client Error occurred: " + error);
-                        throw new OSRMServiceException("Client Error: Unable to calculate distance. OSRM responded with: " + error);
+                        throw new DistanceRestClientServiceException("Client Error: Unable to calculate distance. OSRM responded with: " + error);
                     })
                     .body(OSRMResponseDTO.class);
 
             if (osrmResponseDTO == null || osrmResponseDTO.getRoutes().isEmpty())
-                throw new OSRMServiceException("Error: No valid route found between the provided points.");
+                throw new DistanceRestClientServiceException("Error: No valid route found between the provided points.");
             //  return osrmResponseDTO.getRoutes().get(0).getDistance() / 1000.0;
             return osrmResponseDTO.getRoutes().getFirst().getDistance() / 1000.0; // get first distance from the list
         } catch (Exception e) {
-            throw new RuntimeException("Error getting data from OSRM: " + e.getMessage());
+            throw new DistanceRestClientServiceException("Error getting data from OSRM: " + e.getMessage());
         }
     }
 }

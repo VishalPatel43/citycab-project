@@ -10,10 +10,9 @@ import com.springboot.project.citycab.repositories.RiderRepository;
 import com.springboot.project.citycab.services.*;
 import com.springboot.project.citycab.strategies.DriverMatchingStrategy;
 import com.springboot.project.citycab.strategies.RideFareCalculationStrategy;
-import com.springboot.project.citycab.strategies.RideStrategyManager;
+import com.springboot.project.citycab.strategies.manager.RideStrategyManager;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.locationtech.jts.geom.Point;
 import org.modelmapper.ModelMapper;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -35,7 +34,6 @@ public class RiderServiceImpl implements RiderService {
     private final DriverService driverService;
     private final CancelRideService cancelRideService;
     private final RatingService ratingService;
-    private final DistanceService distanceService;
     // Strategy
     private final RideStrategyManager rideStrategyManager;
     // Mapper
@@ -62,18 +60,19 @@ public class RiderServiceImpl implements RiderService {
                 .driverMatchingStrategy();
 
         List<Driver> drivers = driverMatchingStrategy.findMatchingDriver(savedRideRequest);
+        /*
         if (drivers != null && !drivers.isEmpty()) {
             Point pickupLocation = savedRideRequest.getPickupLocation();
             for (Driver driver : drivers) {
-//                Point driverLocation = driver.getCurrentLocation();
-//                double distanceKm = distanceService.calculateDistance(pickupLocation, driverLocation);
+                Point driverLocation = driver.getCurrentLocation();
+                double distanceKm = distanceService.calculateDistance(pickupLocation, driverLocation);
                 System.out.println("Matched Driver: " + driver);
-//                        + " Distance: " + distanceKm + " km");
+                        + " Distance: " + distanceKm + " km");
             }
         } else
             System.out.println("No drivers matched for RideRequest ID: " + savedRideRequest.getRideRequestId());
 
-
+*/
         // TODO: those drivers are notified about the ride request
         // We can also use the APIs which send the ride information to those drivers
 
@@ -113,6 +112,7 @@ public class RiderServiceImpl implements RiderService {
     }
 
     @Override
+    @Transactional
     public DriverDTO submitRating(Long rideId, RatingDTO ratingDTO) {
         Ride ride = rideService.getRideById(rideId);
         Rider rider = getCurrentRider();

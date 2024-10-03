@@ -7,11 +7,13 @@ import com.springboot.project.citycab.entities.Rating;
 import com.springboot.project.citycab.entities.Ride;
 import com.springboot.project.citycab.exceptions.ResourceNotFoundException;
 import com.springboot.project.citycab.exceptions.RuntimeConflictException;
-import com.springboot.project.citycab.repositories.DriverRepository;
 import com.springboot.project.citycab.repositories.RatingRepository;
+import com.springboot.project.citycab.services.DriverService;
 import com.springboot.project.citycab.services.RatingService;
 import lombok.RequiredArgsConstructor;
 import org.modelmapper.ModelMapper;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
@@ -25,8 +27,16 @@ public class RatingServiceImpl implements RatingService {
 
     private final RatingRepository ratingRepository;
 
-    private final DriverRepository driverRepository;
+    //    private final DriverRepository driverRepository;
+//    private final DriverRatingService driverRatingService;
+    private DriverService driverService;
+
     private final ModelMapper modelMapper;
+
+    @Autowired
+    public void setDriverService(@Lazy DriverService driverService) { // no nood for 1
+        this.driverService = driverService;
+    }
 
     @Override
     @Transactional
@@ -53,11 +63,13 @@ public class RatingServiceImpl implements RatingService {
                 .orElse(0.0);
         driver.setAvgRating(newRating);
 
-        Driver savedDriver = driverRepository.save(driver);
+        Driver savedDriver = driverService.updateDriver(driver);
+//        Driver savedDriver = driverRatingService.updateDriverRating(driver, newRating);
         return modelMapper.map(savedDriver, DriverDTO.class);
     }
 
     @Override
+    @Transactional
     public Rating createNewRating(Ride ride) {
         Rating rating = Rating.builder()
                 .rider(ride.getRider())

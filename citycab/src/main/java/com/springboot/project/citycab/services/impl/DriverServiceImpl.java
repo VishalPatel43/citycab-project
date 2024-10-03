@@ -224,8 +224,15 @@ public class DriverServiceImpl implements DriverService {
     }
 
     @Override
+    @Transactional
     public Driver createNewDriver(Driver createDriver) {
         return driverRepository.save(createDriver);
+    }
+
+    @Override
+    @Transactional
+    public Driver updateDriver(Driver driver) {
+        return driverRepository.save(driver);
     }
 
     @Override

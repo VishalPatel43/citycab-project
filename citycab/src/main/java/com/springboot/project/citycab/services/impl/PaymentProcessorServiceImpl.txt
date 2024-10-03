@@ -27,7 +27,7 @@ public class PaymentProcessorServiceImpl implements PaymentProcessorService {
     }
 
     @Override
-//    @Transactional
+    @Transactional
     public void updatePaymentStatus(Payment payment, PaymentStatus status) {
 //        payment.setPaymentStatus(status);
 //        paymentRepository.save(payment);

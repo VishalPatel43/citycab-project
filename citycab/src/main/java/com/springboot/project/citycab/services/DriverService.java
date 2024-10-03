@@ -46,5 +46,7 @@ public interface DriverService {
 
     Driver createNewDriver(Driver createDriver);
 
+    Driver updateDriver(Driver driver);
+
     Page<DriverDTO> findDriversByName(String name, PageRequest pageRequest);
 }

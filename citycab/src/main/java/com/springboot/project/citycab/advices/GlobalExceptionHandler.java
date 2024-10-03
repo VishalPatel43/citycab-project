@@ -1,6 +1,6 @@
 package com.springboot.project.citycab.advices;
 
-import com.springboot.project.citycab.exceptions.OSRMServiceException;
+import com.springboot.project.citycab.exceptions.DistanceRestClientServiceException;
 import com.springboot.project.citycab.exceptions.ResourceNotFoundException;
 import com.springboot.project.citycab.exceptions.RuntimeConflictException;
 import org.springframework.context.support.DefaultMessageSourceResolvable;
@@ -44,8 +44,8 @@ public class GlobalExceptionHandler {
         );
     }
 
-    @ExceptionHandler(OSRMServiceException.class)
-    public ResponseEntity<ApiResponse<?>> handleOSRMServiceException(OSRMServiceException exception,
+    @ExceptionHandler(DistanceRestClientServiceException.class)
+    public ResponseEntity<ApiResponse<?>> handleOSRMServiceException(DistanceRestClientServiceException exception,
                                                                      WebRequest request) {
         return buildErrorResponseEntity(exception,
                 HttpStatus.SERVICE_UNAVAILABLE, // Use a status code that indicates service unavailability

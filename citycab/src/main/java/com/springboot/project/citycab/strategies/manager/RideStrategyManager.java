@@ -1,6 +1,8 @@
-package com.springboot.project.citycab.strategies;
+package com.springboot.project.citycab.strategies.manager;
 
 import com.springboot.project.citycab.entities.Driver;
+import com.springboot.project.citycab.strategies.DriverMatchingStrategy;
+import com.springboot.project.citycab.strategies.RideFareCalculationStrategy;
 import com.springboot.project.citycab.strategies.impl.*;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;

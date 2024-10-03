@@ -1,7 +1,6 @@
 package com.springboot.project.citycab.services.impl;
 
 import com.springboot.project.citycab.entities.CancelRide;
-import com.springboot.project.citycab.entities.Driver;
 import com.springboot.project.citycab.entities.Ride;
 import com.springboot.project.citycab.entities.enums.RideStatus;
 import com.springboot.project.citycab.entities.enums.Role;
@@ -44,7 +43,6 @@ public class CancelRideServiceImpl implements CancelRideService {
                 .build();
 
         CancelRide updateCancelRide = cancelRideRepository.save(cancelRide);
-//        ride.setCancelRide(updateCancelRide);
         rideService.updateRide(ride);
         return updateCancelRide;
     }
