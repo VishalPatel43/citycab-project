@@ -1,7 +1,6 @@
 package com.springboot.project.citycab.strategies.impl;
 
 import com.springboot.project.citycab.entities.RideRequest;
-import com.springboot.project.citycab.services.DistanceService;
 import com.springboot.project.citycab.strategies.RideFareCalculationStrategy;
 import com.springboot.project.citycab.strategies.manager.DistanceServiceManager;
 import lombok.RequiredArgsConstructor;

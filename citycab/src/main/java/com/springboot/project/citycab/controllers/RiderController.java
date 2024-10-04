@@ -9,8 +9,6 @@ import org.springframework.data.domain.Sort;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.Optional;
-
 @RestController
 @RequestMapping(path = "/riders")
 @RequiredArgsConstructor
@@ -29,11 +27,6 @@ public class RiderController {
                                               @PathVariable Long rideId) {
         return ResponseEntity.ok(riderService.cancelRide(rideId, messageDTO.getReason()));
     }
-
-//    @PostMapping(path = "/rateDriver")
-//    public ResponseEntity<DriverDTO> rateDriver(@RequestBody RatingDTO ratingDTO) {
-//        return ResponseEntity.ok(riderService.rateDriver(ratingDTO.getRideId(), ratingDTO.getRating()));
-//    }
 
     @GetMapping(path = "/getMyProfile")
     public ResponseEntity<RiderDTO> getMyProfile() {
@@ -67,5 +60,14 @@ public class RiderController {
     public ResponseEntity<DriverDTO> rateDriver(@PathVariable Long rideId,
                                                 @RequestBody RatingDTO ratingDTO) {
         return ResponseEntity.ok(riderService.submitRating(rideId, ratingDTO));
+    }
+
+    @GetMapping("/getAllReviewsByRider")
+    public ResponseEntity<Page<RatingDTO>> getReviewsByRider(
+            @RequestParam(defaultValue = "0") Integer pageOffset,
+            @RequestParam(defaultValue = "10", required = false) Integer pageSize) {
+        PageRequest pageRequest = PageRequest.of(pageOffset, pageSize,
+                Sort.by(Sort.Direction.DESC, "createdTime"));
+        return ResponseEntity.ok(riderService.getReviewsByRider(pageRequest));
     }
 }

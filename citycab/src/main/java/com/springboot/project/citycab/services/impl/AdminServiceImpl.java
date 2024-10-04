@@ -2,7 +2,6 @@ package com.springboot.project.citycab.services.impl;
 
 import com.springboot.project.citycab.dto.DriverDTO;
 import com.springboot.project.citycab.dto.RiderDTO;
-import com.springboot.project.citycab.entities.Driver;
 import com.springboot.project.citycab.services.AdminService;
 import com.springboot.project.citycab.services.DriverService;
 import com.springboot.project.citycab.services.RiderService;

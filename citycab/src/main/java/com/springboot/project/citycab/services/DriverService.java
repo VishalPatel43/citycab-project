@@ -2,8 +2,8 @@ package com.springboot.project.citycab.services;
 
 import com.springboot.project.citycab.dto.CancelRideDTO;
 import com.springboot.project.citycab.dto.DriverDTO;
+import com.springboot.project.citycab.dto.RatingDTO;
 import com.springboot.project.citycab.dto.RideDTO;
-import com.springboot.project.citycab.dto.RiderDTO;
 import com.springboot.project.citycab.entities.Driver;
 import org.locationtech.jts.geom.Point;
 import org.springframework.data.domain.Page;
@@ -21,8 +21,6 @@ public interface DriverService {
     RideDTO startRide(Long rideId, String otp);
 
     RideDTO endRide(Long rideId);
-
-//    RiderDTO rateRider(Long rideId, Integer rating);
 
     DriverDTO getMyProfile();
 
@@ -47,6 +45,8 @@ public interface DriverService {
     Driver createNewDriver(Driver createDriver);
 
     Driver updateDriver(Driver driver);
+
+    Page<RatingDTO> getReviewsForDriver(PageRequest pageRequest);
 
     Page<DriverDTO> findDriversByName(String name, PageRequest pageRequest);
 }

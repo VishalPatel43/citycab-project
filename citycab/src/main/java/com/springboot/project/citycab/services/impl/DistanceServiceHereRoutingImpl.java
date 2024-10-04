@@ -53,7 +53,6 @@ public class DistanceServiceHereRoutingImpl implements DistanceService {
                     })
                     .body(HereRoutingResponseDTO.class);
 
-
             if (responseDto == null || responseDto.getFeatures().isEmpty())
                 throw new DistanceRestClientServiceException("Error: No valid route found between the provided points.");
 

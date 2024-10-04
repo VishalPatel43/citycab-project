@@ -3,7 +3,6 @@ package com.springboot.project.citycab.services.impl;
 import com.springboot.project.citycab.exceptions.DistanceRestClientServiceException;
 import com.springboot.project.citycab.services.DistanceService;
 import lombok.Data;
-import lombok.RequiredArgsConstructor;
 import org.locationtech.jts.geom.Point;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.http.HttpStatusCode;

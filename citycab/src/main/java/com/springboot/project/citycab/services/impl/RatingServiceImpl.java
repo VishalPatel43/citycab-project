@@ -5,6 +5,7 @@ import com.springboot.project.citycab.dto.RatingDTO;
 import com.springboot.project.citycab.entities.Driver;
 import com.springboot.project.citycab.entities.Rating;
 import com.springboot.project.citycab.entities.Ride;
+import com.springboot.project.citycab.entities.Rider;
 import com.springboot.project.citycab.exceptions.ResourceNotFoundException;
 import com.springboot.project.citycab.exceptions.RuntimeConflictException;
 import com.springboot.project.citycab.repositories.RatingRepository;
@@ -27,10 +28,9 @@ public class RatingServiceImpl implements RatingService {
 
     private final RatingRepository ratingRepository;
 
-    //    private final DriverRepository driverRepository;
-//    private final DriverRatingService driverRatingService;
+    // Service
     private DriverService driverService;
-
+    // Mapper
     private final ModelMapper modelMapper;
 
     @Autowired
@@ -80,14 +80,25 @@ public class RatingServiceImpl implements RatingService {
     }
 
     @Override
-    public Page<RatingDTO> getReviewsByRider(Long riderId, Pageable pageable) {
+    public Page<RatingDTO> getReviewsByRider(Rider rider, Pageable pageable) {
 
-        return null;
+        Page<Rating> ratings = ratingRepository.findByRider(rider, pageable);
+
+        if (ratings.isEmpty())
+            throw new ResourceNotFoundException("No ratings found for rider with id: " + rider.getRiderId());
+
+        return ratings.map(rating -> modelMapper.map(rating, RatingDTO.class));
     }
 
     @Override
-    public Page<RatingDTO> getReviewsForDriver(Long driverId, Pageable pageable) {
-        return null;
+    public Page<RatingDTO> getReviewsForDriver(Driver driver, Pageable pageable) {
+
+        Page<Rating> ratings = ratingRepository.findByDriver(driver, pageable);
+
+        if (ratings.isEmpty())
+            throw new ResourceNotFoundException("No ratings found for driver with id: " + driver.getDriverId());
+
+        return ratings.map(rating -> modelMapper.map(rating, RatingDTO.class));
     }
 
     @Override

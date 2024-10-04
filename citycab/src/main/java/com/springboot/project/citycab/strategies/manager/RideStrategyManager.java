@@ -41,8 +41,7 @@ public class RideStrategyManager {
                 return driversSecondary;
 
             // 3. Tertiary Condition: 3-10 km with avg_rating < 4, sorted by distance and rating
-//                List<Driver> driversTertiary = nearestStrategy.findMatchingDriver(rideRequest);
-//                return driversTertiary;
+//                List<Driver> driversTertiary = nearestStrategy.findMatchingDriver(rideRequest); //                return driversTertiary;
             return nearestStrategy.findMatchingDriver(rideRequest);
         };
     }

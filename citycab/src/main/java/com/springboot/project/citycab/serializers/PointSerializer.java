@@ -6,7 +6,6 @@ import com.fasterxml.jackson.databind.ser.std.StdSerializer;
 import com.springboot.project.citycab.dto.PointDTO;
 import org.locationtech.jts.geom.Point;
 
-
 import java.io.IOException;
 
 public class PointSerializer extends StdSerializer<Point> {

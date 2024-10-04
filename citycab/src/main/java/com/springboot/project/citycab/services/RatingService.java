@@ -7,10 +7,7 @@ import com.springboot.project.citycab.entities.Rating;
 import com.springboot.project.citycab.entities.Ride;
 import com.springboot.project.citycab.entities.Rider;
 import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
-
-import java.util.Optional;
 
 public interface RatingService {
 
@@ -18,9 +15,9 @@ public interface RatingService {
 
     Rating createNewRating(Ride ride);
 
-    Page<RatingDTO> getReviewsByRider(Long riderId, Pageable pageable);
+    Page<RatingDTO> getReviewsByRider(Rider rider, Pageable pageable);
 
-    Page<RatingDTO> getReviewsForDriver(Long driverId, Pageable pageable);
+    Page<RatingDTO> getReviewsForDriver(Driver driver, Pageable pageable);
 
     Rating getRatingByRide(Ride ride);
 

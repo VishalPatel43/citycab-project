@@ -60,4 +60,13 @@ public class DriverController {
                 Sort.by(Sort.Direction.ASC, "cancelRideId"));
         return ResponseEntity.ok(driverService.getCancelledRidesByDriver(pageRequest));
     }
+
+    @GetMapping("/getReceivedReviews/")
+    public ResponseEntity<Page<RatingDTO>> getReviewsForDriver(
+            @RequestParam(defaultValue = "0") Integer pageOffset,
+            @RequestParam(defaultValue = "10", required = false) Integer pageSize) {
+        PageRequest pageRequest = PageRequest.of(pageOffset, pageSize,
+                Sort.by(Sort.Direction.ASC, "ratingId"));
+        return ResponseEntity.ok(driverService.getReviewsForDriver(pageRequest));
+    }
 }

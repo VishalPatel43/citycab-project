@@ -143,6 +143,16 @@ public class RiderServiceImpl implements RiderService {
     }
 
     @Override
+    public Page<RatingDTO> getReviewsByRider(PageRequest pageRequest) {
+
+        Rider currentRider = getCurrentRider();
+        if (currentRider == null)
+            throw new ResourceNotFoundException("Rider not found");
+
+        return ratingService.getReviewsByRider(currentRider, pageRequest);
+    }
+
+    @Override
     @Transactional
     public Rider createNewRider(User user) {
         Rider rider = Rider

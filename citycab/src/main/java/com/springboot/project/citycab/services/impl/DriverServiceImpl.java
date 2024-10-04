@@ -1,6 +1,9 @@
 package com.springboot.project.citycab.services.impl;
 
-import com.springboot.project.citycab.dto.*;
+import com.springboot.project.citycab.dto.CancelRideDTO;
+import com.springboot.project.citycab.dto.DriverDTO;
+import com.springboot.project.citycab.dto.RatingDTO;
+import com.springboot.project.citycab.dto.RideDTO;
 import com.springboot.project.citycab.entities.*;
 import com.springboot.project.citycab.entities.enums.RideRequestStatus;
 import com.springboot.project.citycab.entities.enums.RideStatus;
@@ -17,7 +20,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
-import java.util.ArrayList;
 import java.util.List;
 
 @Service
@@ -233,6 +235,17 @@ public class DriverServiceImpl implements DriverService {
     @Transactional
     public Driver updateDriver(Driver driver) {
         return driverRepository.save(driver);
+    }
+
+    @Override
+    public Page<RatingDTO> getReviewsForDriver(PageRequest pageRequest) {
+
+        Driver currentDriver = getCurrentDriver();
+
+        if (currentDriver == null)
+            throw new ResourceNotFoundException("Driver not found");
+
+        return ratingService.getReviewsForDriver(currentDriver, pageRequest);
     }
 
     @Override
