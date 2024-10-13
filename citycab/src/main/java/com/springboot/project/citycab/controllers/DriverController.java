@@ -61,7 +61,7 @@ public class DriverController {
         return ResponseEntity.ok(driverService.getCancelledRidesByDriver(pageRequest));
     }
 
-    @GetMapping("/getReceivedReviews/")
+    @GetMapping("/getReceivedReviews")
     public ResponseEntity<Page<RatingDTO>> getReviewsForDriver(
             @RequestParam(defaultValue = "0") Integer pageOffset,
             @RequestParam(defaultValue = "10", required = false) Integer pageSize) {
