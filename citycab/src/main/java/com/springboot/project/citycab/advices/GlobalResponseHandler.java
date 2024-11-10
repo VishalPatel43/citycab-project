@@ -1,5 +1,6 @@
 package com.springboot.project.citycab.advices;
 
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.core.MethodParameter;
 import org.springframework.hateoas.RepresentationModel;
 import org.springframework.http.MediaType;
@@ -12,6 +13,7 @@ import org.springframework.web.servlet.mvc.method.annotation.ResponseBodyAdvice;
 import java.util.List;
 
 // It will be applied to all the controllers with the ResponseBody
+@Slf4j
 @RestControllerAdvice
 public class GlobalResponseHandler implements ResponseBodyAdvice<Object> {
 
@@ -30,20 +32,24 @@ public class GlobalResponseHandler implements ResponseBodyAdvice<Object> {
                                   ServerHttpRequest request,
                                   ServerHttpResponse response) {
 
-//        // Exclude /v3/api-docs endpoint from being wrapped
-//        if (body instanceof ApiResponse<?> || body instanceof RepresentationModel<?> || request.getURI().getPath().contains("/v3/api-docs"))
-//            return body;
-//
-//        // All the Response will be wrapped with ApiResponse
-//        return new ApiResponse<>(body);
-
         List<String> allowedRoutes = List.of("/v3/api-docs", "/actuator");
         boolean isAllowed = allowedRoutes
                 .stream()
                 .anyMatch(route -> request.getURI().getPath().contains(route));
 
-        if (body instanceof ApiResponse<?> || body instanceof RepresentationModel<?> || isAllowed)
+        log.info("Body: {}", body);
+
+        if (body instanceof ApiResponse<?> || // --> ApiError fall here
+                body instanceof String ||
+                body instanceof RepresentationModel<?> ||
+                isAllowed
+        )
             return body;
-        return new ApiResponse<>(body);
+
+        ApiResponse<Object> apiResponse = new ApiResponse<>(body);
+        apiResponse.setPath(request.getURI().getPath()); // Set the path in the response
+
+        log.info("Api Response created: {}", apiResponse);
+        return apiResponse;
     }
 }

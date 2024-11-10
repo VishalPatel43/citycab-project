@@ -1,12 +1,10 @@
 package com.springboot.project.citycab.services;
 
-import com.springboot.project.citycab.dto.DriverDTO;
-import com.springboot.project.citycab.dto.SignUpDTO;
-import com.springboot.project.citycab.dto.UserDTO;
+import com.springboot.project.citycab.dto.*;
 
 public interface AuthService {
 
-    String login(String email, String password);
+    LoginResponseDTO login(LoginRequestDTO loginRequestDTO);
 
     UserDTO singUp(SignUpDTO signUpDTO);
 

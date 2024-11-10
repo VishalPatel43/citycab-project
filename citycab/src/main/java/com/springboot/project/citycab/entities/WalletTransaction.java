@@ -1,7 +1,7 @@
 package com.springboot.project.citycab.entities;
 
-import com.springboot.project.citycab.entities.enums.TransactionMethod;
-import com.springboot.project.citycab.entities.enums.TransactionType;
+import com.springboot.project.citycab.constants.enums.TransactionMethod;
+import com.springboot.project.citycab.constants.enums.TransactionType;
 import jakarta.persistence.*;
 import lombok.*;
 import org.hibernate.annotations.CreationTimestamp;

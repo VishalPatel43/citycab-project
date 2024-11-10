@@ -56,7 +56,7 @@ public class RatingServiceImpl implements RatingService {
 
         ratingRepository.save(ratingObj);
 
-        Double newRating = ratingRepository.findByDriver(driver)
+        Double newRating = ratingRepository.findAllByDriver(driver)
                 .stream()
                 .mapToDouble(Rating::getDriverRating)
                 .average()

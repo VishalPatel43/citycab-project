@@ -6,7 +6,7 @@ import com.springboot.project.citycab.entities.Driver;
 import com.springboot.project.citycab.entities.Ride;
 import com.springboot.project.citycab.entities.RideRequest;
 import com.springboot.project.citycab.entities.Rider;
-import com.springboot.project.citycab.entities.enums.RideStatus;
+import com.springboot.project.citycab.constants.enums.RideStatus;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 

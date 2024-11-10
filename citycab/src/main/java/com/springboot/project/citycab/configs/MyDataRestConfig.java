@@ -1,6 +1,6 @@
 package com.springboot.project.citycab.configs;
 
-import com.springboot.project.citycab.entities.*;
+import com.springboot.project.citycab.constants.RepositoryConstants;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.data.rest.core.config.RepositoryRestConfiguration;
 import org.springframework.data.rest.webmvc.config.RepositoryRestConfigurer;
@@ -11,38 +11,25 @@ import org.springframework.web.servlet.config.annotation.CorsRegistry;
 public class MyDataRestConfig implements RepositoryRestConfigurer {
 
     @Override
-    public void configureRepositoryRestConfiguration(
-            RepositoryRestConfiguration config,
-            CorsRegistry cors) {
+    public void configureRepositoryRestConfiguration(RepositoryRestConfiguration config,
+                                                     CorsRegistry cors) {
 
-        HttpMethod[] theUnsupportedActions = {
-                HttpMethod.POST,
-                HttpMethod.PATCH,
-                HttpMethod.DELETE,
-                HttpMethod.PUT
-        };
+        // Retrieve unsupported HTTP methods from constants
+        HttpMethod[] theUnsupportedActions = RepositoryConstants.UNSUPPORTED_HTTP_METHODS.toArray(new HttpMethod[0]);
 
-        // Set custom base path for default methods
-        config.setBasePath("/restrepo");
+        // Set custom base path using constants
+        config.setBasePath(RepositoryConstants.BASE_PATH);
 
-        // Array of all entity classes to expose IDs for and disable HTTP methods
-        Class<?>[] entityClasses = {
-                Driver.class,
-                Ride.class,
-                RideRequest.class,
-                Rider.class,
-                User.class,
-                Wallet.class,
-                WalletTransaction.class,
-                Payment.class
-        };
+        // Array of all entity classes from constants
+        Class<?>[] entityClasses = RepositoryConstants.EXPOSED_ENTITY_CLASSES;
 
         // Expose entity IDs
         config.exposeIdsFor(entityClasses);
 
-        // Disable HTTP methods for all entity classes in the array
-        for (Class<?> entityClass : entityClasses)
+        // Disable HTTP methods for all entity classes using constants
+        for (Class<?> entityClass : entityClasses) {
             disableHttpMethods(entityClass, config, theUnsupportedActions);
+        }
     }
 
     private void disableHttpMethods(Class<?> theClass,

@@ -4,8 +4,8 @@ import com.springboot.project.citycab.entities.Ride;
 import com.springboot.project.citycab.entities.User;
 import com.springboot.project.citycab.entities.Wallet;
 import com.springboot.project.citycab.entities.WalletTransaction;
-import com.springboot.project.citycab.entities.enums.TransactionMethod;
-import com.springboot.project.citycab.entities.enums.TransactionType;
+import com.springboot.project.citycab.constants.enums.TransactionMethod;
+import com.springboot.project.citycab.constants.enums.TransactionType;
 import com.springboot.project.citycab.exceptions.ResourceNotFoundException;
 import com.springboot.project.citycab.repositories.WalletRepository;
 import com.springboot.project.citycab.services.WalletService;
@@ -92,4 +92,5 @@ public class WalletServiceImpl implements WalletService {
         return walletRepository.findByUser(user)
                 .orElseThrow(() -> new ResourceNotFoundException("Wallet not found for user with id: " + user.getUserId()));
     }
+
 }

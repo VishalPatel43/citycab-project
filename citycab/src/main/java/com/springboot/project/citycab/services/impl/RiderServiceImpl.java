@@ -2,9 +2,9 @@ package com.springboot.project.citycab.services.impl;
 
 import com.springboot.project.citycab.dto.*;
 import com.springboot.project.citycab.entities.*;
-import com.springboot.project.citycab.entities.enums.RideRequestStatus;
-import com.springboot.project.citycab.entities.enums.RideStatus;
-import com.springboot.project.citycab.entities.enums.Role;
+import com.springboot.project.citycab.constants.enums.RideRequestStatus;
+import com.springboot.project.citycab.constants.enums.RideStatus;
+import com.springboot.project.citycab.constants.enums.Role;
 import com.springboot.project.citycab.exceptions.ResourceNotFoundException;
 import com.springboot.project.citycab.repositories.RiderRepository;
 import com.springboot.project.citycab.services.*;
@@ -158,7 +158,7 @@ public class RiderServiceImpl implements RiderService {
         Rider rider = Rider
                 .builder()
                 .user(user)
-//                .rating(0.0)
+                .avgGivenRating(0.0)
                 .build();
         return riderRepository.save(rider);
     }

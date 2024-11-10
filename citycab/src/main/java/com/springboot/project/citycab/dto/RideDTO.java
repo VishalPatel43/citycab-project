@@ -1,8 +1,8 @@
 package com.springboot.project.citycab.dto;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
-import com.springboot.project.citycab.entities.enums.PaymentMethod;
-import com.springboot.project.citycab.entities.enums.RideStatus;
+import com.springboot.project.citycab.constants.enums.PaymentMethod;
+import com.springboot.project.citycab.constants.enums.RideStatus;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;

@@ -1,13 +1,18 @@
 package com.springboot.project.citycab.entities;
 
-import com.springboot.project.citycab.entities.enums.Role;
+import com.springboot.project.citycab.constants.enums.Role;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
+import org.springframework.security.core.userdetails.UserDetails;
 
+import java.util.Collection;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 @Entity
 @AllArgsConstructor
@@ -17,7 +22,7 @@ import java.util.Set;
 @Table(name = "app_user", indexes = {
         @Index(name = "idx_user_email", columnList = "email")
 })
-public class User {
+public class User implements UserDetails {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -30,6 +35,8 @@ public class User {
 
     private String password;
 
+    //    MobileNumber, Birthdate, Gender, Address, Profile Picture, etc.
+
     // Create table for roles only
     // Change Column name to user_roles
     @ElementCollection(fetch = FetchType.LAZY)
@@ -37,8 +44,6 @@ public class User {
     @CollectionTable(name = "user_roles", joinColumns = @JoinColumn(name = "user_id"))
 //    @Column(name = "roles") // Specifies the column name for the roles
     private Set<Role> roles;
-
-//    MobileNumber, Birthdate, Gender, Address, Profile Picture, etc.
 
     // See the Mapping carefully
 //    @OneToOne(mappedBy = "user")
@@ -53,8 +58,22 @@ public class User {
                 "userId=" + userId +
                 ", name='" + name + '\'' +
                 ", email='" + email + '\'' +
-                ", password='" + password + '\'' +
+//                ", password='" + password + '\'' +
                 ", roles=" + roles +
                 '}';
     }
+
+    @Override
+    public Collection<? extends GrantedAuthority> getAuthorities() {
+        return roles.stream()
+                .map(role -> new SimpleGrantedAuthority("ROLE_" + role.name()))
+                .collect(Collectors.toSet());
+    }
+
+    @Override
+    public String getUsername() {
+        return email;
+    }
+
+    // getPassword already there
 }

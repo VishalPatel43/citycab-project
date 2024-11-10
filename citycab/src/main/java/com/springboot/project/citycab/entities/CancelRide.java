@@ -1,6 +1,6 @@
 package com.springboot.project.citycab.entities;
 
-import com.springboot.project.citycab.entities.enums.Role;
+import com.springboot.project.citycab.constants.enums.Role;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotNull;
 import lombok.*;

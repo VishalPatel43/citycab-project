@@ -3,7 +3,7 @@ package com.springboot.project.citycab.services;
 import com.springboot.project.citycab.entities.Ride;
 import com.springboot.project.citycab.entities.User;
 import com.springboot.project.citycab.entities.Wallet;
-import com.springboot.project.citycab.entities.enums.TransactionMethod;
+import com.springboot.project.citycab.constants.enums.TransactionMethod;
 
 public interface WalletService {
 

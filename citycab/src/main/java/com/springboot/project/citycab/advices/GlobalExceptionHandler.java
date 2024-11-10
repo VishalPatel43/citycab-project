@@ -3,10 +3,13 @@ package com.springboot.project.citycab.advices;
 import com.springboot.project.citycab.exceptions.DistanceRestClientServiceException;
 import com.springboot.project.citycab.exceptions.ResourceNotFoundException;
 import com.springboot.project.citycab.exceptions.RuntimeConflictException;
+import io.jsonwebtoken.JwtException;
 import org.springframework.context.support.DefaultMessageSourceResolvable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.orm.jpa.JpaSystemException;
+import org.springframework.security.access.AccessDeniedException;
+import org.springframework.security.core.AuthenticationException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
@@ -55,18 +58,42 @@ public class GlobalExceptionHandler {
         );
     }
 
-    @ExceptionHandler(JpaSystemException.class)
-    public ResponseEntity<ApiResponse<?>> handleJpaSystemException(JpaSystemException exception, WebRequest request) {
-//        String message = "Database error: Invalid endian flag value encountered while executing the statement.";
-
+    @ExceptionHandler(AuthenticationException.class)
+    public ResponseEntity<ApiResponse<?>> handleAuthenticationException(AuthenticationException exception,
+                                                                        WebRequest request) {
         return buildErrorResponseEntity(exception,
-                HttpStatus.INTERNAL_SERVER_ERROR,
-//                message,
-                exception.getMessage(),
+                HttpStatus.UNAUTHORIZED,
+                exception.getLocalizedMessage(),
+//                "Authentication failed. Please check your credentials.",
                 request,
-                null);
+                null
+        );
     }
 
+    @ExceptionHandler(JwtException.class)
+    public ResponseEntity<ApiResponse<?>> handleRuntimeException(JwtException exception,
+                                                                 WebRequest request) {
+        return buildErrorResponseEntity(exception,
+                HttpStatus.UNAUTHORIZED,
+                exception.getLocalizedMessage(),
+//                "Invalid or expired JWT token.",
+                request,
+                null
+        );
+    }
+
+    // Handler for AccessDeniedException to catch 403 errors
+    @ExceptionHandler(AccessDeniedException.class)
+    public ResponseEntity<ApiResponse<?>> handleAccessDeniedException(AccessDeniedException exception,
+                                                                      WebRequest request) {
+        return buildErrorResponseEntity(exception,
+                HttpStatus.FORBIDDEN,
+                "Access is denied. You do not have permission to access this resource.",
+//                exception.getLocalizedMessage(),
+                request,
+                null
+        );
+    }
 
     @ExceptionHandler(MethodArgumentNotValidException.class)
     public ResponseEntity<ApiResponse<?>> handleInputValidationErrors(MethodArgumentNotValidException exception,
@@ -101,7 +128,6 @@ public class GlobalExceptionHandler {
         );
     }
 
-
     private ResponseEntity<ApiResponse<?>> buildErrorResponseEntity(Exception exception,
                                                                     HttpStatus status, String message,
                                                                     WebRequest request,
@@ -109,7 +135,6 @@ public class GlobalExceptionHandler {
         String path = request
                 .getDescription(false)
                 .replace("uri=", "");
-
 
         StringWriter sw = new StringWriter();
         exception.printStackTrace(new PrintWriter(sw));

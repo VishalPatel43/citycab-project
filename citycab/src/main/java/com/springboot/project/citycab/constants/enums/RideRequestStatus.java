@@ -1,4 +1,4 @@
-package com.springboot.project.citycab.entities.enums;
+package com.springboot.project.citycab.constants.enums;
 
 public enum RideRequestStatus {
     PENDING,

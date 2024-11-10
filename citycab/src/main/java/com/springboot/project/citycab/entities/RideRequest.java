@@ -1,8 +1,8 @@
 package com.springboot.project.citycab.entities;
 
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
-import com.springboot.project.citycab.entities.enums.PaymentMethod;
-import com.springboot.project.citycab.entities.enums.RideRequestStatus;
+import com.springboot.project.citycab.constants.enums.PaymentMethod;
+import com.springboot.project.citycab.constants.enums.RideRequestStatus;
 import com.springboot.project.citycab.serializers.PointSerializer;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;

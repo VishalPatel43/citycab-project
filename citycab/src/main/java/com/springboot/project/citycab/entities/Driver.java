@@ -25,6 +25,8 @@ public class Driver {
 
     private Boolean available;
 
+//    private Boolean availableAsDriver; // --> If work as driver then can't be available as rider
+
     private String vehicleId;
 
 //    private String licenseNumber;

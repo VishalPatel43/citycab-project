@@ -1,7 +1,7 @@
 package com.springboot.project.citycab.dto;
 
-import com.springboot.project.citycab.entities.enums.PaymentMethod;
-import com.springboot.project.citycab.entities.enums.RideRequestStatus;
+import com.springboot.project.citycab.constants.enums.PaymentMethod;
+import com.springboot.project.citycab.constants.enums.RideRequestStatus;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;

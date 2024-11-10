@@ -1,6 +1,6 @@
 package com.springboot.project.citycab.strategies.manager;
 
-import com.springboot.project.citycab.entities.enums.PaymentMethod;
+import com.springboot.project.citycab.constants.enums.PaymentMethod;
 import com.springboot.project.citycab.strategies.PaymentStrategy;
 import com.springboot.project.citycab.strategies.impl.CashPaymentStrategy;
 import com.springboot.project.citycab.strategies.impl.WalletPaymentStrategy;

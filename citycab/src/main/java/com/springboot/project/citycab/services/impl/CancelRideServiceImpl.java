@@ -2,8 +2,8 @@ package com.springboot.project.citycab.services.impl;
 
 import com.springboot.project.citycab.entities.CancelRide;
 import com.springboot.project.citycab.entities.Ride;
-import com.springboot.project.citycab.entities.enums.RideStatus;
-import com.springboot.project.citycab.entities.enums.Role;
+import com.springboot.project.citycab.constants.enums.RideStatus;
+import com.springboot.project.citycab.constants.enums.Role;
 import com.springboot.project.citycab.repositories.CancelRideRepository;
 import com.springboot.project.citycab.services.CancelRideService;
 import com.springboot.project.citycab.services.RideService;

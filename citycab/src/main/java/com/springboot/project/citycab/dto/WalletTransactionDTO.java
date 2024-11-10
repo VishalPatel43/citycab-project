@@ -1,6 +1,6 @@
 package com.springboot.project.citycab.dto;
 
-import com.springboot.project.citycab.entities.enums.TransactionType;
+import com.springboot.project.citycab.constants.enums.TransactionType;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
