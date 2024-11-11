@@ -29,6 +29,7 @@ public class DriverServiceImpl implements DriverService {
     // Repository
     private final DriverRepository driverRepository;
     // Services
+    private final UserService userService;
     private final RideRequestService rideRequestService;
     private final RideService rideService;
     private final PaymentService paymentService;
@@ -174,9 +175,11 @@ public class DriverServiceImpl implements DriverService {
 
     @Override
     public Driver getCurrentDriver() {
+        User currentUser = userService.getCurrentUser();
+
         return driverRepository
-                .findById(2L)
-                .orElseThrow(() -> new ResourceNotFoundException("Driver not found with id" + 2L));
+                .findByUser(currentUser)
+                .orElseThrow(() -> new ResourceNotFoundException("Driver not Associated with the current user id: " + currentUser.getUserId()));
     }
 
     @Override

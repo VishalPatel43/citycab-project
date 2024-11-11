@@ -16,7 +16,7 @@ public class SwaggerConfig {
     public OpenAPI cityCabOpenAPI() {
         return new OpenAPI()
                 .info(new Info().title("CityCab Application API")
-                        .description("API documentation for CityCab - a ride-hailing application built with Spring Boot 3")
+                        .description("API documentation for CityCab - a ride-hailing application built with Spring Boot 3 and Spring Security 6")
                         .version("v1.0.0")
                         .license(new License()
                                 .name("Apache 2.0")

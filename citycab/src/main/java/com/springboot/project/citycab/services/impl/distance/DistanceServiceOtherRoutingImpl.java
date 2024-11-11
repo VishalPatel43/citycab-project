@@ -1,4 +1,4 @@
-package com.springboot.project.citycab.services.impl;
+package com.springboot.project.citycab.services.impl.distance;
 
 import com.springboot.project.citycab.exceptions.DistanceRestClientServiceException;
 import com.springboot.project.citycab.services.DistanceService;
@@ -16,13 +16,13 @@ import java.util.List;
 
 @Service
 @Slf4j
-public class DistanceServiceHereRoutingImpl implements DistanceService {
+public class DistanceServiceOtherRoutingImpl implements DistanceService {
 
-    private final RestClient hereRoutingRestClient;
+    private final RestClient otherRoutingRestClient;
 
     // Manually define the constructor with @Qualifier
-    public DistanceServiceHereRoutingImpl(@Qualifier("hereRoutingRestClient") RestClient hereRoutingRestClient) {
-        this.hereRoutingRestClient = hereRoutingRestClient;
+    public DistanceServiceOtherRoutingImpl(@Qualifier("otherRestClient") RestClient otherRoutingRestClient) {
+        this.otherRoutingRestClient = otherRoutingRestClient;
     }
 
     @Value("${here.routing.api.key}")
@@ -42,7 +42,7 @@ public class DistanceServiceHereRoutingImpl implements DistanceService {
 //                    src.getY(), src.getX(),
 //                    dest.getY(), dest.getX(),
 //                    hereRoutingApiKey);
-            HereRoutingResponseDTO responseDto = hereRoutingRestClient
+            OtherRoutingResponseDTO responseDto = otherRoutingRestClient
                     .get()
                     .uri(uri)
                     .retrieve()
@@ -51,7 +51,7 @@ public class DistanceServiceHereRoutingImpl implements DistanceService {
                         System.out.println("Client Error occurred: " + error);
                         throw new DistanceRestClientServiceException("Client Error: Unable to calculate distance. Here Routing responded with: " + error);
                     })
-                    .body(HereRoutingResponseDTO.class);
+                    .body(OtherRoutingResponseDTO.class);
 
             if (responseDto == null || responseDto.getFeatures().isEmpty())
                 throw new DistanceRestClientServiceException("Error: No valid route found between the provided points.");
@@ -67,16 +67,16 @@ public class DistanceServiceHereRoutingImpl implements DistanceService {
 
 @Data
 @ToString
-class HereRoutingResponseDTO {
-    private List<HereRoutingRoute> features;
+class OtherRoutingResponseDTO {
+    private List<OtherRoutingRoute> features;
 }
 
 @Data
-class HereRoutingRoute {
-    private HereRoutingProperties properties;
+class OtherRoutingRoute {
+    private OtherRoutingProperties properties;
 }
 
 @Data
-class HereRoutingProperties {
+class OtherRoutingProperties {
     private Long distance; // Distance in meters
 }

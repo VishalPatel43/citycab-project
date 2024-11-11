@@ -39,7 +39,7 @@ public class User implements UserDetails {
 
     // Create table for roles only
     // Change Column name to user_roles
-    @ElementCollection(fetch = FetchType.LAZY)
+    @ElementCollection(fetch = FetchType.EAGER)
     @Enumerated(EnumType.STRING)
     @CollectionTable(name = "user_roles", joinColumns = @JoinColumn(name = "user_id"))
 //    @Column(name = "roles") // Specifies the column name for the roles

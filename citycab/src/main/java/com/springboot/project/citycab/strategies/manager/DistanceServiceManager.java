@@ -1,9 +1,9 @@
 package com.springboot.project.citycab.strategies.manager;
 
 import com.springboot.project.citycab.exceptions.DistanceRestClientServiceException;
-import com.springboot.project.citycab.services.impl.DistanceServiceHereRoutingImpl;
-import com.springboot.project.citycab.services.impl.DistanceServiceOSRMImpl;
-import com.springboot.project.citycab.services.impl.DistanceServiceOtherRoutingImpl;
+import com.springboot.project.citycab.services.impl.distance.DistanceServiceHereRoutingImpl;
+import com.springboot.project.citycab.services.impl.distance.DistanceServiceOSRMImpl;
+import com.springboot.project.citycab.services.impl.distance.DistanceServiceOtherRoutingImpl;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.locationtech.jts.geom.Point;

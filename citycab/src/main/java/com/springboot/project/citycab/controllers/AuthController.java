@@ -3,12 +3,16 @@ package com.springboot.project.citycab.controllers;
 import com.springboot.project.citycab.dto.*;
 import com.springboot.project.citycab.services.AuthService;
 import jakarta.servlet.http.Cookie;
+import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.annotation.Secured;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.Arrays;
 
 @RestController
 @RequestMapping(path = "/auth")
@@ -38,6 +42,27 @@ public class AuthController {
         return new ResponseEntity<>(loginResponseDTO, HttpStatus.OK);
     }
 
+    @PostMapping("/refresh")
+    public ResponseEntity<LoginResponseDTO> refresh(HttpServletRequest request, HttpServletResponse response) {
+        String refreshToken = Arrays.stream(request.getCookies())
+                .filter(cookie -> "refreshToken".equals(cookie.getName()))
+                .findFirst()
+                .map(Cookie::getValue)
+                .orElseThrow(() -> new RuntimeException("Refresh token not found inside the Cookies"));
+
+        LoginResponseDTO loginResponseDTO = authService.refreshToken(refreshToken);
+
+        // Update refresh token cookie
+        Cookie cookie = new Cookie("refreshToken", loginResponseDTO.getRefreshToken());
+        cookie.setHttpOnly(true);
+        cookie.setSecure("production".equals(deployEnv));
+        cookie.setPath("/");
+        response.addCookie(cookie);
+
+        return ResponseEntity.ok(loginResponseDTO);
+    }
+
+    @Secured("ROLE_ADMIN")
     // write this method in the Admin Controller
     @PostMapping(path = "/onBoardNewDriver/{userId}")
     ResponseEntity<DriverDTO> onBoardNewDriver(@PathVariable Long userId,

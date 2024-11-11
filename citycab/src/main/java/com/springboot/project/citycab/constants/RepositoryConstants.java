@@ -26,6 +26,7 @@ public final class RepositoryConstants {
      * The list of HTTP methods that are unsupported and should be disabled for repositories.
      */
     public static final List<HttpMethod> UNSUPPORTED_HTTP_METHODS = List.of(
+            GET,
             POST,
             PATCH,
             DELETE,

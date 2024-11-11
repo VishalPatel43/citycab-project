@@ -29,6 +29,7 @@ public class RiderServiceImpl implements RiderService {
     // Repository
     private final RiderRepository riderRepository;
     // Service
+    private final UserService userService;
     private final RideRequestService rideRequestService;
     private final RideService rideService;
     private final DriverService driverService;
@@ -171,13 +172,14 @@ public class RiderServiceImpl implements RiderService {
     // Using Spring Security, we get the context of the current user and get the rider
     @Override
     public Rider getCurrentRider() {
-        // TODO: implement Spring Security
+        User currentUser = userService.getCurrentUser();
 
         // currently we are returning with riderId = 1
         return riderRepository
-                .findById(1L)
-                .orElseThrow(
-                        () -> new ResourceNotFoundException("Rider not found with id: 1")
+                .findByUser(currentUser)
+                .orElseThrow(() -> new ResourceNotFoundException(
+                        "Rider not associated with the current user id: " +
+                                currentUser.getUserId())
                 );
     }
 

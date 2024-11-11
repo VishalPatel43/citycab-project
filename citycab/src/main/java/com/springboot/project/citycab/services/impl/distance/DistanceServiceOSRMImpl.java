@@ -1,4 +1,4 @@
-package com.springboot.project.citycab.services.impl;
+package com.springboot.project.citycab.services.impl.distance;
 
 import com.springboot.project.citycab.exceptions.DistanceRestClientServiceException;
 import com.springboot.project.citycab.services.DistanceService;

@@ -111,4 +111,13 @@ public class AuthServiceImpl implements AuthService {
         Driver savedDriver = driverService.createNewDriver(createDriver);
         return modelMapper.map(savedDriver, DriverDTO.class);
     }
+
+    @Override
+    public LoginResponseDTO refreshToken(String refreshToken) {
+        Long userId = jwtService.getUserIdFromToken(refreshToken);
+
+        User user = userService.getUserById(userId);
+        String accessToken = jwtService.generateAccessToken(user);
+        return new LoginResponseDTO(accessToken, refreshToken);
+    }
 }

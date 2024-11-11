@@ -1,6 +1,7 @@
 package com.springboot.project.citycab.repositories;
 
 import com.springboot.project.citycab.entities.Driver;
+import com.springboot.project.citycab.entities.User;
 import org.locationtech.jts.geom.Point;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -9,6 +10,7 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
+import java.util.Optional;
 
 @Repository
 //@RepositoryRestResource(exported = false) // This disables the entire repository from being exposed via REST
@@ -89,4 +91,6 @@ public interface DriverRepository extends JpaRepository<Driver, Long> {
             "ORDER BY d.avg_rating DESC " +
             "LIMIT 10", nativeQuery = true)
     List<Driver> findTenNearbyTopRatedDrivers(Point pickupLocation);
+
+    Optional<Driver> findByUser(User currentUser);
 }

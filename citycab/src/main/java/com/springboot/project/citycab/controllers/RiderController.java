@@ -7,11 +7,15 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.annotation.Secured;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping(path = "/riders")
 @RequiredArgsConstructor
+@Secured("ROLE_RIDER") // default role is "ROLE_RIDER" so put some condition here using @PreAuthorize
+// If it's active as driver then not allowed to access this controller
+// But ADMIN can access this controller
 public class RiderController {
 
     private final RiderService riderService;
