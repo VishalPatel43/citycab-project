@@ -1,11 +1,12 @@
 package com.springboot.project.citycab.services.impl;
 
-import com.springboot.project.citycab.dto.*;
-import com.springboot.project.citycab.entities.*;
 import com.springboot.project.citycab.constants.enums.RideRequestStatus;
 import com.springboot.project.citycab.constants.enums.RideStatus;
 import com.springboot.project.citycab.constants.enums.Role;
+import com.springboot.project.citycab.dto.*;
+import com.springboot.project.citycab.entities.*;
 import com.springboot.project.citycab.exceptions.ResourceNotFoundException;
+import com.springboot.project.citycab.repositories.RideRequestRepository;
 import com.springboot.project.citycab.repositories.RiderRepository;
 import com.springboot.project.citycab.services.*;
 import com.springboot.project.citycab.strategies.DriverMatchingStrategy;
@@ -14,6 +15,8 @@ import com.springboot.project.citycab.strategies.manager.RideStrategyManager;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.modelmapper.ModelMapper;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
@@ -25,6 +28,7 @@ import java.util.List;
 @RequiredArgsConstructor
 @Slf4j
 public class RiderServiceImpl implements RiderService {
+    private final RideRequestRepository rideRequestRepository;
 
     // Repository
     private final RiderRepository riderRepository;
@@ -34,11 +38,16 @@ public class RiderServiceImpl implements RiderService {
     private final RideService rideService;
     private final DriverService driverService;
     private final CancelRideService cancelRideService;
-    private final RatingService ratingService;
+    private RatingService ratingService;
     // Strategy
     private final RideStrategyManager rideStrategyManager;
     // Mapper
     private final ModelMapper modelMapper;
+
+    @Autowired
+    public void setRatingService(@Lazy RatingService ratingService) {
+        this.ratingService = ratingService;
+    }
 
     @Override
     @Transactional
@@ -61,23 +70,15 @@ public class RiderServiceImpl implements RiderService {
                 .driverMatchingStrategy();
 
         List<Driver> drivers = driverMatchingStrategy.findMatchingDriver(savedRideRequest);
-        /*
-        if (drivers != null && !drivers.isEmpty()) {
-            Point pickupLocation = savedRideRequest.getPickupLocation();
-            for (Driver driver : drivers) {
-                Point driverLocation = driver.getCurrentLocation();
-                double distanceKm = distanceService.calculateDistance(pickupLocation, driverLocation);
-                System.out.println("Matched Driver: " + driver);
-                        + " Distance: " + distanceKm + " km");
-            }
-        } else
-            System.out.println("No drivers matched for RideRequest ID: " + savedRideRequest.getRideRequestId());
 
-*/
-        // TODO: those drivers are notified about the ride request
-        // We can also use the APIs which send the ride information to those drivers
+        rideRequest.setDrivers(drivers);
+        rideRequestRepository.save(rideRequest);
 
-        // TODO: Send notification to all the drivers about this ride request
+        for (Driver driver : drivers) {
+//            driver.setRideRequests(List.of(rideRequest));
+            driver.getRideRequests().add(rideRequest);
+            driverService.saveDriver(driver);
+        }
 
         return modelMapper.map(savedRideRequest, RideRequestDTO.class);
     }
@@ -101,6 +102,7 @@ public class RiderServiceImpl implements RiderService {
                 Role.RIDER
         );
 
+        driverService.confirmAndClearAssociations(ride.getRideRequest());
         driverService.updateDriverAvailability(ride.getDriver(), true);
 
         RideDTO rideDTO = modelMapper.map(cancelRide.getRide(), RideDTO.class);
@@ -165,6 +167,11 @@ public class RiderServiceImpl implements RiderService {
     }
 
     @Override
+    public Rider updateRider(Rider rider) {
+        return riderRepository.save(rider);
+    }
+
+    @Override
     public OtpDTO getOtp(Long rideId) {
         return rideService.getOtp(rideId);
     }
@@ -205,5 +212,15 @@ public class RiderServiceImpl implements RiderService {
             throw new ResourceNotFoundException("No riders found with name: " + name);
 
         return riders.map(rider -> modelMapper.map(rider, RiderDTO.class));
+    }
+
+    @Override
+    public List<DriverDTO> getAvailableDriversForRideRequest(Long rideRequestId) {
+        RideRequest rideRequest = rideRequestService.getRideRequestById(rideRequestId);
+        List<Driver> drivers = rideRequest.getDrivers();
+
+        return drivers.stream()
+                .map(driver -> modelMapper.map(driver, DriverDTO.class))
+                .toList();
     }
 }

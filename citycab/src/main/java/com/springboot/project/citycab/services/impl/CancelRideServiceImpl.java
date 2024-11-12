@@ -1,11 +1,15 @@
 package com.springboot.project.citycab.services.impl;
 
-import com.springboot.project.citycab.entities.CancelRide;
-import com.springboot.project.citycab.entities.Ride;
+import com.springboot.project.citycab.constants.enums.RideRequestStatus;
 import com.springboot.project.citycab.constants.enums.RideStatus;
 import com.springboot.project.citycab.constants.enums.Role;
+import com.springboot.project.citycab.entities.CancelRide;
+import com.springboot.project.citycab.entities.Ride;
+import com.springboot.project.citycab.entities.RideRequest;
 import com.springboot.project.citycab.repositories.CancelRideRepository;
 import com.springboot.project.citycab.services.CancelRideService;
+import com.springboot.project.citycab.services.DriverService;
+import com.springboot.project.citycab.services.RideRequestService;
 import com.springboot.project.citycab.services.RideService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -41,6 +45,9 @@ public class CancelRideServiceImpl implements CancelRideService {
                 .cancelledBy(cancelledBy)
                 .ride(ride)
                 .build();
+
+        RideRequest rideRequest = ride.getRideRequest();
+        rideRequest.setRideRequestStatus(RideRequestStatus.CANCELLED);
 
         CancelRide updateCancelRide = cancelRideRepository.save(cancelRide);
         rideService.updateRide(ride);

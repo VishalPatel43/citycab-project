@@ -1,11 +1,11 @@
 package com.springboot.project.citycab.services.impl;
 
+import com.springboot.project.citycab.constants.enums.TransactionMethod;
+import com.springboot.project.citycab.constants.enums.TransactionType;
 import com.springboot.project.citycab.entities.Ride;
 import com.springboot.project.citycab.entities.User;
 import com.springboot.project.citycab.entities.Wallet;
 import com.springboot.project.citycab.entities.WalletTransaction;
-import com.springboot.project.citycab.constants.enums.TransactionMethod;
-import com.springboot.project.citycab.constants.enums.TransactionType;
 import com.springboot.project.citycab.exceptions.ResourceNotFoundException;
 import com.springboot.project.citycab.repositories.WalletRepository;
 import com.springboot.project.citycab.services.WalletService;

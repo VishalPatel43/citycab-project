@@ -11,6 +11,7 @@ import com.springboot.project.citycab.exceptions.RuntimeConflictException;
 import com.springboot.project.citycab.repositories.RatingRepository;
 import com.springboot.project.citycab.services.DriverService;
 import com.springboot.project.citycab.services.RatingService;
+import com.springboot.project.citycab.services.RiderService;
 import lombok.RequiredArgsConstructor;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -29,6 +30,7 @@ public class RatingServiceImpl implements RatingService {
     private final RatingRepository ratingRepository;
 
     // Service
+    private final RiderService riderService;
     private DriverService driverService;
     // Mapper
     private final ModelMapper modelMapper;
@@ -43,6 +45,8 @@ public class RatingServiceImpl implements RatingService {
     public DriverDTO rateDriver(Ride ride, RatingDTO ratingDTO) {
 
         Driver driver = ride.getDriver();
+        Rider rider = ride.getRider();
+
         Rating ratingObj = ratingRepository.findByRide(ride)
                 .orElseThrow(() -> new ResourceNotFoundException("Rating not found for ride with id: " + ride.getRideId()));
 
@@ -63,8 +67,16 @@ public class RatingServiceImpl implements RatingService {
                 .orElse(0.0);
         driver.setAvgRating(newRating);
 
-        Driver savedDriver = driverService.updateDriver(driver);
+        Driver savedDriver = driverService.saveDriver(driver);
 //        Driver savedDriver = driverRatingService.updateDriverRating(driver, newRating);
+
+
+        // Update rider's average given rating
+        Rider saveRider = updateRiderRating(rider);
+
+        // Save the updated rider with the new average rating
+        riderService.updateRider(rider);  // Ensure `save` method is available in `RiderService`
+
         return modelMapper.map(savedDriver, DriverDTO.class);
     }
 
@@ -105,5 +117,27 @@ public class RatingServiceImpl implements RatingService {
     public Rating getRatingByRide(Ride ride) {
         return ratingRepository.findByRide(ride)
                 .orElseThrow(() -> new ResourceNotFoundException("Rating not found for ride with id: " + ride.getRideId()));
+    }
+
+    private Driver updateDriverRating(Driver driver) {
+        double newRating = ratingRepository.findAllByDriver(driver)
+                .stream()
+                .mapToDouble(Rating::getDriverRating)
+                .average()
+                .orElse(0.0);
+
+        driver.setAvgRating(newRating);
+        return driverService.saveDriver(driver);
+    }
+
+    private Rider updateRiderRating(Rider rider) {
+        double newRiderGivenRating = ratingRepository.findAllByRider(rider)
+                .stream()
+                .mapToDouble(Rating::getDriverRating)
+                .average()
+                .orElse(0.0);
+
+        rider.setAvgGivenRating(newRiderGivenRating);
+        return riderService.updateRider(rider);
     }
 }

@@ -1,19 +1,18 @@
 package com.springboot.project.citycab.services.impl;
 
-import com.springboot.project.citycab.dto.CancelRideDTO;
-import com.springboot.project.citycab.dto.DriverDTO;
-import com.springboot.project.citycab.dto.RatingDTO;
-import com.springboot.project.citycab.dto.RideDTO;
-import com.springboot.project.citycab.entities.*;
 import com.springboot.project.citycab.constants.enums.RideRequestStatus;
 import com.springboot.project.citycab.constants.enums.RideStatus;
 import com.springboot.project.citycab.constants.enums.Role;
+import com.springboot.project.citycab.dto.*;
+import com.springboot.project.citycab.entities.*;
 import com.springboot.project.citycab.exceptions.ResourceNotFoundException;
 import com.springboot.project.citycab.repositories.DriverRepository;
 import com.springboot.project.citycab.services.*;
 import lombok.RequiredArgsConstructor;
 import org.locationtech.jts.geom.Point;
 import org.modelmapper.ModelMapper;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
@@ -34,9 +33,14 @@ public class DriverServiceImpl implements DriverService {
     private final RideService rideService;
     private final PaymentService paymentService;
     private final CancelRideService cancelRideService;
-    private final RatingService ratingService;
+    private RatingService ratingService;
     // Mapper
     private final ModelMapper modelMapper;
+
+    @Autowired
+    public void setRatingService(@Lazy RatingService ratingService) {
+        this.ratingService = ratingService;
+    }
 
     // After Ride Request if driver accept the ride then we return the RideDTO
     @Override
@@ -57,6 +61,8 @@ public class DriverServiceImpl implements DriverService {
         // After that we create the ride
         // here we save the driver to make it unavailable so update the driver in the database
         Driver updatedDriver = updateDriverAvailability(currentDriver, false);
+
+        confirmAndClearAssociations(rideRequest);
 
         Ride ride = rideService.createNewRide(rideRequest, updatedDriver);
 
@@ -88,6 +94,8 @@ public class DriverServiceImpl implements DriverService {
                 Role.DRIVER
         );
         updateDriverAvailability(driver, true);
+
+        confirmAndClearAssociations(ride.getRideRequest());
 
         RideDTO rideDTO = modelMapper.map(cancelRide.getRide(), RideDTO.class);
         rideDTO.setRating(null);
@@ -164,6 +172,13 @@ public class DriverServiceImpl implements DriverService {
         return modelMapper.map(currentDiver, DriverDTO.class);
     }
 
+    @Override
+    public Driver getDriverById(Long driverId) {
+        return driverRepository
+                .findById(driverId)
+                .orElseThrow(() -> new ResourceNotFoundException("Driver not found with id: " + driverId));
+    }
+
     // List All the rides of the driver
     @Override
     public Page<RideDTO> getAllMyRides(PageRequest pageRequest) {
@@ -230,13 +245,7 @@ public class DriverServiceImpl implements DriverService {
 
     @Override
     @Transactional
-    public Driver createNewDriver(Driver createDriver) {
-        return driverRepository.save(createDriver);
-    }
-
-    @Override
-    @Transactional
-    public Driver updateDriver(Driver driver) {
+    public Driver saveDriver(Driver driver) {
         return driverRepository.save(driver);
     }
 
@@ -261,5 +270,35 @@ public class DriverServiceImpl implements DriverService {
             throw new ResourceNotFoundException("No driver found with name: " + name);
 
         return drivers.map(driver -> modelMapper.map(driver, DriverDTO.class));
+    }
+
+    @Override
+    public List<RideRequestDTO> getAvailableRideRequests() {
+        Driver driver = getCurrentDriver();
+
+        List<RideRequest> rideRequestList = driver.getRideRequests();
+
+        return rideRequestList.stream()
+                .map(rideRequest -> modelMapper.map(rideRequest, RideRequestDTO.class))
+                .toList();
+    }
+
+    @Transactional
+    @Override
+    public void confirmAndClearAssociations(RideRequest request) {
+        RideRequest rideRequest = rideRequestService.getRideRequestById(request.getRideRequestId());
+
+        if (!rideRequest.getRideRequestStatus().equals(RideRequestStatus.CONFIRMED)) {
+            // Clear the drivers list in the RideRequest
+            List<Driver> drivers = rideRequest.getDrivers();
+            for (Driver driver : drivers) {
+                driver.getRideRequests().remove(rideRequest); // Remove the ride request from each driver
+            }
+            drivers.clear(); // Clear the list of drivers in RideRequest
+
+            // Save the changes to the repositories
+            rideRequestService.saveRideRequest(rideRequest);
+            driverRepository.saveAll(drivers);
+        }
     }
 }

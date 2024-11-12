@@ -1,5 +1,6 @@
 package com.springboot.project.citycab.dto;
 
+import com.springboot.project.citycab.constants.enums.Role;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;
@@ -16,4 +17,5 @@ public class LoginRequestDTO {
     @Size(min = 4, message = "Password should have at least 4 characters")
     private String password;
 
+    private Role acitveRole;
 }

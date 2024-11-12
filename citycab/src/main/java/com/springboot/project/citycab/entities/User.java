@@ -1,5 +1,6 @@
 package com.springboot.project.citycab.entities;
 
+import com.springboot.project.citycab.constants.enums.Gender;
 import com.springboot.project.citycab.constants.enums.Role;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
@@ -10,6 +11,7 @@ import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
+import java.time.LocalDate;
 import java.util.Collection;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -35,7 +37,14 @@ public class User implements UserDetails {
 
     private String password;
 
-    //    MobileNumber, Birthdate, Gender, Address, Profile Picture, etc.
+    @Column(unique = true, nullable = false)
+    private String mobileNumber; // add prefix +91-1234567890 or add with country code
+
+
+    private LocalDate birthdate;
+
+    @Enumerated(EnumType.STRING)
+    private Gender gender;
 
     // Create table for roles only
     // Change Column name to user_roles
@@ -58,10 +67,14 @@ public class User implements UserDetails {
                 "userId=" + userId +
                 ", name='" + name + '\'' +
                 ", email='" + email + '\'' +
-//                ", password='" + password + '\'' +
+                ", activeRole='" + activeRole + '\'' +
                 ", roles=" + roles +
                 '}';
     }
+
+    // Don't add in Database
+//    @Transient
+    private Role activeRole;
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {

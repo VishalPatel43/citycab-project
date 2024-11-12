@@ -1,10 +1,14 @@
 package com.springboot.project.citycab.entities;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import com.springboot.project.citycab.serializers.PointSerializer;
 import jakarta.persistence.*;
 import lombok.*;
 import org.locationtech.jts.geom.Point;
+
+import java.util.List;
+import java.util.Set;
 
 @Entity
 @AllArgsConstructor
@@ -25,11 +29,8 @@ public class Driver {
 
     private Boolean available;
 
-//    private Boolean availableAsDriver; // --> If work as driver then can't be available as rider
-
     private String vehicleId;
 
-//    private String licenseNumber;
 
     @JsonSerialize(using = PointSerializer.class)  // Use custom serializer
     @Column(columnDefinition = "Geometry(Point, 4326)")
@@ -39,33 +40,33 @@ public class Driver {
     @JoinColumn(name = "user_id")
     private User user;
 
-    // Vehicle information
-    // One to One mapping with Vehicle Entity
-    // Vehicle Type, Vehicle Number, Vehicle Model, Vehicle Color, etc.
+    @OneToOne(cascade = CascadeType.ALL)
+    @JoinColumn(name = "address_id")
+    private Address address;
 
-    // Custom getter to serialize the Point as PointDTO
-//    public PointDTO getCurrentLocation() {
-//        if (currentLocation != null) {
-//            return new PointDTO(
-//                    new double[]{
-//                            currentLocation.getX(),
-//                            currentLocation.getY()
-//                    }
-//            );
-//        }
-//        return null;
-//    }
+    @ManyToMany
+    @JoinTable(
+            name = "driver_vehicle",
+            joinColumns = @JoinColumn(name = "driver_id"),
+            inverseJoinColumns = @JoinColumn(name = "vehicle_id")
+    )
+    private Set<Vehicle> vehicles;
 
+    @ManyToMany(mappedBy = "drivers")
+    @JsonIgnore  // To prevent infinite recursion during JSON serialization
+    private List<RideRequest> rideRequests;
 
     @Override
     public String toString() {
         return "Driver{" +
-                "driverId=" + driverId +
-                ", avgRating=" + avgRating +
-                ", available=" + available +
-                ", vehicleId='" + vehicleId + '\'' +
+                "driverId=" + driverId + "\n" +
+                ", avgRating=" + avgRating + "\n" +
+                ", available=" + available + "\n" +
+                ", vehicleId='" + vehicleId + '\'' + "\n" +
                 ", currentLocation=" + currentLocation + "\n" +
-                ", user=" + user +
+                ", user=" + user + "\n" +
+                ", address=" + address + "\n" +
+                ", vehicles=" + vehicles + "\n" +
                 '}';
     }
 }

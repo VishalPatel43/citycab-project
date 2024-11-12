@@ -1,12 +1,12 @@
 package com.springboot.project.citycab.services.impl;
 
+import com.springboot.project.citycab.constants.enums.RideRequestStatus;
+import com.springboot.project.citycab.constants.enums.RideStatus;
 import com.springboot.project.citycab.dto.OtpDTO;
 import com.springboot.project.citycab.entities.Driver;
 import com.springboot.project.citycab.entities.Ride;
 import com.springboot.project.citycab.entities.RideRequest;
 import com.springboot.project.citycab.entities.Rider;
-import com.springboot.project.citycab.constants.enums.RideRequestStatus;
-import com.springboot.project.citycab.constants.enums.RideStatus;
 import com.springboot.project.citycab.exceptions.RuntimeConflictException;
 import com.springboot.project.citycab.repositories.RideRepository;
 import com.springboot.project.citycab.services.RideRequestService;
@@ -41,10 +41,11 @@ public class RideServiceImpl implements RideService {
     @Transactional
     public Ride createNewRide(RideRequest rideRequest, Driver driver) {
         rideRequest.setRideRequestStatus(RideRequestStatus.CONFIRMED);
-        rideRequestService.updateRideRequest(rideRequest);
+        rideRequestService.saveRideRequest(rideRequest);
 
         // Here we convert RideRequest to Ride for some of the fields which has same name
         Ride ride = modelMapper.map(rideRequest, Ride.class);
+        ride.setRideRequest(rideRequest);
         ride.setRideStatus(RideStatus.CONFIRMED);
         ride.setDriver(driver);
         ride.setOtp(generateRandomOTP());

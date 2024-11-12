@@ -26,7 +26,6 @@ public class JwtAuthFilter extends OncePerRequestFilter {
 
     private HandlerExceptionResolver handlerExceptionResolver;
 
-
     // Setter for HandlerExceptionResolver
     @Autowired
     @Qualifier("handlerExceptionResolver")
@@ -49,14 +48,17 @@ public class JwtAuthFilter extends OncePerRequestFilter {
 
             final String token = requestTokenHeader.split("Bearer ")[1];
             final Long userId = jwtService.getUserIdFromToken(token);
+//            final Role activeRole = jwtService.extractActiveRole(token);
 
             if (userId != null && SecurityContextHolder.getContext().getAuthentication() == null) {
 
                 User user = userService.getUserById(userId);
+//                user.setActiveRole(activeRole);
 
                 if (jwtService.validateToken(token, user)) {
                     log.info("Authenticated user: {}", user.getUsername());
                     log.info("Authorities: {}", user.getAuthorities());
+                    log.info("User: {}", user);
 
                     UsernamePasswordAuthenticationToken authenticationToken =
                             new UsernamePasswordAuthenticationToken(

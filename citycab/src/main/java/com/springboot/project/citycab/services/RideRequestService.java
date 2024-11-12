@@ -1,6 +1,9 @@
 package com.springboot.project.citycab.services;
 
+import com.springboot.project.citycab.dto.DriverDTO;
 import com.springboot.project.citycab.entities.RideRequest;
+
+import java.util.List;
 
 public interface RideRequestService {
 
@@ -8,5 +11,6 @@ public interface RideRequestService {
 
     RideRequest findRideRequestById(Long rideRequestId);
 
-    RideRequest updateRideRequest(RideRequest rideRequest);
+    RideRequest getRideRequestById(Long rideRequestId);
+
 }

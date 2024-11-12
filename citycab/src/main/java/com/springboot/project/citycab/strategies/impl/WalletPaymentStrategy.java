@@ -1,10 +1,10 @@
 package com.springboot.project.citycab.strategies.impl;
 
+import com.springboot.project.citycab.constants.enums.PaymentStatus;
+import com.springboot.project.citycab.constants.enums.TransactionMethod;
 import com.springboot.project.citycab.entities.Driver;
 import com.springboot.project.citycab.entities.Payment;
 import com.springboot.project.citycab.entities.Rider;
-import com.springboot.project.citycab.constants.enums.PaymentStatus;
-import com.springboot.project.citycab.constants.enums.TransactionMethod;
 import com.springboot.project.citycab.services.PaymentService;
 import com.springboot.project.citycab.services.WalletService;
 import com.springboot.project.citycab.strategies.PaymentStrategy;

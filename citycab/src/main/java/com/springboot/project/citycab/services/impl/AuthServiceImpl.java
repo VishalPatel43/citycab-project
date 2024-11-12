@@ -1,16 +1,20 @@
 package com.springboot.project.citycab.services.impl;
 
-import com.springboot.project.citycab.dto.*;
-import com.springboot.project.citycab.entities.Driver;
+import com.springboot.project.citycab.constants.enums.Role;
+import com.springboot.project.citycab.dto.LoginRequestDTO;
+import com.springboot.project.citycab.dto.LoginResponseDTO;
+import com.springboot.project.citycab.dto.SignUpDTO;
+import com.springboot.project.citycab.dto.UserDTO;
 import com.springboot.project.citycab.entities.Rider;
 import com.springboot.project.citycab.entities.User;
 import com.springboot.project.citycab.entities.Wallet;
-import com.springboot.project.citycab.constants.enums.Role;
 import com.springboot.project.citycab.exceptions.ResourceNotFoundException;
 import com.springboot.project.citycab.exceptions.RuntimeConflictException;
-import com.springboot.project.citycab.repositories.UserRepository;
 import com.springboot.project.citycab.security.JWTService;
-import com.springboot.project.citycab.services.*;
+import com.springboot.project.citycab.services.AuthService;
+import com.springboot.project.citycab.services.RiderService;
+import com.springboot.project.citycab.services.UserService;
+import com.springboot.project.citycab.services.WalletService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.modelmapper.ModelMapper;
@@ -32,7 +36,6 @@ public class AuthServiceImpl implements AuthService {
     // Service
     private final JWTService jwtService;
     private final RiderService riderService;
-    private final DriverService driverService;
     private final WalletService walletService;
     // Mapper
     private final ModelMapper modelMapper;
@@ -47,6 +50,15 @@ public class AuthServiceImpl implements AuthService {
         // Authenticate User
         User user = authenticateUser(loginRequestDTO);
 
+        Role activeRole = loginRequestDTO.getAcitveRole();
+        if (activeRole != null) {
+            if (user.getRoles().contains(Role.ADMIN) || (user.getRoles().contains(activeRole))) {
+                user.setActiveRole(activeRole);
+                user = userService.save(user);
+            } else throw new ResourceNotFoundException("User does not have the role " + activeRole);
+        }
+
+        log.info("User: {}", user);
         // Generate JWT Token
         String accessToken = jwtService.generateAccessToken(user);
         String refreshToken = jwtService.generateRefreshToken(user);
@@ -58,8 +70,6 @@ public class AuthServiceImpl implements AuthService {
         Authentication authentication = authenticationManager.authenticate(
                 new UsernamePasswordAuthenticationToken(loginRequestDTO.getUsername(),
                         loginRequestDTO.getPassword()));
-
-        log.info("Authenticated User: {}", (User) authentication.getPrincipal());
         return (User) authentication.getPrincipal();
     }
 
@@ -88,28 +98,6 @@ public class AuthServiceImpl implements AuthService {
         Wallet wallet = walletService.createNewWallet(savedUser);
 
         return modelMapper.map(savedUser, UserDTO.class);
-    }
-
-
-    @Override
-    public DriverDTO onboardNewDriver(Long userId, String vehicleId) {
-        User user = userService.getUserById(userId);
-
-        if (user.getRoles().contains(Role.DRIVER))
-            throw new RuntimeConflictException("User with id: " + userId + " is already a Driver");
-
-        Driver createDriver = Driver.builder()
-                .user(user)
-                .avgRating(0.0)
-                .vehicleId(vehicleId)
-                .available(true)
-                .build();
-
-        user.getRoles().add(Role.DRIVER);
-        userService.save(user);
-
-        Driver savedDriver = driverService.createNewDriver(createDriver);
-        return modelMapper.map(savedDriver, DriverDTO.class);
     }
 
     @Override

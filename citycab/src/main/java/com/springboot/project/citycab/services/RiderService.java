@@ -6,6 +6,8 @@ import com.springboot.project.citycab.entities.User;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 
+import java.util.List;
+
 public interface RiderService {
 
     RideRequestDTO requestRide(RideRequestDTO rideRequestDTO);
@@ -22,6 +24,8 @@ public interface RiderService {
 
     Rider createNewRider(User user);
 
+    Rider updateRider(Rider rider);
+
     OtpDTO getOtp(Long rideId);
 
     Rider getCurrentRider();
@@ -30,4 +34,5 @@ public interface RiderService {
 
     Page<RiderDTO> findRidersByName(String name, PageRequest pageRequest);
 
+    List<DriverDTO> getAvailableDriversForRideRequest(Long rideRequestId);
 }

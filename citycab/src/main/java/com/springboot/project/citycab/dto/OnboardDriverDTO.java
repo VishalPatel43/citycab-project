@@ -4,5 +4,8 @@ import lombok.Data;
 
 @Data
 public class OnboardDriverDTO {
-    private String vehicleId;
+
+    private AddressDTO address;
+    private VehicleDTO vehicle;
+
 }

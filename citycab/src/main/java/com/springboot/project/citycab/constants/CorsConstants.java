@@ -1,8 +1,5 @@
 package com.springboot.project.citycab.constants;
 
-import org.springframework.http.HttpHeaders;
-import org.springframework.http.HttpMethod;
-
 import java.util.List;
 
 import static org.springframework.http.HttpHeaders.*;

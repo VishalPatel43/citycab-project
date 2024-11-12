@@ -7,13 +7,14 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.access.annotation.Secured;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
 
 @RestController
 @RequestMapping(path = "/drivers")
 @RequiredArgsConstructor
-@Secured("ROLE_DRIVER")
+//@Secured("ROLE_DRIVER")
 public class DriverController {
 
     private final DriverService driverService;
@@ -38,6 +39,11 @@ public class DriverController {
     public ResponseEntity<RideDTO> cancelRide(@RequestBody MessageDTO messageDTO,
                                               @PathVariable Long rideId) {
         return ResponseEntity.ok(driverService.cancelRide(rideId, messageDTO.getReason()));
+    }
+
+    @GetMapping("/getAvailableRideRequests")
+    public ResponseEntity<List<RideRequestDTO>> getAvailableRideRequests() {
+        return ResponseEntity.ok(driverService.getAvailableRideRequests());
     }
 
     @GetMapping("/getMyProfile")

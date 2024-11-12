@@ -39,6 +39,7 @@ public class UserServiceImpl implements UserDetailsService, UserService {
         if (authentication == null || !(authentication.getPrincipal() instanceof User user))
             throw new UsernameNotFoundException("No authenticated user found");
 //        return (User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        log.info("Current User: {}", user);
         return user;
     }
 

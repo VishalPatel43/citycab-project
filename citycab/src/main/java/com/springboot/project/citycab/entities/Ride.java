@@ -1,5 +1,6 @@
 package com.springboot.project.citycab.entities;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import com.springboot.project.citycab.constants.enums.PaymentMethod;
@@ -65,6 +66,11 @@ public class Ride {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "driver_id")
     private Driver driver;
+
+    @JsonIgnore
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "ride_request_id")
+    private RideRequest rideRequest;
 
     // Cancellation details
 //    @JsonIgnore

@@ -1,8 +1,8 @@
 package com.springboot.project.citycab.services.impl;
 
+import com.springboot.project.citycab.constants.enums.PaymentStatus;
 import com.springboot.project.citycab.entities.Payment;
 import com.springboot.project.citycab.entities.Ride;
-import com.springboot.project.citycab.constants.enums.PaymentStatus;
 import com.springboot.project.citycab.exceptions.ResourceNotFoundException;
 import com.springboot.project.citycab.repositories.PaymentRepository;
 import com.springboot.project.citycab.services.PaymentService;

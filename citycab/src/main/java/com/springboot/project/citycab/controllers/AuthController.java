@@ -1,6 +1,9 @@
 package com.springboot.project.citycab.controllers;
 
-import com.springboot.project.citycab.dto.*;
+import com.springboot.project.citycab.dto.LoginRequestDTO;
+import com.springboot.project.citycab.dto.LoginResponseDTO;
+import com.springboot.project.citycab.dto.SignUpDTO;
+import com.springboot.project.citycab.dto.UserDTO;
 import com.springboot.project.citycab.services.AuthService;
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
@@ -9,8 +12,10 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.access.annotation.Secured;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
 
 import java.util.Arrays;
 
@@ -60,14 +65,5 @@ public class AuthController {
         response.addCookie(cookie);
 
         return ResponseEntity.ok(loginResponseDTO);
-    }
-
-    @Secured("ROLE_ADMIN")
-    // write this method in the Admin Controller
-    @PostMapping(path = "/onBoardNewDriver/{userId}")
-    ResponseEntity<DriverDTO> onBoardNewDriver(@PathVariable Long userId,
-                                               @RequestBody OnboardDriverDTO onboardDriverDTO) {
-        return new ResponseEntity<>(authService.onboardNewDriver(userId,
-                onboardDriverDTO.getVehicleId()), HttpStatus.CREATED);
     }
 }

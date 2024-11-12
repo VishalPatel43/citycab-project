@@ -1,7 +1,7 @@
 package com.springboot.project.citycab.repositories;
 
-import com.springboot.project.citycab.entities.CancelRide;
 import com.springboot.project.citycab.constants.enums.Role;
+import com.springboot.project.citycab.entities.CancelRide;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;

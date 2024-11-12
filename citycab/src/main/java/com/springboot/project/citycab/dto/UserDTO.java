@@ -1,10 +1,13 @@
 package com.springboot.project.citycab.dto;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
+import com.springboot.project.citycab.constants.enums.Gender;
 import com.springboot.project.citycab.constants.enums.Role;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.time.LocalDate;
 import java.util.Set;
 
 @Data
@@ -15,5 +18,10 @@ public class UserDTO {
     private Long userId;
     private String name;
     private String email;
+    private String mobileNumber;
+    private Gender gender;
+
+    @JsonFormat(pattern = "yyyy-MM-dd")
+    private LocalDate birthdate;
     private Set<Role> roles;
 }

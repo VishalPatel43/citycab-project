@@ -1,6 +1,7 @@
 package com.springboot.project.citycab.security;
 
 
+import com.springboot.project.citycab.constants.enums.Role;
 import com.springboot.project.citycab.entities.User;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
@@ -41,6 +42,7 @@ public class JWTService {
         Map<String, Object> claims = Map.of(
                 "email", user.getUsername(),
 //                "email", user.getEmail(),
+//                "activeRole", user.getActiveRole(),
                 "roles", user.getRoles().toString());
         return createToken(claims, user.getUserId().toString(), 1000L * 60 * 60);  // 60 minutes validity
     }
@@ -78,6 +80,10 @@ public class JWTService {
     // Extract email from the token
     public String extractEmail(String token) {
         return extractClaim(token, claims -> claims.get("email", String.class));
+    }
+
+    public Role extractActiveRole(String token) {
+        return Role.valueOf(extractClaim(token, claims -> claims.get("activeRole", String.class)));
     }
 
     // Extract userId (subject) from the token

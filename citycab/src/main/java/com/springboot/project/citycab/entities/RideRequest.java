@@ -13,6 +13,7 @@ import org.hibernate.annotations.CreationTimestamp;
 import org.locationtech.jts.geom.Point;
 
 import java.time.LocalDateTime;
+import java.util.List;
 
 @Entity
 @AllArgsConstructor
@@ -52,6 +53,14 @@ public class RideRequest {
     @ManyToOne(fetch = FetchType.LAZY) // Many RideRequests can be associated with one Rider
     @JoinColumn(name = "rider_id")
     private Rider rider; // One Rider can have many RideRequests
+
+    @ManyToMany
+    @JoinTable(
+            name = "ride_request_driver",
+            joinColumns = @JoinColumn(name = "ride_request_id"),
+            inverseJoinColumns = @JoinColumn(name = "driver_id")
+    )
+    private List<Driver> drivers;
 
     @Override
     public String toString() {

@@ -1,10 +1,8 @@
 package com.springboot.project.citycab.services;
 
-import com.springboot.project.citycab.dto.CancelRideDTO;
-import com.springboot.project.citycab.dto.DriverDTO;
-import com.springboot.project.citycab.dto.RatingDTO;
-import com.springboot.project.citycab.dto.RideDTO;
+import com.springboot.project.citycab.dto.*;
 import com.springboot.project.citycab.entities.Driver;
+import com.springboot.project.citycab.entities.RideRequest;
 import org.locationtech.jts.geom.Point;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -24,6 +22,8 @@ public interface DriverService {
 
     DriverDTO getMyProfile();
 
+    Driver getDriverById(Long driverId);
+
     Page<RideDTO> getAllMyRides(PageRequest pageRequest);
 
     Driver getCurrentDriver();
@@ -42,11 +42,14 @@ public interface DriverService {
 
     Page<CancelRideDTO> getCancelledRidesByDriver(PageRequest pageRequest);
 
-    Driver createNewDriver(Driver createDriver);
-
-    Driver updateDriver(Driver driver);
+    Driver saveDriver(Driver driver);
 
     Page<RatingDTO> getReviewsForDriver(PageRequest pageRequest);
 
     Page<DriverDTO> findDriversByName(String name, PageRequest pageRequest);
+
+
+    List<RideRequestDTO> getAvailableRideRequests();
+
+    void confirmAndClearAssociations(RideRequest request);
 }
