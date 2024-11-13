@@ -13,8 +13,6 @@ public interface AdminService {
 
     DriverDTO onboardNewVehicle(Long driverId, VehicleDTO vehicleDTO);
 
-//    Page<DriverDTO> getAllDrivers(PageRequest pageRequest);
-//    Page<RiderDTO> getAllRiders(PageRequest pageRequest);
 
     Page<RiderDTO> findRidersByName(String name, PageRequest pageRequest);
 

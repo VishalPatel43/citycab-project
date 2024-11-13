@@ -8,8 +8,6 @@ import com.springboot.project.citycab.entities.Ride;
 import com.springboot.project.citycab.entities.RideRequest;
 import com.springboot.project.citycab.repositories.CancelRideRepository;
 import com.springboot.project.citycab.services.CancelRideService;
-import com.springboot.project.citycab.services.DriverService;
-import com.springboot.project.citycab.services.RideRequestService;
 import com.springboot.project.citycab.services.RideService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;

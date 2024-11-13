@@ -6,7 +6,6 @@ import com.springboot.project.citycab.constants.enums.Role;
 import com.springboot.project.citycab.dto.*;
 import com.springboot.project.citycab.entities.*;
 import com.springboot.project.citycab.exceptions.ResourceNotFoundException;
-import com.springboot.project.citycab.repositories.RideRequestRepository;
 import com.springboot.project.citycab.repositories.RiderRepository;
 import com.springboot.project.citycab.services.*;
 import com.springboot.project.citycab.strategies.DriverMatchingStrategy;
@@ -28,7 +27,6 @@ import java.util.List;
 @RequiredArgsConstructor
 @Slf4j
 public class RiderServiceImpl implements RiderService {
-    private final RideRequestRepository rideRequestRepository;
 
     // Repository
     private final RiderRepository riderRepository;
@@ -72,7 +70,7 @@ public class RiderServiceImpl implements RiderService {
         List<Driver> drivers = driverMatchingStrategy.findMatchingDriver(savedRideRequest);
 
         rideRequest.setDrivers(drivers);
-        rideRequestRepository.save(rideRequest);
+        rideRequestService.saveRideRequest(rideRequest);
 
         for (Driver driver : drivers) {
 //            driver.setRideRequests(List.of(rideRequest));
@@ -222,5 +220,17 @@ public class RiderServiceImpl implements RiderService {
         return drivers.stream()
                 .map(driver -> modelMapper.map(driver, DriverDTO.class))
                 .toList();
+    }
+
+    @Transactional
+    @Override
+    public RideRequestDTO cancelRideRequestByRider(Long rideRequestId) {
+        RideRequest rideRequest = rideRequestService.getRideRequestById(rideRequestId);
+
+        if (!rideRequest.getRideRequestStatus().equals(RideRequestStatus.PENDING))
+            throw new RuntimeException("RideRequest cannot be cancelled, status is " + rideRequest.getRideRequestStatus());
+
+        return driverService.confirmAndClearAssociations(rideRequest);
+
     }
 }

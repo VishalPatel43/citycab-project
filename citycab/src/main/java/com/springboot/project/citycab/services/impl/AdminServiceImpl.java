@@ -38,7 +38,7 @@ public class AdminServiceImpl implements AdminService {
             throw new RuntimeConflictException("User with id: " + userId + " is already an Admin");
 
         user.getRoles().add(Role.ADMIN);
-        userService.save(user);
+        userService.saveUser(user);
 
         return modelMapper.map(user, UserDTO.class);
     }
@@ -76,7 +76,7 @@ public class AdminServiceImpl implements AdminService {
                 .build();
 
         user.getRoles().add(Role.DRIVER);
-        userService.save(user);
+        userService.saveUser(user);
 
         Driver savedDriver = driverService.saveDriver(createDriver);
 

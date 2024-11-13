@@ -17,8 +17,6 @@ public class Rider {
 
     private Double avgGivenRating;
 
-//    private Boolean availableAsRider; // --> If work as rider then can't be available as driver
-
     @OneToOne
     @JoinColumn(name = "user_id")
     private User user;

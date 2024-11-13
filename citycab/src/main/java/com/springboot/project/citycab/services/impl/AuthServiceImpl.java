@@ -54,7 +54,7 @@ public class AuthServiceImpl implements AuthService {
         if (activeRole != null) {
             if (user.getRoles().contains(Role.ADMIN) || (user.getRoles().contains(activeRole))) {
                 user.setActiveRole(activeRole);
-                user = userService.save(user);
+                user = userService.saveUser(user);
             } else throw new ResourceNotFoundException("User does not have the role " + activeRole);
         }
 
@@ -88,7 +88,7 @@ public class AuthServiceImpl implements AuthService {
         // When user signed up it will be a rider, after that onl admin can onboard him as a driver
         mappedUser.setRoles(Set.of(Role.RIDER));
 
-        User savedUser = userService.save(mappedUser);
+        User savedUser = userService.saveUser(mappedUser);
 
         // Create User related entities (When we signup it will create so many entities related to user like wallet, rider, etc)
 //        Rider rider = riderService.createNewRider(savedUser);

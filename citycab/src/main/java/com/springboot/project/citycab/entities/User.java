@@ -11,7 +11,6 @@ import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
-import java.time.LocalDate;
 import java.util.Collection;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -40,18 +39,24 @@ public class User implements UserDetails {
     @Column(unique = true, nullable = false)
     private String mobileNumber; // add prefix +91-1234567890 or add with country code
 
-
-    private LocalDate birthdate;
+//    @JsonFormat(pattern = "yyyy-MM-dd")
+//    private LocalDate birthdate;
+    private String birthdate;
 
     @Enumerated(EnumType.STRING)
     private Gender gender;
+
+    // Don't add in Database
+//    @Transient
+    @Enumerated(EnumType.STRING)
+    private Role activeRole;
 
     // Create table for roles only
     // Change Column name to user_roles
     @ElementCollection(fetch = FetchType.EAGER)
     @Enumerated(EnumType.STRING)
     @CollectionTable(name = "user_roles", joinColumns = @JoinColumn(name = "user_id"))
-//    @Column(name = "roles") // Specifies the column name for the roles
+    @Column(name = "role") // Specifies the column name for the roles
     private Set<Role> roles;
 
     // See the Mapping carefully
@@ -71,10 +76,6 @@ public class User implements UserDetails {
                 ", roles=" + roles +
                 '}';
     }
-
-    // Don't add in Database
-//    @Transient
-    private Role activeRole;
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {

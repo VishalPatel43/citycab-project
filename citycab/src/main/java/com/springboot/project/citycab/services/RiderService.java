@@ -35,4 +35,6 @@ public interface RiderService {
     Page<RiderDTO> findRidersByName(String name, PageRequest pageRequest);
 
     List<DriverDTO> getAvailableDriversForRideRequest(Long rideRequestId);
+
+    RideRequestDTO cancelRideRequestByRider(Long rideRequestId);
 }

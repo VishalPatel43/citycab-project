@@ -28,16 +28,6 @@ public interface DriverService {
 
     Driver getCurrentDriver();
 
-    List<Driver> findTenNearestDrivers(Point pickupLocation);
-
-    List<Driver> findTenNearbyTopRatedDrivers(Point pickupLocation);
-
-    List<Driver> findTopRatedDriversWithin2Km(Point pickupLocation);
-
-    List<Driver> findHighestRatedDriversWithin3Km(Point pickupLocation);
-
-    List<Driver> findDriversWithin3To10KmWithLowRating(Point pickupLocation);
-
     Driver updateDriverAvailability(Driver driver, Boolean available);
 
     Page<CancelRideDTO> getCancelledRidesByDriver(PageRequest pageRequest);
@@ -48,8 +38,20 @@ public interface DriverService {
 
     Page<DriverDTO> findDriversByName(String name, PageRequest pageRequest);
 
-
     List<RideRequestDTO> getAvailableRideRequests();
 
-    void confirmAndClearAssociations(RideRequest request);
+    RideRequestDTO confirmAndClearAssociations(RideRequest request);
+
+    RideRequestDTO cancelRideRequestByDriver(Long rideRequestId);
+
+    List<Driver> findTenNearestDrivers(Point pickupLocation);
+
+    List<Driver> findTenNearbyTopRatedDrivers(Point pickupLocation);
+
+    List<Driver> findTopRatedDriversWithin2Km(Point pickupLocation);
+
+    List<Driver> findHighestRatedDriversWithin3Km(Point pickupLocation);
+
+    List<Driver> findDriversWithin3To10KmWithLowRating(Point pickupLocation);
+
 }

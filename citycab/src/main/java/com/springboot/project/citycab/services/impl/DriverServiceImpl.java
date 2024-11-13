@@ -285,20 +285,42 @@ public class DriverServiceImpl implements DriverService {
 
     @Transactional
     @Override
-    public void confirmAndClearAssociations(RideRequest request) {
+    public RideRequestDTO confirmAndClearAssociations(RideRequest request) {
         RideRequest rideRequest = rideRequestService.getRideRequestById(request.getRideRequestId());
 
         if (!rideRequest.getRideRequestStatus().equals(RideRequestStatus.CONFIRMED)) {
             // Clear the drivers list in the RideRequest
             List<Driver> drivers = rideRequest.getDrivers();
-            for (Driver driver : drivers) {
+            for (Driver driver : drivers)
                 driver.getRideRequests().remove(rideRequest); // Remove the ride request from each driver
-            }
             drivers.clear(); // Clear the list of drivers in RideRequest
 
             // Save the changes to the repositories
-            rideRequestService.saveRideRequest(rideRequest);
+            rideRequest = rideRequestService.saveRideRequest(rideRequest);
             driverRepository.saveAll(drivers);
-        }
+        } else throw new RuntimeException("RideRequest is already confirmed");
+
+        return modelMapper.map(rideRequest, RideRequestDTO.class);
+    }
+
+    @Transactional
+    @Override
+    public RideRequestDTO cancelRideRequestByDriver(Long rideRequestId) {
+        RideRequest rideRequest = rideRequestService.getRideRequestById(rideRequestId);
+        Driver currentDriver = getCurrentDriver();
+
+        if (!rideRequest.getDrivers().contains(currentDriver))
+            throw new RuntimeException("Driver is not associated with the ride request");
+
+        if (!rideRequest.getRideRequestStatus().equals(RideRequestStatus.PENDING))
+            throw new RuntimeException("RideRequest cannot be cancelled, status is " + rideRequest.getRideRequestStatus());
+
+        rideRequest.getDrivers().remove(currentDriver);
+        currentDriver.getRideRequests().remove(rideRequest);
+
+        rideRequest = rideRequestService.saveRideRequest(rideRequest);
+        driverRepository.save(currentDriver);
+
+        return modelMapper.map(rideRequest, RideRequestDTO.class);
     }
 }
