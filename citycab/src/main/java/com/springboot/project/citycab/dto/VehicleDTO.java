@@ -19,6 +19,7 @@ public class VehicleDTO {
 
     private String registrationDate;
 //    private LocalDate registrationDate;
+    //    private LocalDate registrationDate; (optional) --> It will create at the creation of time
 
     private String ownerName;
 
@@ -29,7 +30,5 @@ public class VehicleDTO {
     private int capacity;
 
     private String color;
-
-//    private String registrationDate; (optional)
 
 }

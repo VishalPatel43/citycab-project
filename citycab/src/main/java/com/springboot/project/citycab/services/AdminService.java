@@ -13,14 +13,16 @@ public interface AdminService {
 
     DriverDTO onboardNewVehicle(Long driverId, VehicleDTO vehicleDTO);
 
-
-    Page<RiderDTO> findRidersByName(String name, PageRequest pageRequest);
-
-    Page<DriverDTO> findDriversByName(String name, PageRequest pageRequest);
+    DriverDTO assignDriverToVehicle(Long driverId, VehicleDTO vehicleDTO);
 
     DriverDTO updateDriverAddress(Long driverId, AddressDTO addressDTO);
 
     DriverDTO updateDriverVehicle(Long driverId, VehicleDTO vehicleDTO);
 
     String removeVehicle(Long vehicleId);
+
+    Page<RiderDTO> findRidersByName(String name, PageRequest pageRequest);
+
+    Page<DriverDTO> findDriversByName(String name, PageRequest pageRequest);
+
 }

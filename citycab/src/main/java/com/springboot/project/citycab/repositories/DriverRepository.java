@@ -93,4 +93,8 @@ public interface DriverRepository extends JpaRepository<Driver, Long> {
     List<Driver> findTenNearbyTopRatedDrivers(Point pickupLocation);
 
     Optional<Driver> findByUser(User currentUser);
+
+    Optional<Driver> findByDrivingLicenseNumber(String drivingLicenseNumber);
+
+    Optional<Driver> findByAadharCardNumber(Long aadharCardNumber);
 }

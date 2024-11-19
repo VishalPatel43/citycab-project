@@ -51,7 +51,8 @@ public class DriverServiceImpl implements DriverService {
 
         // only when accept the rideRequest if Driver is present in the list of drivers of the rideRequest
 
-        RideRequest rideRequest = rideRequestService.findRideRequestById(rideRequestId);
+        RideRequest rideRequest = rideRequestService.getRideRequestById(rideRequestId);
+
 
         if (!rideRequest.getRideRequestStatus().equals(RideRequestStatus.PENDING))
             throw new RuntimeException(
@@ -61,6 +62,11 @@ public class DriverServiceImpl implements DriverService {
         Driver currentDriver = getCurrentDriver();
         if (!currentDriver.getAvailable())
             throw new RuntimeException("Driver cannot accept ride due to unavailability");
+
+        // Check if the current driver is in the list of drivers assigned to the ride request
+        if (!rideRequest.getDrivers().contains(currentDriver)) {
+            throw new RuntimeException("Driver is not assigned to this RideRequest");
+        }
 
         // After that we create the ride
         // here we save the driver to make it unavailable so update the driver in the database
@@ -245,6 +251,16 @@ public class DriverServiceImpl implements DriverService {
         addressService.saveAddress(existingAddress);
 
         return modelMapper.map(driver, DriverDTO.class);
+    }
+
+    @Override
+    public Driver findDriverByAadharCardNumber(Long aadharCardNumber) {
+        return driverRepository.findByAadharCardNumber(aadharCardNumber).orElse(null);
+    }
+
+    @Override
+    public Driver findDriverByDrivingLicenseNumber(String drivingLicenseNumber) {
+        return driverRepository.findByDrivingLicenseNumber(drivingLicenseNumber).orElse(null);
     }
 
     @Override

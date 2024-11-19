@@ -56,5 +56,7 @@ public interface DriverService {
 
     DriverDTO updateDriverAddress(Long driverId, AddressDTO addressDTO);
 
-//    DriverDTO addDriverVehicle(Long driverId, VehicleDTO vehicleDTO);
+    Driver findDriverByAadharCardNumber(Long aadharCardNumber);
+
+    Driver findDriverByDrivingLicenseNumber(String drivingLicenseNumber);
 }

@@ -6,8 +6,6 @@ public interface RideRequestService {
 
     RideRequest saveRideRequest(RideRequest rideRequest);
 
-    RideRequest findRideRequestById(Long rideRequestId);
-
     RideRequest getRideRequestById(Long rideRequestId);
 
 }

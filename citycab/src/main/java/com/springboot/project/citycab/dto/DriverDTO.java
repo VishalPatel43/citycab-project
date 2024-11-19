@@ -16,6 +16,8 @@ public class DriverDTO {
     private Long aadharCardNumber;
     private String drivingLicenseNumber;
 
+    private PointDTO currentLocation;
+
     private AddressDTO address;
     private VehicleDTO vehicle;
 

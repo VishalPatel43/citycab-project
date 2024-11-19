@@ -22,12 +22,6 @@ public class RideRequestServiceImpl implements RideRequestService {
     }
 
     @Override
-    public RideRequest findRideRequestById(Long rideRequestId) {
-        return rideRequestRepository.findById(rideRequestId)
-                .orElseThrow(() -> new ResourceNotFoundException("RideRequest not found with rideRequestId: " + rideRequestId));
-    }
-
-    @Override
     public RideRequest getRideRequestById(Long rideRequestId) {
         return rideRequestRepository.findById(rideRequestId)
                 .orElseThrow(() -> new ResourceNotFoundException("RideRequest not found with rideRequestId: " + rideRequestId));

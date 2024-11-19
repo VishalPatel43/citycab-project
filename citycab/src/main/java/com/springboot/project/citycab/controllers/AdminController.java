@@ -64,6 +64,12 @@ public class AdminController {
                 vehicleDTO), HttpStatus.CREATED);
     }
 
+    @PostMapping(path = "/assignDriverToVehicle/{driverId}")
+    ResponseEntity<DriverDTO> assignDriverToVehicle(@PathVariable Long driverId,
+                                                    @RequestBody VehicleDTO vehicleDTO) {
+        return new ResponseEntity<>(adminService.assignDriverToVehicle(driverId, vehicleDTO), HttpStatus.OK);
+    }
+
     @PostMapping(path = "/updateDriverAddress/{driverId}")
     ResponseEntity<DriverDTO> updateDriverAddress(@PathVariable Long driverId,
                                                   @RequestBody AddressDTO addressDTO) {

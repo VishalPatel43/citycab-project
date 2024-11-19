@@ -59,7 +59,7 @@ public class AdminServiceImpl implements AdminService {
             throw new RuntimeConflictException("User with id: " + userId + " is already a Driver");
 
         Address address = modelMapper.map(onboardDriverDTO.getAddress(), Address.class);
-        Address savedAddress = addressService.saveAddress(address);
+        Address savedAddress = addressService.saveAddress(address); // we get the address id after saving
 
         // Map and save or retrieve the Vehicle (if vehicle already exists)
         VehicleDTO vehicleDTO = onboardDriverDTO.getVehicle();
@@ -68,12 +68,20 @@ public class AdminServiceImpl implements AdminService {
         Vehicle vehicle = existingVehicle;
         if (existingVehicle == null) {
             vehicle = modelMapper.map(vehicleDTO, Vehicle.class);
-            vehicle = vehicleService.saveVehicle(vehicle);
+            vehicle = vehicleService.saveVehicle(vehicle); // we get the vehicle id after saving
         }
 
         log.info("Vehicle1: {}", vehicle);
 
         Point currentLocation = modelMapper.map(onboardDriverDTO.getCurrentLocation(), Point.class);
+
+        Long aadharCardNumber = onboardDriverDTO.getAadharCardNumber();
+        if (driverService.findDriverByAadharCardNumber(aadharCardNumber) != null)
+            throw new RuntimeConflictException("Driver with Aadhar Card Number: " + aadharCardNumber + " already exists");
+
+        String drivingLicenseNumber = onboardDriverDTO.getDrivingLicenseNumber();
+        if (driverService.findDriverByDrivingLicenseNumber(drivingLicenseNumber) != null)
+            throw new RuntimeConflictException("Driver with Driving License Number: " + drivingLicenseNumber + " already exists");
 
         Driver createDriver = Driver.builder()
                 .user(user)
@@ -83,6 +91,8 @@ public class AdminServiceImpl implements AdminService {
 //                .vehicles(Set.of(vehicle))
                 .vehicles(new HashSet<>(Set.of(vehicle))) // Convert to mutable set
                 .currentLocation(currentLocation)  // --> set the current location
+                .aadharCardNumber(aadharCardNumber)
+                .drivingLicenseNumber(drivingLicenseNumber)
                 .build();
 
         user.getRoles().add(Role.DRIVER);
@@ -91,23 +101,25 @@ public class AdminServiceImpl implements AdminService {
         Driver savedDriver = driverService.saveDriver(createDriver);
         log.info("Driver1: {}", savedDriver);
 
-        Set<Driver> drivers = vehicle.getDrivers();
-        log.info("Drivers: {}", drivers);
-        if (drivers == null || drivers.isEmpty()) {
-            drivers = new HashSet<>();
-            vehicle.setDrivers(drivers);
-            log.info("Vehicle2: {}", vehicle);
-        }
-        drivers.add(savedDriver);
-
-        log.info("Vehicle3: {}", vehicle);
-        Vehicle savedVehicle = vehicleService.saveVehicle(vehicle);
+//        Set<Driver> drivers = vehicle.getDrivers();
+//        log.info("Drivers: {}", drivers);
+//        if (drivers == null || drivers.isEmpty()) {
+//            drivers = new HashSet<>();
+//            vehicle.setDrivers(drivers);
+//            log.info("Vehicle2: {}", vehicle);
+//        }
+//        drivers.add(savedDriver);
+//
+//        log.info("Vehicle3: {}", vehicle);
+//        Vehicle savedVehicle = vehicleService.saveVehicle(vehicle);
 
 //        savedDriver.getVehicles().add(savedVehicle); // for DTO result, not necessary for DB
         // already saved in the vehicleService.saveVehicle(vehicle) method
 
         DriverDTO driverDTO = modelMapper.map(savedDriver, DriverDTO.class);
-        driverDTO.setVehicle(modelMapper.map(savedVehicle, VehicleDTO.class));
+        driverDTO.setVehicle(savedDriver.getVehicles().stream().findFirst().map(v -> modelMapper.map(v, VehicleDTO.class)).orElse(null));
+//        driverDTO.setVehicle(modelMapper.map(savedVehicle, VehicleDTO.class));
+
         return driverDTO;
     }
 
@@ -115,9 +127,9 @@ public class AdminServiceImpl implements AdminService {
     @Override
     public DriverDTO onboardNewVehicle(Long driverId, VehicleDTO vehicleDTO) {
 
-        User currentUser = userService.getCurrentUser();
-        if (!currentUser.getRoles().contains(Role.ADMIN))
-            throw new RuntimeException("You are not authorized to onboard a new vehicle");
+//        User currentUser = userService.getCurrentUser();
+//        if (!currentUser.getRoles().contains(Role.ADMIN))
+//            throw new RuntimeException("You are not authorized to onboard a new vehicle");
 
         Vehicle vehicle = vehicleService.findByRegistrationNumber(vehicleDTO.getRegistrationNumber());
         if (vehicle != null)
@@ -141,9 +153,11 @@ public class AdminServiceImpl implements AdminService {
         log.info("Vehicle Drivers: {}", vehicle.getDrivers());
 //        vehicle.getDrivers().add(driver);
 //        vehicle.setDrivers(new HashSet<>(Set.of(driver))); // Convert to mutable set
-        vehicle.setDrivers(new HashSet<>()); // Convert to mutable set
-        vehicle.getDrivers().add(driver);
-        vehicleService.saveVehicle(vehicle);
+
+
+//        vehicle.setDrivers(new HashSet<>()); // Convert to mutable set
+//        vehicle.getDrivers().add(driver);
+//        vehicleService.saveVehicle(vehicle);
 
         DriverDTO driverDTO = modelMapper.map(driver, DriverDTO.class);
         driverDTO.setVehicle(modelMapper.map(vehicle, VehicleDTO.class));
@@ -152,22 +166,52 @@ public class AdminServiceImpl implements AdminService {
     }
 
     @Override
-    public Page<RiderDTO> findRidersByName(String name, PageRequest pageRequest) {
-        return riderService.findRidersByName(name, pageRequest);
-    }
+    public DriverDTO assignDriverToVehicle(Long driverId, VehicleDTO vehicleDTO) {
 
-    @Override
-    public Page<DriverDTO> findDriversByName(String name, PageRequest pageRequest) {
-        return driverService.findDriversByName(name, pageRequest);
+//        User currentUser = userService.getCurrentUser();
+//        if (!currentUser.getRoles().contains(Role.ADMIN))
+//            throw new RuntimeException("You are not authorized to onboard a new vehicle");
+
+        Vehicle vehicleServiceByRegistrationNumber = vehicleService.findByRegistrationNumber(vehicleDTO.getRegistrationNumber());
+        if (vehicleServiceByRegistrationNumber == null)
+            throw new RuntimeConflictException("Vehicle with registration number: " + vehicleDTO.getRegistrationNumber() + " does not exist");
+
+        Vehicle vehicleServiceByNumberPlate = vehicleService.findByNumberPlate(vehicleDTO.getNumberPlate());
+        if (vehicleServiceByNumberPlate == null)
+            throw new RuntimeConflictException("Vehicle with number plate: " + vehicleDTO.getNumberPlate() + " does not exist");
+
+        if (!vehicleServiceByNumberPlate.getVehicleId().equals(vehicleServiceByRegistrationNumber.getVehicleId()))
+            throw new RuntimeConflictException("Vehicle with registration number: " + vehicleDTO.getRegistrationNumber() + " and number plate: " + vehicleDTO.getNumberPlate() + " do not match");
+
+        Driver driver = driverService.getDriverById(driverId);
+
+        // Copy the vehicle object
+        Vehicle vehicle = modelMapper.map(vehicleServiceByRegistrationNumber, Vehicle.class);
+        // Add the vehicle to the driver
+        driver.getVehicles().add(vehicle);
+        driver = driverService.saveDriver(driver);
+
+//        vehicle.getDrivers().add(driver);
+//        vehicle.setDrivers(new HashSet<>(Set.of(driver))); // Convert to mutable set
+
+//        vehicle.setDrivers(new HashSet<>()); // Convert to mutable set
+//        vehicle.getDrivers().add(driver);
+//        vehicleService.saveVehicle(vehicle);
+
+        DriverDTO driverDTO = modelMapper.map(driver, DriverDTO.class);
+        driverDTO.setVehicle(modelMapper.map(vehicle, VehicleDTO.class));
+
+        return driverDTO;
+
     }
 
     @Override
     public DriverDTO updateDriverAddress(Long driverId, AddressDTO addressDTO) {
         Driver driver = driverService.getDriverById(driverId);
-        User currentUser = userService.getCurrentUser();
+//        User currentUser = userService.getCurrentUser();
 
-        if (!currentUser.getRoles().contains(Role.ADMIN))
-            throw new RuntimeException("You are not authorized to update profile for this driver");
+//        if (!currentUser.getRoles().contains(Role.ADMIN))
+//            throw new RuntimeException("You are not authorized to update profile for this driver");
 
         Address address = driver.getAddress();
         Address existingAddress = addressService.findAddressById(address.getAddressId());
@@ -181,10 +225,10 @@ public class AdminServiceImpl implements AdminService {
     @Override
     public DriverDTO updateDriverVehicle(Long driverId, VehicleDTO vehicleDTO) {
         Driver driver = driverService.getDriverById(driverId);
-        User currentUser = userService.getCurrentUser();
-
-        if (!currentUser.getRoles().contains(Role.ADMIN))
-            throw new RuntimeException("You are not authorized to update profile for this driver");
+//        User currentUser = userService.getCurrentUser();
+//
+//        if (!currentUser.getRoles().contains(Role.ADMIN))
+//            throw new RuntimeException("You are not authorized to update profile for this driver");
 
         Vehicle vehicle = driver.getVehicles().stream()
                 .filter(v -> v.getVehicleId().equals(vehicleDTO.getVehicleId()))
@@ -203,20 +247,16 @@ public class AdminServiceImpl implements AdminService {
         driver.getVehicles().add(tempVehicle);
         driver = driverService.saveDriver(driver);
 
-//        vehicle.getDrivers().remove(driver);
-//        vehicle.getDrivers().add(driver);
-//        vehicleService.saveVehicle(vehicle);
-
         return modelMapper.map(driver, DriverDTO.class);
     }
 
     @Override
     public String removeVehicle(Long vehicleId) {
         Vehicle vehicle = vehicleService.findVehicleById(vehicleId);
-        User currentUser = userService.getCurrentUser();
-
-        if (!currentUser.getRoles().contains(Role.ADMIN))
-            throw new RuntimeException("You are not authorized to remove this vehicle");
+//        User currentUser = userService.getCurrentUser();
+//
+//        if (!currentUser.getRoles().contains(Role.ADMIN))
+//            throw new RuntimeException("You are not authorized to remove this vehicle");
 
         // Remove the vehicle from all drivers
         vehicle.getDrivers().forEach(driver -> {
@@ -227,6 +267,16 @@ public class AdminServiceImpl implements AdminService {
         vehicleService.deleteVehicle(vehicle);
 
         return "Vehicle with id: " + vehicleId + " removed successfully";
+    }
+
+    @Override
+    public Page<RiderDTO> findRidersByName(String name, PageRequest pageRequest) {
+        return riderService.findRidersByName(name, pageRequest);
+    }
+
+    @Override
+    public Page<DriverDTO> findDriversByName(String name, PageRequest pageRequest) {
+        return driverService.findDriversByName(name, pageRequest);
     }
 
 }
