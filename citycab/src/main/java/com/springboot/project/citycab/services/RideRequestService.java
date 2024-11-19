@@ -10,6 +10,4 @@ public interface RideRequestService {
 
     RideRequest getRideRequestById(Long rideRequestId);
 
-
-
 }

@@ -1,5 +1,6 @@
 package com.springboot.project.citycab.entities;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
 import com.springboot.project.citycab.constants.enums.Gender;
 import com.springboot.project.citycab.constants.enums.Role;
 import jakarta.persistence.*;
@@ -39,7 +40,7 @@ public class User implements UserDetails {
     @Column(unique = true, nullable = false)
     private String mobileNumber; // add prefix +91-1234567890 or add with country code
 
-//    @JsonFormat(pattern = "yyyy-MM-dd")
+    @JsonFormat(pattern = "yyyy-MM-dd")
 //    private LocalDate birthdate;
     private String birthdate;
 

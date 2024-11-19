@@ -83,4 +83,15 @@ public class DriverController {
                 Sort.by(Sort.Direction.ASC, "ratingId"));
         return ResponseEntity.ok(driverService.getReviewsForDriver(pageRequest));
     }
+
+    @PostMapping("/updateAddress/{driverId}")
+    public ResponseEntity<DriverDTO> updateAddress(@PathVariable Long driverId, @RequestBody AddressDTO addressDTO) {
+        return ResponseEntity.ok(driverService.updateDriverAddress(driverId, addressDTO));
+    }
+/*
+    @PostMapping("/addVehicle/{driverId}")
+    public ResponseEntity<DriverDTO> addVehicle(@PathVariable Long driverId, @RequestBody VehicleDTO vehicleDTO) {
+        return ResponseEntity.ok(driverService.addDriverVehicle(driverId, vehicleDTO));
+    }
+    */
 }

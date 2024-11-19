@@ -16,4 +16,10 @@ public class AddressServiceImpl implements AddressService {
     public Address saveAddress(Address address) {
         return addressRepository.save(address);
     }
+
+    @Override
+    public Address findAddressById(Long addressId) {
+        return addressRepository.findById(addressId)
+                .orElseThrow(() -> new RuntimeException("Address not found with id: " + addressId));
+    }
 }

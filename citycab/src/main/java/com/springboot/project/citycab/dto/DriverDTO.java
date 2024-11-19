@@ -13,6 +13,8 @@ public class DriverDTO {
     private UserDTO user;
     private Double avgRating;
     private Boolean available;
+    private Long aadharCardNumber;
+    private String drivingLicenseNumber;
 
     private AddressDTO address;
     private VehicleDTO vehicle;

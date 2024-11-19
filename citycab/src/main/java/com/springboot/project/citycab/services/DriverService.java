@@ -54,4 +54,7 @@ public interface DriverService {
 
     List<Driver> findDriversWithin3To10KmWithLowRating(Point pickupLocation);
 
+    DriverDTO updateDriverAddress(Long driverId, AddressDTO addressDTO);
+
+//    DriverDTO addDriverVehicle(Long driverId, VehicleDTO vehicleDTO);
 }

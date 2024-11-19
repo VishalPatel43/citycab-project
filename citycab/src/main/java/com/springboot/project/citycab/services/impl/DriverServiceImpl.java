@@ -34,6 +34,8 @@ public class DriverServiceImpl implements DriverService {
     private final PaymentService paymentService;
     private final CancelRideService cancelRideService;
     private RatingService ratingService;
+    private final AddressService addressService;
+
     // Mapper
     private final ModelMapper modelMapper;
 
@@ -46,6 +48,8 @@ public class DriverServiceImpl implements DriverService {
     @Override
     @Transactional
     public RideDTO acceptRide(Long rideRequestId) {
+
+        // only when accept the rideRequest if Driver is present in the list of drivers of the rideRequest
 
         RideRequest rideRequest = rideRequestService.findRideRequestById(rideRequestId);
 
@@ -222,6 +226,25 @@ public class DriverServiceImpl implements DriverService {
     @Override
     public List<Driver> findDriversWithin3To10KmWithLowRating(Point pickupLocation) {
         return driverRepository.findNearestDriversFrom3To10KmWithLowRating(pickupLocation);
+    }
+
+    @Override
+    public DriverDTO updateDriverAddress(Long driverId, AddressDTO addressDTO) {
+        Driver driver = getDriverById(driverId);
+        Driver currentDriver = getCurrentDriver();
+
+        User currentUser = userService.getCurrentUser();
+
+        if (!driver.getDriverId().equals(currentDriver.getDriverId()) && !currentUser.getRoles().contains(Role.ADMIN))
+            throw new RuntimeException("You are not authorized to update profile for this driver");
+
+        Address address = driver.getAddress();
+        Address existingAddress = addressService.findAddressById(address.getAddressId());
+        modelMapper.map(addressDTO, existingAddress);
+
+        addressService.saveAddress(existingAddress);
+
+        return modelMapper.map(driver, DriverDTO.class);
     }
 
     @Override

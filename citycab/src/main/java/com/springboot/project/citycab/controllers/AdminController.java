@@ -63,4 +63,21 @@ public class AdminController {
         return new ResponseEntity<>(adminService.onboardNewVehicle(driverId,
                 vehicleDTO), HttpStatus.CREATED);
     }
+
+    @PostMapping(path = "/updateDriverAddress/{driverId}")
+    ResponseEntity<DriverDTO> updateDriverAddress(@PathVariable Long driverId,
+                                                  @RequestBody AddressDTO addressDTO) {
+        return new ResponseEntity<>(adminService.updateDriverAddress(driverId, addressDTO), HttpStatus.OK);
+    }
+
+    @PostMapping(path = "/updateDriverVehicle/{driverId}")
+    ResponseEntity<DriverDTO> updateDriverVehicle(@PathVariable Long driverId,
+                                                  @RequestBody VehicleDTO vehicleDTO) {
+        return new ResponseEntity<>(adminService.updateDriverVehicle(driverId, vehicleDTO), HttpStatus.OK);
+    }
+
+    @PostMapping(path = "/removeVehicle/{vehicleId}")
+    ResponseEntity<String> removeVehicle(@PathVariable Long vehicleId) {
+        return new ResponseEntity<>(adminService.removeVehicle(vehicleId), HttpStatus.OK);
+    }
 }

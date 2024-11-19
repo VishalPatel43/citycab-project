@@ -8,4 +8,6 @@ public class OnboardDriverDTO {
     private AddressDTO address;
     private VehicleDTO vehicle;
 
+    private PointDTO currentLocation;
+
 }

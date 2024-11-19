@@ -52,7 +52,8 @@ public class AuthServiceImpl implements AuthService {
 
         Role activeRole = loginRequestDTO.getAcitveRole();
         if (activeRole != null) {
-            if (user.getRoles().contains(Role.ADMIN) || (user.getRoles().contains(activeRole))) {
+            if (activeRole.equals(Role.ADMIN) && (user.getRoles().contains(Role.ADMIN)) ||
+                    (user.getRoles().contains(activeRole))) {
                 user.setActiveRole(activeRole);
                 user = userService.saveUser(user);
             } else throw new ResourceNotFoundException("User does not have the role " + activeRole);

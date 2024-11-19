@@ -17,4 +17,10 @@ public interface AdminService {
     Page<RiderDTO> findRidersByName(String name, PageRequest pageRequest);
 
     Page<DriverDTO> findDriversByName(String name, PageRequest pageRequest);
+
+    DriverDTO updateDriverAddress(Long driverId, AddressDTO addressDTO);
+
+    DriverDTO updateDriverVehicle(Long driverId, VehicleDTO vehicleDTO);
+
+    String removeVehicle(Long vehicleId);
 }

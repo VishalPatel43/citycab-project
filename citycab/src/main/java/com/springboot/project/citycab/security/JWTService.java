@@ -44,7 +44,7 @@ public class JWTService {
 //                "email", user.getEmail(),
 //                "activeRole", user.getActiveRole(),
                 "roles", user.getRoles().toString());
-        return createToken(claims, user.getUserId().toString(), 1000L * 60 * 60);  // 60 minutes validity
+        return createToken(claims, user.getUserId().toString(), 1000L * 60 * 60 * 24);  // 60 minutes validity
     }
 
     // Generate refresh token for user with 6 months validity
@@ -55,7 +55,6 @@ public class JWTService {
                 1000L * 60 * 60 * 24 * 30 * 6
         );  // 6 months validity
     }
-
 
     // Extract specific claim from the JWT token
     public <T> T extractClaim(String token, Function<Claims, T> claimsResolver) {

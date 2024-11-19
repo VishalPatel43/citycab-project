@@ -121,7 +121,8 @@ public class GlobalExceptionHandler {
                                                                     WebRequest request) {
         return buildErrorResponseEntity(exception,
                 HttpStatus.INTERNAL_SERVER_ERROR,
-                exception.getMessage(),
+//                exception.getMessage(),
+                exception.getLocalizedMessage(),
                 request,
                 null
         );

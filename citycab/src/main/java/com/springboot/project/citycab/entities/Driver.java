@@ -16,8 +16,9 @@ import java.util.Set;
 @Getter
 @Setter
 @Builder
-@Table(indexes = {
-        @Index(name = "idx_driver_vehicle_id", columnList = "vehicleId")
+@Table (indexes = {
+        @Index(name = "driver_aadhar_card_number_index", columnList = "aadharCardNumber", unique = true),
+        @Index(name = "driver_license_number_index", columnList = "drivingLicenseNumber", unique = true)
 })
 public class Driver {
 
@@ -29,12 +30,17 @@ public class Driver {
 
     private Boolean available;
 
-    private String vehicleId;
-
-
     @JsonSerialize(using = PointSerializer.class)  // Use custom serializer
     @Column(columnDefinition = "Geometry(Point, 4326)")
     private Point currentLocation;
+
+    private Long aadharCardNumber;
+
+    private String drivingLicenseNumber;
+
+//    private String licenseExpiryDate;
+
+    // private Boolean status;
 
     @OneToOne
     @JoinColumn(name = "user_id")
@@ -44,7 +50,7 @@ public class Driver {
     @JoinColumn(name = "address_id")
     private Address address;
 
-    @ManyToMany
+    @ManyToMany(cascade = {CascadeType.DETACH, CascadeType.MERGE, CascadeType.PERSIST, CascadeType.REFRESH})
     @JoinTable(
             name = "driver_vehicle",
             joinColumns = @JoinColumn(name = "driver_id"),
@@ -59,14 +65,13 @@ public class Driver {
     @Override
     public String toString() {
         return "Driver{" +
-                "driverId=" + driverId + "\n" +
-                ", avgRating=" + avgRating + "\n" +
-                ", available=" + available + "\n" +
-                ", vehicleId='" + vehicleId + '\'' + "\n" +
-                ", currentLocation=" + currentLocation + "\n" +
-                ", user=" + user + "\n" +
-                ", address=" + address + "\n" +
-                ", vehicles=" + vehicles + "\n" +
+                "driverId=" + driverId +
+                ", avgRating=" + avgRating +
+                ", available=" + available +
+                ", currentLocation=" + currentLocation +
+                ", user=" + user +
+                ", address=" + address +
+//                ", vehicles=" + vehicles +
                 '}';
     }
 }

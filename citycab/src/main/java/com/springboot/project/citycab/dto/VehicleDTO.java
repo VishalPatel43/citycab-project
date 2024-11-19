@@ -17,6 +17,9 @@ public class VehicleDTO {
 
     private String registrationNumber;
 
+    private String registrationDate;
+//    private LocalDate registrationDate;
+
     private String ownerName;
 
     private String type; // e.g., SUV, Sedan, Hatchback
@@ -24,5 +27,9 @@ public class VehicleDTO {
     private String model;
 
     private int capacity;
+
+    private String color;
+
+//    private String registrationDate; (optional)
 
 }
