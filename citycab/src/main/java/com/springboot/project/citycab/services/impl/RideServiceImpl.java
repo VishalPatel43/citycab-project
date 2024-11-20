@@ -37,8 +37,8 @@ public class RideServiceImpl implements RideService {
                 .orElseThrow(() -> new RuntimeException("Ride not found with id: " + rideId));
     }
 
-    @Override
     @Transactional
+    @Override
     public Ride createNewRide(RideRequest rideRequest, Driver driver) {
         rideRequest.setRideRequestStatus(RideRequestStatus.CONFIRMED);
         rideRequestService.saveRideRequest(rideRequest);
@@ -48,14 +48,15 @@ public class RideServiceImpl implements RideService {
         ride.setRideRequest(rideRequest);
         ride.setRideStatus(RideStatus.CONFIRMED);
         ride.setDriver(driver);
+        ride.setVehicle(driver.getCurrentVehicle());
         ride.setOtp(generateRandomOTP());
 //        ride.setRideId(null); // not required coz we already have different rideId and rideRequestId
 
         return rideRepository.save(ride);
     }
 
-    @Override
     @Transactional
+    @Override
     public Ride updateRideStatus(Ride ride, RideStatus rideStatus) {
         getRideById(ride.getRideId());
 

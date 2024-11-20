@@ -14,4 +14,6 @@ public interface VehicleService {
     Vehicle saveVehicle(Vehicle vehicle);
 
     void deleteVehicle(Vehicle vehicle);
+
+    void updateVehicleAvailability(Vehicle vehicle, boolean available);
 }

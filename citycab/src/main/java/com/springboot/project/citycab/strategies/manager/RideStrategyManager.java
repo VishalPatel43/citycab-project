@@ -2,7 +2,7 @@ package com.springboot.project.citycab.strategies.manager;
 
 import com.springboot.project.citycab.entities.Driver;
 import com.springboot.project.citycab.strategies.DriverMatchingStrategy;
-import com.springboot.project.citycab.strategies.RideFareCalculationStrategy;
+import com.springboot.project.citycab.strategies.RideDistanceTimeFareCalculationStrategy;
 import com.springboot.project.citycab.strategies.impl.*;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
@@ -18,8 +18,8 @@ public class RideStrategyManager {
     private final DriverMatchingNearestDriverStrategy nearestStrategy;
     private final DriverMatchingAdvancedStrategy advancedStrategy;
 
-    private final RiderFareDefaultRideFareCalculationStrategy defaultRideFareCalculationStrategy;
-    private final RideFareSurgePricingRideFareCalculationStrategy surgePricingRideFareCalculationStrategy;
+    private final RiderFareDefaultRideDistanceTimeFareCalculationStrategy defaultRideFareCalculationStrategy;
+    private final RideFareSurgePricingRideDistanceTimeFareCalculationStrategy surgePricingRideFareCalculationStrategy;
 
     /**
      * Returns a DriverMatchingStrategy that encapsulates the three conditions:
@@ -46,7 +46,7 @@ public class RideStrategyManager {
         };
     }
 
-    public RideFareCalculationStrategy rideFareCalculationStrategy() {
+    public RideDistanceTimeFareCalculationStrategy rideFareCalculationStrategy() {
 
         /*
          *  Only for pick hour

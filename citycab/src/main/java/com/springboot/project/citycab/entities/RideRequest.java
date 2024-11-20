@@ -50,6 +50,10 @@ public class RideRequest {
 
     private Double fare;
 
+    private Double rideDistance;
+
+    private Double rideTime;
+
     @ManyToOne(fetch = FetchType.LAZY) // Many RideRequests can be associated with one Rider
     @JoinColumn(name = "rider_id")
     private Rider rider; // One Rider can have many RideRequests

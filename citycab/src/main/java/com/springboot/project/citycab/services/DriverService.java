@@ -12,7 +12,7 @@ import java.util.List;
 public interface DriverService {
 
 
-    RideDTO acceptRide(Long rideRequestId);
+    RideDTO acceptRide(Long rideRequestId, PointDTO driverLocation);
 
     RideDTO cancelRide(Long rideId, String reason);
 
@@ -40,6 +40,10 @@ public interface DriverService {
 
     List<RideRequestDTO> getAvailableRideRequests();
 
+    List<VehicleDTO> getVehiclesByDriverId();
+
+    DriverDTO changeDriverLocation(PointDTO location);
+
     RideRequestDTO confirmAndClearAssociations(RideRequest request);
 
     RideRequestDTO cancelRideRequestByDriver(Long rideRequestId);
@@ -59,4 +63,8 @@ public interface DriverService {
     Driver findDriverByAadharCardNumber(Long aadharCardNumber);
 
     Driver findDriverByDrivingLicenseNumber(String drivingLicenseNumber);
+
+    DriverDTO currentDriverVehicle(VehicleDTO vehicleDTO);
+
+    DriverDTO freeDriverVehicle();
 }

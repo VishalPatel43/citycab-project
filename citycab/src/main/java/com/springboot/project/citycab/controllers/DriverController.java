@@ -20,8 +20,8 @@ public class DriverController {
     private final DriverService driverService;
 
     @PostMapping(path = "/acceptRide/{rideRequestId}")
-    public ResponseEntity<RideDTO> acceptRide(@PathVariable Long rideRequestId) {
-        return ResponseEntity.ok(driverService.acceptRide(rideRequestId));
+    public ResponseEntity<RideDTO> acceptRide(@PathVariable Long rideRequestId, PointDTO driverLocation) {
+        return ResponseEntity.ok(driverService.acceptRide(rideRequestId, driverLocation));
     }
 
     // cancel the rideRequest --> remove from the list of available drivers
@@ -88,10 +88,24 @@ public class DriverController {
     public ResponseEntity<DriverDTO> updateAddress(@PathVariable Long driverId, @RequestBody AddressDTO addressDTO) {
         return ResponseEntity.ok(driverService.updateDriverAddress(driverId, addressDTO));
     }
-/*
-    @PostMapping("/addVehicle/{driverId}")
-    public ResponseEntity<DriverDTO> addVehicle(@PathVariable Long driverId, @RequestBody VehicleDTO vehicleDTO) {
-        return ResponseEntity.ok(driverService.addDriverVehicle(driverId, vehicleDTO));
+
+    @GetMapping("/getVehicles")
+    public ResponseEntity<List<VehicleDTO>> getVehicles() {
+        return ResponseEntity.ok(driverService.getVehiclesByDriverId());
     }
-    */
+
+    @PostMapping("/changeDriverLocation")
+    public ResponseEntity<DriverDTO> changeDriverLocation(@RequestBody PointDTO pointDTO) {
+        return ResponseEntity.ok(driverService.changeDriverLocation(pointDTO));
+    }
+
+    @PostMapping("/currentVehicle")
+    public ResponseEntity<DriverDTO> currentDriverVehicle(@RequestBody VehicleDTO vehicleDTO) {
+        return ResponseEntity.ok(driverService.currentDriverVehicle(vehicleDTO));
+    }
+
+    @PostMapping("/freeVehicle")
+    public ResponseEntity<DriverDTO> freeDriverVehicle() {
+        return ResponseEntity.ok(driverService.freeDriverVehicle());
+    }
 }

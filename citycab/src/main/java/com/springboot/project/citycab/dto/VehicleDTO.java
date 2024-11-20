@@ -31,4 +31,6 @@ public class VehicleDTO {
 
     private String color;
 
+    private Boolean available;
+
 }

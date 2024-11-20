@@ -10,6 +10,8 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
+
 @RestController
 @RequestMapping(path = "/admins")
 @RequiredArgsConstructor
@@ -76,14 +78,19 @@ public class AdminController {
         return new ResponseEntity<>(adminService.updateDriverAddress(driverId, addressDTO), HttpStatus.OK);
     }
 
-    @PostMapping(path = "/updateDriverVehicle/{driverId}")
-    ResponseEntity<DriverDTO> updateDriverVehicle(@PathVariable Long driverId,
-                                                  @RequestBody VehicleDTO vehicleDTO) {
-        return new ResponseEntity<>(adminService.updateDriverVehicle(driverId, vehicleDTO), HttpStatus.OK);
+    @PostMapping(path = "/deAssignDriverToVehicle/{driverId}")
+    ResponseEntity<DriverDTO> deAssignDriverToVehicle(@PathVariable Long driverId,
+                                                      @RequestBody VehicleDTO vehicleDTO) {
+        return new ResponseEntity<>(adminService.deAssignDriverToVehicle(driverId, vehicleDTO), HttpStatus.OK);
     }
 
     @PostMapping(path = "/removeVehicle/{vehicleId}")
-    ResponseEntity<String> removeVehicle(@PathVariable Long vehicleId) {
+    ResponseEntity<DeleteDTO> removeVehicle(@PathVariable Long vehicleId) {
         return new ResponseEntity<>(adminService.removeVehicle(vehicleId), HttpStatus.OK);
+    }
+
+    @GetMapping(path = "/getDriversByVehicleId/{vehicleId}")
+    ResponseEntity<List<DriverDTO>> getDriversByVehicleId(@PathVariable Long vehicleId) {
+        return new ResponseEntity<>(adminService.getDriversByVehicleId(vehicleId), HttpStatus.OK);
     }
 }

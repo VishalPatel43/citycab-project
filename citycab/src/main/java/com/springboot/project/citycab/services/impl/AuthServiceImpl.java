@@ -44,6 +44,7 @@ public class AuthServiceImpl implements AuthService {
     // Authentication Manager
     private final AuthenticationManager authenticationManager;
 
+    @Transactional
     @Override
     public LoginResponseDTO login(LoginRequestDTO loginRequestDTO) {
 
@@ -74,8 +75,8 @@ public class AuthServiceImpl implements AuthService {
         return (User) authentication.getPrincipal();
     }
 
-    @Override
     @Transactional
+    @Override
     public UserDTO singUp(SignUpDTO signUpDTO) {
 
         User user = userService.getUserByEmail(signUpDTO.getEmail());

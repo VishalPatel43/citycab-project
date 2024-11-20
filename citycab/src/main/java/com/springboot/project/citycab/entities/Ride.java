@@ -59,6 +59,18 @@ public class Ride {
 
     private LocalDateTime endedAt;
 
+    private Double rideDistance;
+
+    private Double rideTime;
+
+    private Double driverToRiderDistance;
+
+    private Double driverToRiderTime;
+
+    @OneToOne
+    @JoinColumn(name = "vehicle_id")
+    private Vehicle vehicle; // Ride vehicle
+
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "rider_id")
     private Rider rider;

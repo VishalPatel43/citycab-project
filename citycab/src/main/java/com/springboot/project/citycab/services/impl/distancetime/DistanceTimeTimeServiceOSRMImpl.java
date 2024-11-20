@@ -1,7 +1,8 @@
-package com.springboot.project.citycab.services.impl.distance;
+package com.springboot.project.citycab.services.impl.distancetime;
 
+import com.springboot.project.citycab.dto.DistanceTimeResponseDTO;
 import com.springboot.project.citycab.exceptions.DistanceRestClientServiceException;
-import com.springboot.project.citycab.services.DistanceService;
+import com.springboot.project.citycab.services.DistanceTimeService;
 import lombok.Data;
 import org.locationtech.jts.geom.Point;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -12,7 +13,7 @@ import org.springframework.web.client.RestClient;
 import java.util.List;
 
 @Service
-public class DistanceServiceOSRMImpl implements DistanceService {
+public class DistanceTimeTimeServiceOSRMImpl implements DistanceTimeService {
     /*
      TODO: Implement the method to calculate the distance between two points
      Call third party service/API OSRM to calculate the distance
@@ -29,12 +30,12 @@ public class DistanceServiceOSRMImpl implements DistanceService {
     private final RestClient osrmRestClient;
 
     // Manually define the constructor with @Qualifier
-    public DistanceServiceOSRMImpl(@Qualifier("distanceServiceOSRM") RestClient osrmRestClient) {
+    public DistanceTimeTimeServiceOSRMImpl(@Qualifier("distanceServiceOSRM") RestClient osrmRestClient) {
         this.osrmRestClient = osrmRestClient;
     }
 
     @Override
-    public double calculateDistance(Point src, Point dest) {
+    public DistanceTimeResponseDTO calculateDistanceTime(Point src, Point dest) {
         /*
          * We use RestClient only for this method so don't need to create a separate config for this
          * getX and getY are the latitude and longitude
@@ -59,7 +60,15 @@ public class DistanceServiceOSRMImpl implements DistanceService {
             if (osrmResponseDTO == null || osrmResponseDTO.getRoutes().isEmpty())
                 throw new DistanceRestClientServiceException("Error: No valid route found between the provided points.");
             //  return osrmResponseDTO.getRoutes().get(0).getDistance() / 1000.0;
-            return osrmResponseDTO.getRoutes().getFirst().getDistance() / 1000.0; // get first distance from the list
+//            return osrmResponseDTO.getRoutes().getFirst().getDistance() / 1000.0; // get first distance from the list
+
+            // Extract distance and duration from the first route
+            OSRMRoutes firstRoute = osrmResponseDTO.getRoutes().getFirst();
+            double distanceKm = firstRoute.getDistance() / 1000.0; // Convert meters to kilometers
+            double timeMinutes = firstRoute.getDuration() / 60.0;  // Convert seconds to minutes
+
+            // Return as a structured response
+            return new DistanceTimeResponseDTO(distanceKm, timeMinutes);
         } catch (Exception e) {
             throw new DistanceRestClientServiceException("Error getting data from OSRM: " + e.getMessage());
         }
@@ -78,4 +87,5 @@ class OSRMResponseDTO {
 @Data
 class OSRMRoutes {
     private Double distance; // distance name also same in the OSRM API response so Jackson will map it automatically
+    private Double duration;
 }

@@ -20,6 +20,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Set;
 
 @Service
 @RequiredArgsConstructor
@@ -38,6 +39,7 @@ public class DriverServiceImpl implements DriverService {
 
     // Mapper
     private final ModelMapper modelMapper;
+    private final VehicleService vehicleService;
 
     @Autowired
     public void setRatingService(@Lazy RatingService ratingService) {
@@ -45,14 +47,13 @@ public class DriverServiceImpl implements DriverService {
     }
 
     // After Ride Request if driver accept the ride then we return the RideDTO
-    @Override
     @Transactional
-    public RideDTO acceptRide(Long rideRequestId) {
+    @Override
+    public RideDTO acceptRide(Long rideRequestId, PointDTO driverLocation) {
 
         // only when accept the rideRequest if Driver is present in the list of drivers of the rideRequest
 
         RideRequest rideRequest = rideRequestService.getRideRequestById(rideRequestId);
-
 
         if (!rideRequest.getRideRequestStatus().equals(RideRequestStatus.PENDING))
             throw new RuntimeException(
@@ -64,9 +65,14 @@ public class DriverServiceImpl implements DriverService {
             throw new RuntimeException("Driver cannot accept ride due to unavailability");
 
         // Check if the current driver is in the list of drivers assigned to the ride request
-        if (!rideRequest.getDrivers().contains(currentDriver)) {
+        if (!rideRequest.getDrivers().contains(currentDriver))
             throw new RuntimeException("Driver is not assigned to this RideRequest");
-        }
+
+        if (currentDriver.getCurrentVehicle() == null)
+            throw new RuntimeException("Driver does not have any vehicle associated");
+
+        if (currentDriver.getCurrentVehicle().getAvailable()) // if it's already assign to driver with current vehicle
+            throw new RuntimeException("Vehicle is not available");
 
         // After that we create the ride
         // here we save the driver to make it unavailable so update the driver in the database
@@ -78,11 +84,13 @@ public class DriverServiceImpl implements DriverService {
 
         RideDTO rideDTO = modelMapper.map(ride, RideDTO.class);
         rideDTO.setRating(null);
+        rideDTO.getDriver().setVehicles(null);
+
         return rideDTO;
     }
 
-    @Override
     @Transactional
+    @Override
     public RideDTO cancelRide(Long rideId, String reason) {
 
         Ride ride = rideService.getRideById(rideId);
@@ -113,12 +121,13 @@ public class DriverServiceImpl implements DriverService {
         CancelRideDTO cancelRideDTO = modelMapper.map(cancelRide, CancelRideDTO.class);
         cancelRideDTO.setRide(null);
         rideDTO.setCancelRide(cancelRideDTO);
+        rideDTO.getDriver().setVehicles(null);
 
         return rideDTO;
     }
 
-    @Override
     @Transactional
+    @Override
     public RideDTO startRide(Long rideId, String otp) {
 
         Ride ride = rideService.getRideById(rideId);
@@ -146,11 +155,12 @@ public class DriverServiceImpl implements DriverService {
 //        savedRide.setRating(rating); // set the rating to the ride for dto
         RideDTO rideDTO = modelMapper.map(savedRide, RideDTO.class);
         rideDTO.setRating(ratingDTO);
+        rideDTO.getDriver().setVehicles(null);
         return rideDTO;
     }
 
-    @Override
     @Transactional
+    @Override
     public RideDTO endRide(Long rideId) {
         Ride ride = rideService.getRideById(rideId);
         Driver driver = getCurrentDriver();
@@ -173,6 +183,7 @@ public class DriverServiceImpl implements DriverService {
 
         RideDTO rideDTO = modelMapper.map(savedRide, RideDTO.class);
         rideDTO.setRating(ratingDTO);
+        rideDTO.getDriver().setVehicles(null);
         return rideDTO;
     }
 
@@ -195,7 +206,11 @@ public class DriverServiceImpl implements DriverService {
         Driver currentDriver = getCurrentDriver();
         return rideService
                 .getAllRidesOfDriver(currentDriver, pageRequest)
-                .map(ride -> modelMapper.map(ride, RideDTO.class));
+                .map(ride -> {
+                    RideDTO rideDTO = modelMapper.map(ride, RideDTO.class);
+                    rideDTO.getDriver().setVehicles(null);
+                    return rideDTO;
+                });
     }
 
     @Override
@@ -234,6 +249,7 @@ public class DriverServiceImpl implements DriverService {
         return driverRepository.findNearestDriversFrom3To10KmWithLowRating(pickupLocation);
     }
 
+    @Transactional
     @Override
     public DriverDTO updateDriverAddress(Long driverId, AddressDTO addressDTO) {
         Driver driver = getDriverById(driverId);
@@ -263,8 +279,48 @@ public class DriverServiceImpl implements DriverService {
         return driverRepository.findByDrivingLicenseNumber(drivingLicenseNumber).orElse(null);
     }
 
-    @Override
     @Transactional
+    @Override
+    public DriverDTO currentDriverVehicle(VehicleDTO vehicleDTO) {
+        Driver driver = getCurrentDriver();
+
+        Vehicle vehicleServiceByRegistrationNumber = vehicleService.findByRegistrationNumber(vehicleDTO.getRegistrationNumber());
+        if (vehicleServiceByRegistrationNumber == null)
+            throw new ResourceNotFoundException("Vehicle not found with registration number: " + vehicleDTO.getRegistrationNumber());
+        Vehicle vehicleServiceByNumberPlate = vehicleService.findByNumberPlate(vehicleDTO.getNumberPlate());
+        if (vehicleServiceByNumberPlate == null)
+            throw new ResourceNotFoundException("Vehicle not found with number plate: " + vehicleDTO.getNumberPlate());
+        if (!vehicleServiceByNumberPlate.getVehicleId().equals(vehicleServiceByRegistrationNumber.getVehicleId()))
+            throw new RuntimeException("Vehicle not found with registration number: " + vehicleDTO.getRegistrationNumber());
+
+        // check if the vehicle is already associated with the driver
+        if (!driver.getVehicles().contains(vehicleServiceByNumberPlate))
+            throw new RuntimeException("Vehicle is not associated with the driver");
+
+        vehicleService.updateVehicleAvailability(vehicleServiceByNumberPlate, false);
+        driver.setCurrentVehicle(vehicleServiceByNumberPlate);
+
+        return modelMapper.map(driverRepository.save(driver), DriverDTO.class);
+    }
+
+    @Transactional
+    @Override
+    public DriverDTO freeDriverVehicle() {
+        Driver driver = getCurrentDriver();
+
+        Vehicle currentVehicle = driver.getCurrentVehicle();
+        if (currentVehicle == null)
+            throw new ResourceNotFoundException("Driver does not have any vehicle associated");
+
+        Vehicle vehicle = vehicleService.findVehicleById(currentVehicle.getVehicleId());
+        vehicleService.updateVehicleAvailability(vehicle, true);
+        driver.setCurrentVehicle(null);
+
+        return modelMapper.map(driverRepository.save(driver), DriverDTO.class);
+    }
+
+    @Transactional
+    @Override
     public Driver updateDriverAvailability(Driver driver, Boolean available) {
         driver.setAvailable(available);
         return driverRepository.save(driver);
@@ -279,11 +335,15 @@ public class DriverServiceImpl implements DriverService {
         // Fetch cancelled rides for the current driver
         Page<CancelRide> cancelledRides = cancelRideService.getCancelRideByRole(Role.DRIVER, pageRequest);
 
-        return cancelledRides.map(cancelRide -> modelMapper.map(cancelRide, CancelRideDTO.class));
+        return cancelledRides.map(cancelRide -> {
+            CancelRideDTO cancelRideDTO = modelMapper.map(cancelRide, CancelRideDTO.class);
+            cancelRideDTO.getRide().getDriver().setVehicles(null);
+            return cancelRideDTO;
+        });
     }
 
-    @Override
     @Transactional
+    @Override
     public Driver saveDriver(Driver driver) {
         return driverRepository.save(driver);
     }
@@ -322,6 +382,28 @@ public class DriverServiceImpl implements DriverService {
                 .toList();
     }
 
+    @Override
+    public List<VehicleDTO> getVehiclesByDriverId() {
+        Driver currentDriver = getCurrentDriver();
+
+        Set<Vehicle> vehicles = currentDriver.getVehicles();
+
+        return vehicles.stream()
+                .map(vehicle -> modelMapper.map(vehicle, VehicleDTO.class))
+                .toList();
+    }
+
+    @Transactional
+    @Override
+    public DriverDTO changeDriverLocation(PointDTO location) {
+        Driver currentDriver = getCurrentDriver();
+
+        Point point = modelMapper.map(location, Point.class);
+        currentDriver.setCurrentLocation(point);
+
+        return modelMapper.map(driverRepository.save(currentDriver), DriverDTO.class);
+    }
+
     @Transactional
     @Override
     public RideRequestDTO confirmAndClearAssociations(RideRequest request) {
@@ -336,7 +418,7 @@ public class DriverServiceImpl implements DriverService {
 
             // Save the changes to the repositories
             rideRequest = rideRequestService.saveRideRequest(rideRequest);
-            driverRepository.saveAll(drivers);
+//            driverRepository.saveAll(drivers);
         } else throw new RuntimeException("RideRequest is already confirmed");
 
         return modelMapper.map(rideRequest, RideRequestDTO.class);
@@ -355,10 +437,10 @@ public class DriverServiceImpl implements DriverService {
             throw new RuntimeException("RideRequest cannot be cancelled, status is " + rideRequest.getRideRequestStatus());
 
         rideRequest.getDrivers().remove(currentDriver);
-        currentDriver.getRideRequests().remove(rideRequest);
+//        currentDriver.getRideRequests().remove(rideRequest);
 
         rideRequest = rideRequestService.saveRideRequest(rideRequest);
-        driverRepository.save(currentDriver);
+//        driverRepository.save(currentDriver);
 
         return modelMapper.map(rideRequest, RideRequestDTO.class);
     }

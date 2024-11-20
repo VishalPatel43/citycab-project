@@ -40,6 +40,8 @@ public class Vehicle {
 
     private String color;
 
+    private Boolean available;
+
     //    @CreationTimestamp
     @JsonFormat(pattern = "yyyy-MM-dd")
 //    private LocalDate registrationDate;

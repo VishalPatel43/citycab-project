@@ -13,13 +13,10 @@ import org.springframework.data.domain.PageRequest;
 
 public interface RideService {
 
-    // This RideService can use by other services such as RiderService, DriverService, etc.
-
     Ride getRideById(Long rideId); // Internal service so we can return entity
 
     Ride createNewRide(RideRequest rideRequest, Driver driver);
 
-    // Any Service can use it
     Ride updateRideStatus(Ride ride, RideStatus rideStatus);
 
     Page<Ride> getAllRidesOfRider(Rider rider, PageRequest pageRequest);
@@ -29,4 +26,5 @@ public interface RideService {
     OtpDTO getOtp(Long rideId);
 
     Ride updateRide(Ride ride);
+
 }

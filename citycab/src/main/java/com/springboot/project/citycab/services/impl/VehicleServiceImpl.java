@@ -40,4 +40,11 @@ public class VehicleServiceImpl implements VehicleService {
     public void deleteVehicle(Vehicle vehicle) {
         vehicleRepository.delete(vehicle);
     }
+
+    @Transactional
+    @Override
+    public void updateVehicleAvailability(Vehicle vehicle, boolean available) {
+        vehicle.setAvailable(available);
+        vehicleRepository.save(vehicle);
+    }
 }

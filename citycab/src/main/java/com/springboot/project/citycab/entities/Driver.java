@@ -58,6 +58,10 @@ public class Driver {
     )
     private Set<Vehicle> vehicles;
 
+    @OneToOne
+    @JoinColumn(name = "current_vehicle_id")
+    private Vehicle currentVehicle;
+
     @ManyToMany(mappedBy = "drivers")
     @JsonIgnore  // To prevent infinite recursion during JSON serialization
     private List<RideRequest> rideRequests;

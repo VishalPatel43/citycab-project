@@ -22,7 +22,6 @@ public class RiderController {
 
     private final RiderService riderService;
 
-
     @PostMapping(path = "/requestRide")
     public ResponseEntity<RideRequestDTO> requestRide(
             @RequestBody RideRequestDTO rideRequestDTO) {

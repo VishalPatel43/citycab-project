@@ -1,8 +1,11 @@
 package com.springboot.project.citycab.services;
 
 import com.springboot.project.citycab.dto.*;
+import com.springboot.project.citycab.entities.Driver;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
+
+import java.util.List;
 
 public interface AdminService {
 
@@ -15,11 +18,13 @@ public interface AdminService {
 
     DriverDTO assignDriverToVehicle(Long driverId, VehicleDTO vehicleDTO);
 
+    DriverDTO deAssignDriverToVehicle(Long driverId, VehicleDTO vehicleDTO);
+
     DriverDTO updateDriverAddress(Long driverId, AddressDTO addressDTO);
 
-    DriverDTO updateDriverVehicle(Long driverId, VehicleDTO vehicleDTO);
+    DeleteDTO removeVehicle(Long vehicleId);
 
-    String removeVehicle(Long vehicleId);
+    List<DriverDTO>  getDriversByVehicleId(Long vehicleId);
 
     Page<RiderDTO> findRidersByName(String name, PageRequest pageRequest);
 

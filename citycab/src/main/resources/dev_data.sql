@@ -144,27 +144,27 @@ VALUES ('101', 'MG Road', 'Near Central Park', 'Mumbai', 'Maharashtra', '400001'
        ('87', 'Ruby Square', 'Cityscape', 'Thiruvananthapuram', 'Kerala', '695001', 'India');
 
 -- Vehicle
-INSERT INTO vehicle (number_plate, registration_number, owner_name, model, type, capacity, color, registration_date)
-VALUES ('MH01AB1234', 'ABC123', 'Ramesh Sharma', 'Maruti Suzuki Swift', 'HATCHBACK', 4, 'Red', '2022-03-15'),
-       ('KA02CD5678', 'DEF456', 'Suresh Kumar', 'Hyundai i20', 'HATCHBACK', 4, 'Blue', '2022-03-15'),
-       ('DL03EF9012', 'GHI789', 'Amit Verma', 'Toyota Innova', 'SUV', 6, 'Silver', '2022-03-15'),
-       ('TN04GH3456', 'JKL012', 'Priya Iyer', 'Honda City', 'SEDAN', 4, 'White', '2022-03-15'),
-       ('UP05IJ7890', 'MNO345', 'Rohit Mehra', 'Ford EcoSport', 'SUV', 5, 'Black', '2022-03-15'),
-       ('WB06KL1234', 'PQR678', 'Ananya Das', 'Tata Nexon', 'SUV', 5, 'Orange', '2022-03-15'),
-       ('TS07MN5678', 'STU901', 'Vikas Rao', 'Mahindra XUV700', 'SUV', 7, 'Grey', '2022-03-15'),
-       ('CH08OP9012', 'VWX234', 'Aarav Singh', 'Renault Kwid', 'HATCHBACK', 4, 'Green', '2022-03-15'),
-       ('GJ09QR3456', 'YZA567', 'Krishna Patel', 'Kia Seltos', 'SUV', 5, 'White', '2022-03-15'),
-       ('RJ10ST7890', 'BCD890', 'Naveen Gupta', 'MG Hector', 'SUV', 5, 'Blue', '2022-03-15'),
-       ('GA11UV1234', 'EFG123', 'Pooja Naik', 'Hyundai Creta', 'SUV', 5, 'Red', '2022-03-15'),
-       ('MP12WX5678', 'HIJ456', 'Arjun Singh', 'Maruti Suzuki Ciaz', 'SEDAN', 4, 'Silver', '2022-03-15'),
-       ('UP13YZ9012', 'KLM789', 'Rajesh Pandey', 'Honda Amaze', 'SEDAN', 4, 'Grey', '2022-03-15'),
-       ('MH14AB3456', 'NOP012', 'Sneha Joshi', 'Toyota Fortuner', 'SUV', 7, 'Black', '2022-03-15'),
-       ('KA15CD7890', 'QRS345', 'Vikram Shetty', 'Tata Tiago', 'HATCHBACK', 4, 'White', '2022-03-15'),
-       ('DL16EF1234', 'TUV678', 'Deepak Malhotra', 'Mahindra Scorpio', 'SUV', 7, 'Blue', '2022-03-15'),
-       ('TN17GH5678', 'WXY901', 'Shalini Nair', 'Ford Endeavour', 'SUV', 7, 'White', '2022-03-15'),
-       ('WB18IJ9012', 'ZAB234', 'Ashok Sen', 'Hyundai Verna', 'SEDAN', 4, 'Red', '2022-03-15'),
-       ('TS19KL3456', 'CDE567', 'Akash Reddy', 'Renault Duster', 'SUV', 5, 'Green', '2022-03-15'),
-       ('CH20MN7890', 'FGH890', 'Manish Arora', 'Kia Carnival', 'MPV', 7, 'Silver', '2022-03-15');
+INSERT INTO vehicle (number_plate, registration_number, owner_name, model, type, capacity, color, registration_date, available)
+VALUES ('MH01AB1234', 'ABC123', 'Ramesh Sharma', 'Maruti Suzuki Swift', 'HATCHBACK', 4, 'Red', '2022-03-15', TRUE),
+       ('KA02CD5678', 'DEF456', 'Suresh Kumar', 'Hyundai i20', 'HATCHBACK', 4, 'Blue', '2022-03-15', TRUE),
+       ('DL03EF9012', 'GHI789', 'Amit Verma', 'Toyota Innova', 'SUV', 6, 'Silver', '2022-03-15', TRUE),
+       ('TN04GH3456', 'JKL012', 'Priya Iyer', 'Honda City', 'SEDAN', 4, 'White', '2022-03-15', TRUE),
+       ('UP05IJ7890', 'MNO345', 'Rohit Mehra', 'Ford EcoSport', 'SUV', 5, 'Black', '2022-03-15', TRUE),
+       ('WB06KL1234', 'PQR678', 'Ananya Das', 'Tata Nexon', 'SUV', 5, 'Orange', '2022-03-15', TRUE),
+       ('TS07MN5678', 'STU901', 'Vikas Rao', 'Mahindra XUV700', 'SUV', 7, 'Grey', '2022-03-15', TRUE),
+       ('CH08OP9012', 'VWX234', 'Aarav Singh', 'Renault Kwid', 'HATCHBACK', 4, 'Green', '2022-03-15', TRUE),
+       ('GJ09QR3456', 'YZA567', 'Krishna Patel', 'Kia Seltos', 'SUV', 5, 'White', '2022-03-15', TRUE),
+       ('RJ10ST7890', 'BCD890', 'Naveen Gupta', 'MG Hector', 'SUV', 5, 'Blue', '2022-03-15', TRUE),
+       ('GA11UV1234', 'EFG123', 'Pooja Naik', 'Hyundai Creta', 'SUV', 5, 'Red', '2022-03-15', TRUE),
+       ('MP12WX5678', 'HIJ456', 'Arjun Singh', 'Maruti Suzuki Ciaz', 'SEDAN', 4, 'Silver', '2022-03-15', TRUE),
+       ('UP13YZ9012', 'KLM789', 'Rajesh Pandey', 'Honda Amaze', 'SEDAN', 4, 'Grey', '2022-03-15', TRUE),
+       ('MH14AB3456', 'NOP012', 'Sneha Joshi', 'Toyota Fortuner', 'SUV', 7, 'Black', '2022-03-15', TRUE),
+       ('KA15CD7890', 'QRS345', 'Vikram Shetty', 'Tata Tiago', 'HATCHBACK', 4, 'White', '2022-03-15', TRUE),
+       ('DL16EF1234', 'TUV678', 'Deepak Malhotra', 'Mahindra Scorpio', 'SUV', 7, 'Blue', '2022-03-15', TRUE),
+       ('TN17GH5678', 'WXY901', 'Shalini Nair', 'Ford Endeavour', 'SUV', 7, 'White', '2022-03-15', TRUE),
+       ('WB18IJ9012', 'ZAB234', 'Ashok Sen', 'Hyundai Verna', 'SEDAN', 4, 'Red', '2022-03-15', TRUE),
+       ('TS19KL3456', 'CDE567', 'Akash Reddy', 'Renault Duster', 'SUV', 5, 'Green', '2022-03-15', TRUE),
+       ('CH20MN7890', 'FGH890', 'Manish Arora', 'Kia Carnival', 'MPV', 7, 'Silver', '2022-03-15', TRUE);
 
 -- Driver
 

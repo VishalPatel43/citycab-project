@@ -23,6 +23,10 @@ public class RideRequestDTO {
 
     private PaymentMethod paymentMethod;
 
+    private Double rideDistance; // We calculate the distance between the pickup and drop-off locations
+
+    private Double rideTime; // We calculate the time between the pickup and drop-off locations
+
     private Double fare; // We calculate the fare based on the distance between the pickup and drop-off locations
 
     private RideRequestStatus rideRequestStatus; // The first we set to the PENDING status

@@ -1,7 +1,8 @@
-package com.springboot.project.citycab.services.impl.distance;
+package com.springboot.project.citycab.services.impl.distancetime;
 
+import com.springboot.project.citycab.dto.DistanceTimeResponseDTO;
 import com.springboot.project.citycab.exceptions.DistanceRestClientServiceException;
-import com.springboot.project.citycab.services.DistanceService;
+import com.springboot.project.citycab.services.DistanceTimeService;
 import lombok.Data;
 import lombok.ToString;
 import lombok.extern.slf4j.Slf4j;
@@ -16,13 +17,13 @@ import java.util.List;
 
 @Service
 @Slf4j
-public class DistanceServiceHereRoutingImpl implements DistanceService {
+public class DistanceTimeTimeServiceOtherRoutingImpl implements DistanceTimeService {
 
-    private final RestClient hereRoutingRestClient;
+    private final RestClient otherRoutingRestClient;
 
     // Manually define the constructor with @Qualifier
-    public DistanceServiceHereRoutingImpl(@Qualifier("hereRoutingRestClient") RestClient hereRoutingRestClient) {
-        this.hereRoutingRestClient = hereRoutingRestClient;
+    public DistanceTimeTimeServiceOtherRoutingImpl(@Qualifier("otherRestClient") RestClient otherRoutingRestClient) {
+        this.otherRoutingRestClient = otherRoutingRestClient;
     }
 
     @Value("${here.routing.api.key}")
@@ -34,7 +35,7 @@ public class DistanceServiceHereRoutingImpl implements DistanceService {
      */
 
     @Override
-    public double calculateDistance(Point src, Point dest) {
+    public DistanceTimeResponseDTO calculateDistanceTime(Point src, Point dest) {
 
         try {
             String uri = "?waypoints=" + src.getY() + "," + src.getX() + "|" + dest.getY() + "," + dest.getX() + "&mode=drive&apiKey=" + hereRoutingApiKey;
@@ -42,7 +43,7 @@ public class DistanceServiceHereRoutingImpl implements DistanceService {
 //                    src.getY(), src.getX(),
 //                    dest.getY(), dest.getX(),
 //                    hereRoutingApiKey);
-            HereRoutingResponseDTO responseDto = hereRoutingRestClient
+            OtherRoutingResponseDTO responseDTO = otherRoutingRestClient
                     .get()
                     .uri(uri)
                     .retrieve()
@@ -51,13 +52,17 @@ public class DistanceServiceHereRoutingImpl implements DistanceService {
                         System.out.println("Client Error occurred: " + error);
                         throw new DistanceRestClientServiceException("Client Error: Unable to calculate distance. Here Routing responded with: " + error);
                     })
-                    .body(HereRoutingResponseDTO.class);
+                    .body(OtherRoutingResponseDTO.class);
 
-            if (responseDto == null || responseDto.getFeatures().isEmpty())
+            if (responseDTO == null || responseDTO.getFeatures().isEmpty())
                 throw new DistanceRestClientServiceException("Error: No valid route found between the provided points.");
+            // Extract distance and time from the first feature
+            OtherRoutingProperties properties = responseDTO.getFeatures().getFirst().getProperties();
+            double distanceKm = properties.getDistance() / 1000.0; // Convert meters to kilometers
+            double timeMinutes = properties.getTime() / 60.0;     // Convert seconds to minutes
 
-            return responseDto.getFeatures().getFirst().getProperties().getDistance() / 1000.0; // Convert meters to kilometers
-        } catch (Exception e) {
+            // Return as a structured response
+            return new DistanceTimeResponseDTO(distanceKm, timeMinutes);        } catch (Exception e) {
             throw new DistanceRestClientServiceException("Error getting data from Here Routing: " + e.getMessage(), e);
         }
     }
@@ -67,16 +72,17 @@ public class DistanceServiceHereRoutingImpl implements DistanceService {
 
 @Data
 @ToString
-class HereRoutingResponseDTO {
-    private List<HereRoutingRoute> features;
+class OtherRoutingResponseDTO {
+    private List<OtherRoutingRoute> features;
 }
 
 @Data
-class HereRoutingRoute {
-    private HereRoutingProperties properties;
+class OtherRoutingRoute {
+    private OtherRoutingProperties properties;
 }
 
 @Data
-class HereRoutingProperties {
+class OtherRoutingProperties {
     private Long distance; // Distance in meters
+    private Long time;
 }
