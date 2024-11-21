@@ -27,6 +27,14 @@ public class RideDTO {
 
     private RideStatus rideStatus;
 
+    private Double rideDistance;
+
+    private Double rideTime;
+
+    private Double driverToRiderDistance;
+
+    private Double driverToRiderTime;
+
     private Double fare;
 
     private OtpDTO otp;

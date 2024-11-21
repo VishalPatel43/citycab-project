@@ -8,6 +8,7 @@ import com.springboot.project.citycab.entities.*;
 import com.springboot.project.citycab.exceptions.ResourceNotFoundException;
 import com.springboot.project.citycab.repositories.DriverRepository;
 import com.springboot.project.citycab.services.*;
+import com.springboot.project.citycab.strategies.manager.DistanceTimeServiceManager;
 import lombok.RequiredArgsConstructor;
 import org.locationtech.jts.geom.Point;
 import org.modelmapper.ModelMapper;
@@ -34,12 +35,12 @@ public class DriverServiceImpl implements DriverService {
     private final RideService rideService;
     private final PaymentService paymentService;
     private final CancelRideService cancelRideService;
-    private RatingService ratingService;
     private final AddressService addressService;
+    private final VehicleService vehicleService;
+    private RatingService ratingService;
 
     // Mapper
     private final ModelMapper modelMapper;
-    private final VehicleService vehicleService;
 
     @Autowired
     public void setRatingService(@Lazy RatingService ratingService) {

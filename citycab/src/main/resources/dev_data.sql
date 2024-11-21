@@ -144,7 +144,8 @@ VALUES ('101', 'MG Road', 'Near Central Park', 'Mumbai', 'Maharashtra', '400001'
        ('87', 'Ruby Square', 'Cityscape', 'Thiruvananthapuram', 'Kerala', '695001', 'India');
 
 -- Vehicle
-INSERT INTO vehicle (number_plate, registration_number, owner_name, model, type, capacity, color, registration_date, available)
+INSERT INTO vehicle (number_plate, registration_number, owner_name, model, type, capacity, color, registration_date,
+                     available)
 VALUES ('MH01AB1234', 'ABC123', 'Ramesh Sharma', 'Maruti Suzuki Swift', 'HATCHBACK', 4, 'Red', '2022-03-15', TRUE),
        ('KA02CD5678', 'DEF456', 'Suresh Kumar', 'Hyundai i20', 'HATCHBACK', 4, 'Blue', '2022-03-15', TRUE),
        ('DL03EF9012', 'GHI789', 'Amit Verma', 'Toyota Innova', 'SUV', 6, 'Silver', '2022-03-15', TRUE),
@@ -170,7 +171,8 @@ VALUES ('MH01AB1234', 'ABC123', 'Ramesh Sharma', 'Maruti Suzuki Swift', 'HATCHBA
 
 INSERT INTO driver (avg_rating, available, current_location, user_id, address_id, aadhar_card_number,
                     driving_license_number)
-VALUES (4.5, TRUE, ST_GeomFromText('POINT(72.8777 19.0760)', 4326), 3, 1, 234567890123, 'MH01A2023456'),
+-- VALUES (4.5, TRUE, ST_GeomFromText('POINT(72.8777 19.0760)', 4326), 3, 1, 234567890123, 'MH01A2023456'),
+VALUES (4.5, TRUE, ST_GeomFromText('POINT(74.2313 28.33423)', 4326), 3, 1, 234567890123, 'MH01A2023456'),
        (4.2, TRUE, ST_GeomFromText('POINT(77.5946 12.9716)', 4326), 5, 2, 345678901234, 'KA02B1234567'),
        (4.7, TRUE, ST_GeomFromText('POINT(80.2707 13.0827)', 4326), 7, 3, 456789012345, 'DL03C9876543'),
        (4.3, TRUE, ST_GeomFromText('POINT(77.3910 28.5355)', 4326), 9, 4, 567890123456, 'TN04D6543210'),

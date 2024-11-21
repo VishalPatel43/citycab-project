@@ -5,6 +5,7 @@ import com.springboot.project.citycab.strategies.DriverMatchingStrategy;
 import com.springboot.project.citycab.strategies.RideDistanceTimeFareCalculationStrategy;
 import com.springboot.project.citycab.strategies.impl.*;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 
 import java.time.LocalTime;
@@ -12,6 +13,7 @@ import java.util.List;
 
 @Component
 @RequiredArgsConstructor
+@Slf4j
 public class RideStrategyManager {
 
     private final DriverMatchingHighestRatedDriverStrategy highestRatedStrategy;
@@ -32,17 +34,21 @@ public class RideStrategyManager {
         return rideRequest -> {
             // 1. Primary Condition: 0-2 km with avg_rating >=4.5
             List<Driver> driversPrimary = highestRatedStrategy.findMatchingDriver(rideRequest);
+            log.info("Drivers Primary: {}", driversPrimary);
             if (!driversPrimary.isEmpty())
                 return driversPrimary;
 
+
             // 2. Secondary Condition: 0-3 km sorted by rating and distance
             List<Driver> driversSecondary = advancedStrategy.findMatchingDriver(rideRequest);
+            log.info("Drivers Secondary: {}", driversSecondary);
             if (!driversSecondary.isEmpty())
                 return driversSecondary;
 
             // 3. Tertiary Condition: 3-10 km with avg_rating < 4, sorted by distance and rating
-//                List<Driver> driversTertiary = nearestStrategy.findMatchingDriver(rideRequest); //                return driversTertiary;
-            return nearestStrategy.findMatchingDriver(rideRequest);
+            List<Driver> driversTertiary = nearestStrategy.findMatchingDriver(rideRequest); //                return driversTertiary;
+            log.info("Drivers Tertiary: {}", driversTertiary);
+            return driversTertiary;
         };
     }
 

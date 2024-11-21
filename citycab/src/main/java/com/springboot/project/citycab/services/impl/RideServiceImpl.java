@@ -2,6 +2,7 @@ package com.springboot.project.citycab.services.impl;
 
 import com.springboot.project.citycab.constants.enums.RideRequestStatus;
 import com.springboot.project.citycab.constants.enums.RideStatus;
+import com.springboot.project.citycab.dto.DistanceTimeResponseDTO;
 import com.springboot.project.citycab.dto.OtpDTO;
 import com.springboot.project.citycab.entities.Driver;
 import com.springboot.project.citycab.entities.Ride;
@@ -11,6 +12,7 @@ import com.springboot.project.citycab.exceptions.RuntimeConflictException;
 import com.springboot.project.citycab.repositories.RideRepository;
 import com.springboot.project.citycab.services.RideRequestService;
 import com.springboot.project.citycab.services.RideService;
+import com.springboot.project.citycab.strategies.manager.DistanceTimeServiceManager;
 import lombok.RequiredArgsConstructor;
 import org.modelmapper.ModelMapper;
 import org.springframework.data.domain.Page;
@@ -30,6 +32,9 @@ public class RideServiceImpl implements RideService {
     private final RideRequestService rideRequestService;
     // Mapper
     private final ModelMapper modelMapper;
+
+    // Manager
+    private final DistanceTimeServiceManager distanceTimeServiceManager;
 
     @Override
     public Ride getRideById(Long rideId) {
@@ -51,6 +56,12 @@ public class RideServiceImpl implements RideService {
         ride.setVehicle(driver.getCurrentVehicle());
         ride.setOtp(generateRandomOTP());
 //        ride.setRideId(null); // not required coz we already have different rideId and rideRequestId
+
+        // find the time and distance from the driver to the rider
+        DistanceTimeResponseDTO distanceTimeResponseDTO = distanceTimeServiceManager
+                .calculateDistanceTime(rideRequest.getPickupLocation(), driver.getCurrentLocation());
+        ride.setDriverToRiderDistance(distanceTimeResponseDTO.getDistanceKm());
+        ride.setDriverToRiderTime(distanceTimeResponseDTO.getTimeMinutes());
 
         return rideRepository.save(ride);
     }

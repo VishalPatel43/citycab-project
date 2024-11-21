@@ -1,9 +1,0 @@
-"create the endpoint after the successful of requestRide --> how those List<Driver> knows that they get the ride and accept it
-After the ride accept by the driver list will be empty for that ride id
-Use some entity if required or anything --> Before accepting : One Driver has multiple RideRequestDTO and one RideRequestDTO has multiple drivers"
-"End point in that driver can check the available RideRequestDTO"
-
-
-
-
-archna_53
