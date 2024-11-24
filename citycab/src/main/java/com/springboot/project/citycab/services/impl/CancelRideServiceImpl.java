@@ -37,6 +37,10 @@ public class CancelRideServiceImpl implements CancelRideService {
 
         RideRequest rideRequest = ride.getRideRequest();
         rideRequest.setRideRequestStatus(RideRequestStatus.CANCELLED);
+
+        ride.getRider().setAvailable(true);
+        ride.getDriver().setAvailable(true);
+
         ride = rideService.updateRide(ride);
 
         // Create the CancelRide entity
@@ -47,7 +51,6 @@ public class CancelRideServiceImpl implements CancelRideService {
                 .cancelledBy(cancelledBy)
                 .ride(ride)
                 .build();
-
 
         return cancelRideRepository.save(cancelRide);
     }

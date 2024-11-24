@@ -20,8 +20,8 @@ public class DriverController {
     private final DriverService driverService;
 
     @PostMapping(path = "/acceptRide/{rideRequestId}")
-    public ResponseEntity<RideDTO> acceptRide(@PathVariable Long rideRequestId, PointDTO driverLocation) {
-        return ResponseEntity.ok(driverService.acceptRide(rideRequestId, driverLocation));
+    public ResponseEntity<RideDTO> acceptRide(@PathVariable Long rideRequestId) {
+        return ResponseEntity.ok(driverService.acceptRide(rideRequestId));
     }
 
     // cancel the rideRequest --> remove from the list of available drivers
@@ -99,9 +99,9 @@ public class DriverController {
         return ResponseEntity.ok(driverService.changeDriverLocation(pointDTO));
     }
 
-    @PostMapping("/currentVehicle")
-    public ResponseEntity<DriverDTO> currentDriverVehicle(@RequestBody VehicleDTO vehicleDTO) {
-        return ResponseEntity.ok(driverService.currentDriverVehicle(vehicleDTO));
+    @PostMapping("/setCurrentVehicle")
+    public ResponseEntity<DriverDTO> setCurrentDriverVehicle(@RequestBody VehicleDTO vehicleDTO) {
+        return ResponseEntity.ok(driverService.setCurrentDriverVehicle(vehicleDTO));
     }
 
     @PostMapping("/freeVehicle")

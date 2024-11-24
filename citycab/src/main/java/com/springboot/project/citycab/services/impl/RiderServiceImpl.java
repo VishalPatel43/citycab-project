@@ -10,9 +10,11 @@ import com.springboot.project.citycab.repositories.RiderRepository;
 import com.springboot.project.citycab.services.*;
 import com.springboot.project.citycab.strategies.DriverMatchingStrategy;
 import com.springboot.project.citycab.strategies.RideDistanceTimeFareCalculationStrategy;
+import com.springboot.project.citycab.strategies.manager.DistanceTimeServiceManager;
 import com.springboot.project.citycab.strategies.manager.RideStrategyManager;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.locationtech.jts.geom.Point;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Lazy;
@@ -39,6 +41,7 @@ public class RiderServiceImpl implements RiderService {
     private RatingService ratingService;
     // Strategy
     private final RideStrategyManager rideStrategyManager;
+    private final DistanceTimeServiceManager distanceTimeServiceManager;
     // Mapper
     private final ModelMapper modelMapper;
 
@@ -52,6 +55,10 @@ public class RiderServiceImpl implements RiderService {
     public RideRequestDTO requestRide(RideRequestDTO rideRequestDTO) {
 
         Rider rider = getCurrentRider();
+
+        if (!rider.getAvailable())
+            throw new RuntimeException("Rider is not available to request a ride");
+
         RideRequest rideRequest = modelMapper.map(rideRequestDTO, RideRequest.class);
         rideRequest.setRider(rider);
 
@@ -73,19 +80,8 @@ public class RiderServiceImpl implements RiderService {
         List<Driver> drivers = driverMatchingStrategy.findMatchingDriver(savedRideRequest);
 
         rideRequest.setDrivers(drivers);
-        rideRequestService.saveRideRequest(rideRequest);
-
-        // Now add all the drivers to the rideRequest using stream and save db
-        drivers.forEach(driver -> {
-            driver.getRideRequests().add(rideRequest);
-            driverService.saveDriver(driver);
-        });
-
-        /* for (Driver driver : drivers) {
-//            driver.setRideRequests(List.of(rideRequest));
-            driver.getRideRequests().add(rideRequest);
-            driverService.saveDriver(driver);
-        }*/
+        rideRequest.getRider().setAvailable(false);
+        savedRideRequest = rideRequestService.saveRideRequest(rideRequest);
 
         return modelMapper.map(savedRideRequest, RideRequestDTO.class);
     }
@@ -169,6 +165,7 @@ public class RiderServiceImpl implements RiderService {
                 .builder()
                 .user(user)
                 .avgGivenRating(0.0)
+                .available(true)
                 .build();
         return riderRepository.save(rider);
     }
@@ -243,14 +240,19 @@ public class RiderServiceImpl implements RiderService {
         if (!rideRequest.getRideRequestStatus().equals(RideRequestStatus.PENDING))
             throw new RuntimeException("RideRequest cannot be cancelled, status is " + rideRequest.getRideRequestStatus());
 
+        rideRequest.setRideRequestStatus(RideRequestStatus.CANCELLED);
+        rideRequest.getRider().setAvailable(true);
+
         return driverService.confirmAndClearAssociations(rideRequest);
     }
 
-    // Distance, Time and Fare calculation also add when the driver accept the ride
     @Transactional
-    public RideDTO currentRide(Long rideId) { // Driver reach to the rider
-        Ride ride = rideService.getRideById(rideId);
+    @Override
+    public DistanceTimeResponseDTO driverToRiderDistanceTime(Long rideId, PointDTO driverLocation) {
         Rider rider = getCurrentRider();
+
+        Ride ride = rideService.getRideById(rideId);
+//        Driver driver = ride.getDriver();
 
         if (!ride.getRider().getRiderId().equals(rider.getRiderId()))
             throw new RuntimeException("Rider is not the owner of this Ride");
@@ -258,10 +260,37 @@ public class RiderServiceImpl implements RiderService {
         if (!ride.getRideStatus().equals(RideStatus.CONFIRMED))
             throw new RuntimeException("Ride status is not Confirmed hence cannot start the ride, status: " + ride.getRideStatus());
 
-        // calculate the distance and time --> Driver to Rider
+        Point currentLocation = modelMapper.map(driverLocation, Point.class);
+        DistanceTimeResponseDTO responseDTO = calculateTimeDistance(currentLocation, ride.getRideRequest().getPickupLocation());
 
-        RideDTO rideDTO = modelMapper.map(ride, RideDTO.class);
-        rideDTO.getDriver().setVehicles(null);
-        return  rideDTO;
+        log.info("Driver to Rider Remaining: Distance={} km, Time={} min", responseDTO.getDistanceKm(), responseDTO.getTimeMinutes());
+        return responseDTO;
+    }
+
+    @Transactional
+    @Override
+    public DistanceTimeResponseDTO riderToDestinationDistanceTime(Long rideId, PointDTO driverLocation) {
+        Rider rider = getCurrentRider();
+
+        Ride ride = rideService.getRideById(rideId);
+
+        if (!ride.getRider().getRiderId().equals(rider.getRiderId()))
+            throw new RuntimeException("Rider is not the owner of this Ride");
+
+        if (!ride.getRideStatus().equals(RideStatus.ONGOING))
+            throw new RuntimeException("Ride status is not Started hence cannot calculate the distance and time to the destination, status: " + ride.getRideStatus());
+
+        Point currentLocation = modelMapper.map(driverLocation, Point.class);
+        DistanceTimeResponseDTO responseDTO = calculateTimeDistance(currentLocation, ride.getDropOffLocation());
+
+        log.info("Rider to Destination Remaining: Distance={} km, Time={} min", responseDTO.getDistanceKm(), responseDTO.getTimeMinutes());
+        return responseDTO;
+    }
+
+    @Transactional
+    public DistanceTimeResponseDTO calculateTimeDistance(Point source, Point destination) {
+
+        return distanceTimeServiceManager
+                .calculateDistanceTime(source, destination);
     }
 }

@@ -11,5 +11,7 @@ public class RiderDTO {
 
     private Long riderId;
     private UserDTO user;
+    private Double avgGivenRating;
+    private Boolean available;
 //    private Double rating;
 }

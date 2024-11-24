@@ -55,6 +55,8 @@ public class RideServiceImpl implements RideService {
         ride.setDriver(driver);
         ride.setVehicle(driver.getCurrentVehicle());
         ride.setOtp(generateRandomOTP());
+
+        ride.getDriver().setAvailable(false);
 //        ride.setRideId(null); // not required coz we already have different rideId and rideRequestId
 
         // find the time and distance from the driver to the rider

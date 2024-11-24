@@ -37,4 +37,8 @@ public interface RiderService {
     List<DriverDTO> getAvailableDriversForRideRequest(Long rideRequestId);
 
     RideRequestDTO cancelRideRequestByRider(Long rideRequestId);
+
+    DistanceTimeResponseDTO driverToRiderDistanceTime(Long rideId, PointDTO driverLocation);
+
+    DistanceTimeResponseDTO riderToDestinationDistanceTime(Long rideId, PointDTO driverLocation);
 }

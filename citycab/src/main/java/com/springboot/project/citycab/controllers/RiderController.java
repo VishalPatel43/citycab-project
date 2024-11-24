@@ -87,4 +87,16 @@ public class RiderController {
                 Sort.by(Sort.Direction.DESC, "ratingDate"));
         return ResponseEntity.ok(riderService.getReviewsByRider(pageRequest));
     }
+
+    @GetMapping("/riderToDestinationDistanceTime/{rideId}")
+    public ResponseEntity<DistanceTimeResponseDTO> riderToDestinationDistanceTime(
+            @PathVariable Long rideId, @RequestBody PointDTO driverLocation) {
+        return ResponseEntity.ok(riderService.riderToDestinationDistanceTime(rideId, driverLocation));
+    }
+
+    @GetMapping("/driverToRiderDistanceTime/{rideId}")
+    public ResponseEntity<DistanceTimeResponseDTO> driverToRiderDistanceTime(
+            @PathVariable Long rideId, @RequestBody PointDTO driverLocation) {
+        return ResponseEntity.ok(riderService.driverToRiderDistanceTime(rideId, driverLocation));
+    }
 }

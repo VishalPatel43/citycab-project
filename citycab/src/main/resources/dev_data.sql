@@ -224,8 +224,38 @@ VALUES (1, 1),
 
 
 -- Rider
-INSERT INTO rider (avg_given_rating, user_id)
-VALUES (4.9, 1);
+INSERT INTO rider (avg_given_rating, user_id, available)
+VALUES (4.9, 1, true),   -- Aarav Sharma
+       (4.8, 2, true),   -- Anaya Patel
+       (4.7, 3, true),   -- Vivaan Singh
+       (4.6, 4, true),   -- Diya Mehta
+       (4.5, 5, true),   -- Arjun Gupta
+       (4.9, 6, true),   -- Ishita Verma
+       (4.4, 7, true),   -- Krishna Reddy
+       (4.3, 8, true),   -- Sara Nair
+       (4.7, 9, true),   -- Dev Mishra
+       (4.6, 10, true),  -- Neha Kapoor
+       (4.8, 11, true),  -- Kabir Joshi
+       (4.5, 12, true),  -- Myra Iyer
+       (4.7, 13, true),  -- Ayaan Choudhary
+       (4.9, 14, true),  -- Kiara Bhat
+       (4.6, 15, true),  -- Kabir Deshmukh
+       (4.4, 16, true),  -- Riya Rao
+       (4.7, 17, true),  -- Aryan Jain
+       (4.3, 18, true),  -- Tara Banerjee
+       (4.5, 19, true),  -- Veer Saxena
+       (4.8, 20, true),  -- Nisha Sen
+       (4.6, 21, true),  -- Raghav Pandey
+       (4.7, 22, true),  -- Sana Khan
+       (4.4, 23, true),  -- Laksh Sinha
+       (4.9, 24, true),  -- Aditi Pillai
+       (4.8, 25, true),  -- Aditya Bhatt
+       (4.6, 26, true),  -- Pari Mukherjee
+       (4.5, 27, true),  -- Karan Ahuja
+       (4.7, 28, true),  -- Meera Das
+       (4.9, 29, true),  -- Yash Tiwari
+       (4.8, 30, true),  -- Bhavya Chatterjee
+       (5.0, 31, true);  -- Vishal Patel
 
 -- Wallet
 INSERT INTO wallet (balance, user_id)

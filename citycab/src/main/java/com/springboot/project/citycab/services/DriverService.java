@@ -12,7 +12,7 @@ import java.util.List;
 public interface DriverService {
 
 
-    RideDTO acceptRide(Long rideRequestId, PointDTO driverLocation);
+    RideDTO acceptRide(Long rideRequestId);
 
     RideDTO cancelRide(Long rideId, String reason);
 
@@ -64,7 +64,7 @@ public interface DriverService {
 
     Driver findDriverByDrivingLicenseNumber(String drivingLicenseNumber);
 
-    DriverDTO currentDriverVehicle(VehicleDTO vehicleDTO);
+    DriverDTO setCurrentDriverVehicle(VehicleDTO vehicleDTO);
 
     DriverDTO freeDriverVehicle();
 }

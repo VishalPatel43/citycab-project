@@ -103,28 +103,12 @@ public class AdminServiceImpl implements AdminService {
         Driver savedDriver = driverService.saveDriver(createDriver);
         log.info("Driver1: {}", savedDriver);
 
-//        Set<Driver> drivers = vehicle.getDrivers();
-//        log.info("Drivers: {}", drivers);
-//        if (drivers == null || drivers.isEmpty()) {
-//            drivers = new HashSet<>();
-//            vehicle.setDrivers(drivers);
-//            log.info("Vehicle2: {}", vehicle);
-//        }
-//        drivers.add(savedDriver);
-//
-//        log.info("Vehicle3: {}", vehicle);
-//        Vehicle savedVehicle = vehicleService.saveVehicle(vehicle);
-
-//        savedDriver.getVehicles().add(savedVehicle); // for DTO result, not necessary for DB
-        // already saved in the vehicleService.saveVehicle(vehicle) method
-
         DriverDTO driverDTO = modelMapper.map(savedDriver, DriverDTO.class);
         Set<VehicleDTO> vehicleDTOS = savedDriver.getVehicles().stream()
                 .map(v -> modelMapper.map(v, VehicleDTO.class))
                 .collect(Collectors.toSet());
 
         driverDTO.setVehicles(vehicleDTOS);
-//        driverDTO.setVehicle(modelMapper.map(savedVehicle, VehicleDTO.class));
 
         return driverDTO;
     }
@@ -157,13 +141,6 @@ public class AdminServiceImpl implements AdminService {
         driver = driverService.saveDriver(driver);
 
         log.info("Vehicle Drivers: {}", vehicle.getDrivers());
-//        vehicle.getDrivers().add(driver);
-//        vehicle.setDrivers(new HashSet<>(Set.of(driver))); // Convert to mutable set
-
-
-//        vehicle.setDrivers(new HashSet<>()); // Convert to mutable set
-//        vehicle.getDrivers().add(driver);
-//        vehicleService.saveVehicle(vehicle);
 
         DriverDTO driverDTO = modelMapper.map(driver, DriverDTO.class);
         Set<VehicleDTO> vehicleDTOS = driver.getVehicles().stream()
@@ -200,13 +177,6 @@ public class AdminServiceImpl implements AdminService {
         // Add the vehicle to the driver
         driver.getVehicles().add(vehicle);
         driver = driverService.saveDriver(driver);
-
-//        vehicle.getDrivers().add(driver);
-//        vehicle.setDrivers(new HashSet<>(Set.of(driver))); // Convert to mutable set
-
-//        vehicle.setDrivers(new HashSet<>()); // Convert to mutable set
-//        vehicle.getDrivers().add(driver);
-//        vehicleService.saveVehicle(vehicle);
 
         DriverDTO driverDTO = modelMapper.map(driver, DriverDTO.class);
         Set<VehicleDTO> vehicleDTOS = driver.getVehicles().stream()
@@ -297,23 +267,11 @@ public class AdminServiceImpl implements AdminService {
     @Override
     public DeleteDTO removeVehicle(Long vehicleId) {
         Vehicle vehicle = vehicleService.findVehicleById(vehicleId);
-//        User currentUser = userService.getCurrentUser();
-//
-//        if (!currentUser.getRoles().contains(Role.ADMIN))
-//            throw new RuntimeException("You are not authorized to remove this vehicle");
-
-        // Remove the vehicle from all drivers
-//        vehicle.getDrivers().forEach(driver -> {
-//                    driver.getVehicles().remove(vehicle);
-//                    driverService.saveDriver(driver);
-//                }
-//        );
-//        vehicleService.deleteVehicle(vehicle);
 
         vehicle.getDrivers().forEach(driver -> {
             driver.getVehicles().remove(vehicle);
         });
-//        vehicleService.saveVehicle(vehicle);
+
         vehicleService.deleteVehicle(vehicle); // delete from the vehicle table
 
         return new DeleteDTO("Vehicle with id: " + vehicleId + " removed successfully");

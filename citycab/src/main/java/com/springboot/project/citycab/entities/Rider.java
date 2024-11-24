@@ -17,6 +17,8 @@ public class Rider {
 
     private Double avgGivenRating;
 
+    private Boolean available;
+
     @OneToOne
     @JoinColumn(name = "user_id")
     private User user;
