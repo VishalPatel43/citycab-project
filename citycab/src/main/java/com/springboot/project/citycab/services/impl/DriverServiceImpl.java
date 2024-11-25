@@ -91,12 +91,6 @@ public class DriverServiceImpl implements DriverService {
     }
 
     @Override
-    public DriverDTO getMyProfile() {
-        Driver currentDiver = getCurrentDriver();
-        return modelMapper.map(currentDiver, DriverDTO.class);
-    }
-
-    @Override
     public DriverDTO mapDriverToDTO(Driver driver) {
         DriverDTO driverDTO = modelMapper.map(driver, DriverDTO.class);
         driverDTO.setVehicles(driver.getVehicles().stream()
@@ -105,18 +99,23 @@ public class DriverServiceImpl implements DriverService {
         return driverDTO;
     }
 
+    @Override
+    public DriverDTO getMyProfile() {
+        Driver currentDiver = getCurrentDriver();
+        return mapDriverToDTO(currentDiver);
+    }
+
     @Transactional
     @Override
     public DriverDTO setCurrentDriverVehicle(VehicleDTO vehicleDTO) {
         Driver driver = getCurrentDriver();
-
         Vehicle vehicle = vehicleService.validateExistingVehicle(vehicleDTO);
 
         driver.setCurrentVehicle(vehicle);
         driver.getCurrentVehicle().setAvailable(false);
         driver.setAvailable(true);
 
-        return modelMapper.map(driverRepository.save(driver), DriverDTO.class);
+        return mapDriverToDTO(driverRepository.save(driver));
     }
 
     @Override
@@ -135,36 +134,16 @@ public class DriverServiceImpl implements DriverService {
     @Override
     public RideDTO acceptRide(Long rideRequestId) {
 
-        // only when accept the rideRequest if Driver is present in the list of drivers of the rideRequest
-
         RideRequest rideRequest = rideRequestService.getRideRequestById(rideRequestId);
-
-        if (!rideRequest.getRideRequestStatus().equals(RideRequestStatus.PENDING))
-            throw new RuntimeException("RideRequest cannot be accepted, status is " + rideRequest.getRideRequestStatus());
-
         Driver currentDriver = getCurrentDriver();
-        if (!currentDriver.getAvailable())
-            throw new RuntimeException("Driver cannot accept ride due to unavailability");
 
-        // Check if the current driver is in the list of drivers assigned to the ride request
-        if (!rideRequest.getDrivers().contains(currentDriver))
-            throw new RuntimeException("Driver is not assigned to this RideRequest");
-
-        if (currentDriver.getCurrentVehicle() == null)
-            throw new RuntimeException("Driver does not have any vehicle associated");
-
-        if (currentDriver.getCurrentVehicle().getAvailable()) // if it's already assign to driver with current vehicle
-            throw new RuntimeException("Vehicle is not available");
-
+        // only when accept the rideRequest if Driver is present in the list of drivers of the rideRequest
+        validateRideRequestForAcceptance(currentDriver, rideRequest);
         confirmAndClearAssociations(rideRequest);
 
         Ride ride = rideService.createNewRide(rideRequest, currentDriver);
 
-        RideDTO rideDTO = modelMapper.map(ride, RideDTO.class);
-        rideDTO.setRating(null);
-        rideDTO.getDriver().setVehicles(null);
-
-        return rideDTO;
+        return mapRideToDTO(ride, null);
     }
 
     @Transactional
@@ -172,18 +151,14 @@ public class DriverServiceImpl implements DriverService {
     public RideRequestDTO cancelRideRequestByDriver(Long rideRequestId) {
 
         RideRequest rideRequest = rideRequestService.getRideRequestById(rideRequestId);
-        Driver currentDriver = getCurrentDriver();
-
-        if (!rideRequest.getDrivers().contains(currentDriver))
-            throw new RuntimeException("Driver is not associated with the ride request");
-
         if (!rideRequest.getRideRequestStatus().equals(RideRequestStatus.PENDING))
             throw new RuntimeException("RideRequest cannot be cancelled, status is " + rideRequest.getRideRequestStatus());
 
-        rideRequest.getDrivers().remove(currentDriver);
+        Driver currentDriver = getCurrentDriver();
+        if (!rideRequest.getDrivers().remove(currentDriver))
+            throw new RuntimeException("Driver is not associated with the ride request");
 
         rideRequest = rideRequestService.saveRideRequest(rideRequest);
-
         return modelMapper.map(rideRequest, RideRequestDTO.class);
 
     }
@@ -192,19 +167,7 @@ public class DriverServiceImpl implements DriverService {
     @Override
     public RideDTO startRide(Long rideId, String otp) {
 
-        Ride ride = rideService.getRideById(rideId);
-        // check this driver is the driver of this ride means owns this ride
-        Driver driver = getCurrentDriver();
-
-        if (!driver.equals(ride.getDriver()))
-            throw new RuntimeException("Driver cannot start the ride as it has not been accepted earlier");
-
-        if (!ride.getRideStatus().equals(RideStatus.CONFIRMED))
-            throw new RuntimeException("Ride status is not CONFIRMED hence, status: " + ride.getRideStatus());
-
-        if (!otp.equals(ride.getOtp()))
-            throw new RuntimeException("Otp is not valid, otp: " + otp);
-
+        Ride ride = validateRideStart(rideId, otp);
         ride.setStartedAt(LocalDateTime.now());
         ride.setRideStatus(RideStatus.ONGOING);
         Ride savedRide = rideService.saveRide(ride);
@@ -212,13 +175,7 @@ public class DriverServiceImpl implements DriverService {
         paymentService.createNewPayment(savedRide);
         Rating rating = ratingService.createNewRating(savedRide);
 
-        RatingDTO ratingDTO = modelMapper.map(rating, RatingDTO.class);
-
-//        savedRide.setRating(rating); // set the rating to the ride for dto
-        RideDTO rideDTO = modelMapper.map(savedRide, RideDTO.class);
-        rideDTO.setRating(ratingDTO);
-        rideDTO.getDriver().setVehicles(null);
-        return rideDTO;
+        return mapRideToDTO(savedRide, rating);
     }
 
     @Transactional
@@ -226,12 +183,10 @@ public class DriverServiceImpl implements DriverService {
     public RideDTO cancelRide(Long rideId, String reason) {
 
         Ride ride = rideService.getRideById(rideId);
-
-        // check this driver is the driver of this ride means owns this ride
         Driver driver = getCurrentDriver();
 
-        if (!driver.equals(ride.getDriver()))
-            throw new RuntimeException("Driver cannot start the ride as it has not been accepted earlier");
+        if (!driver.getDriverId().equals(ride.getDriver().getDriverId()))
+            throw new RuntimeException("Driver not associated with the ride");
 
         // only CANCELLED ride if it is in CONFIRMED status otherwise now meaning of it if it is CANCELLED, ONGOING, ENDED
         if (!ride.getRideStatus().equals(RideStatus.CONFIRMED))
@@ -241,16 +196,7 @@ public class DriverServiceImpl implements DriverService {
         CancelRide cancelRide = cancelRideService.cancelRide(ride, reason, Role.DRIVER);
 
         confirmAndClearAssociations(ride.getRideRequest());
-
-        RideDTO rideDTO = modelMapper.map(cancelRide.getRide(), RideDTO.class);
-        rideDTO.setRating(null);
-
-        CancelRideDTO cancelRideDTO = modelMapper.map(cancelRide, CancelRideDTO.class);
-        cancelRideDTO.setRide(null);
-        rideDTO.setCancelRide(cancelRideDTO);
-        rideDTO.getDriver().setVehicles(null);
-
-        return rideDTO;
+        return mapCancelledRideToDTO(cancelRide);
     }
 
     @Transactional
@@ -259,30 +205,25 @@ public class DriverServiceImpl implements DriverService {
         Ride ride = rideService.getRideById(rideId);
         Driver driver = getCurrentDriver();
 
-        if (!driver.equals(ride.getDriver()))
-            throw new RuntimeException("Driver cannot start a ride as he has not accepted it earlier");
+        if (!driver.getDriverId().equals(ride.getDriver().getDriverId()))
+            throw new RuntimeException("Driver not associated with the ride");
 
         if (!ride.getRideStatus().equals(RideStatus.ONGOING))
             throw new RuntimeException("Ride status is not ONGOING hence cannot be ended, status: " + ride.getRideStatus());
 
         ride.setEndedAt(LocalDateTime.now());
+        ride.setRideStatus(RideStatus.ENDED);
 
         ride.getRider().setAvailable(true);
         ride.getDriver().setAvailable(true);
 
-        ride.setRideStatus(RideStatus.ENDED);
 
         Ride savedRide = rideService.saveRide(ride);
 
         paymentService.processPayment(savedRide);
 
         Rating rating = ratingService.getRatingByRide(savedRide);
-        RatingDTO ratingDTO = modelMapper.map(rating, RatingDTO.class);
-
-        RideDTO rideDTO = modelMapper.map(savedRide, RideDTO.class);
-        rideDTO.setRating(ratingDTO);
-        rideDTO.getDriver().setVehicles(null);
-        return rideDTO;
+        return mapRideToDTO(savedRide, rating);
     }
 
     @Transactional
@@ -293,7 +234,8 @@ public class DriverServiceImpl implements DriverService {
         Point point = modelMapper.map(location, Point.class);
         currentDriver.setCurrentLocation(point);
 
-        return modelMapper.map(driverRepository.save(currentDriver), DriverDTO.class);
+        Driver savedDriver = driverRepository.save(currentDriver);
+        return mapDriverToDTO(savedDriver);
     }
 
     @Transactional
@@ -309,7 +251,8 @@ public class DriverServiceImpl implements DriverService {
         vehicleService.updateVehicleAvailability(vehicle, true);
         driver.setCurrentVehicle(null);
 
-        return modelMapper.map(driverRepository.save(driver), DriverDTO.class);
+        Driver savedDriver = driverRepository.save(driver);
+        return mapDriverToDTO(savedDriver);
     }
 
     @Transactional
@@ -317,13 +260,12 @@ public class DriverServiceImpl implements DriverService {
     public DriverDTO updateDriverAddress(AddressDTO addressDTO) {
         Driver driver = getCurrentDriver(); //  not access by ADMIN
 
-        Address address = driver.getAddress();
-        Address existingAddress = addressService.findAddressById(address.getAddressId());
-        modelMapper.map(addressDTO, existingAddress);
+        Address existingAddress = driver.getAddress();
 
+        modelMapper.map(addressDTO, existingAddress);
         addressService.saveAddress(existingAddress);
 
-        return modelMapper.map(driver, DriverDTO.class);
+        return mapDriverToDTO(driver);
     }
 
     @Override
@@ -344,8 +286,9 @@ public class DriverServiceImpl implements DriverService {
         if (!rideRequest.getRideRequestStatus().equals(RideRequestStatus.CONFIRMED)) {
             // Clear the drivers list in the RideRequest
             List<Driver> drivers = rideRequest.getDrivers();
-            for (Driver driver : drivers)
-                driver.getRideRequests().remove(rideRequest); // Remove the ride request from each driver
+
+            RideRequest finalRideRequest = rideRequest;
+            drivers.forEach(driver -> driver.getRideRequests().remove(finalRideRequest)); // Remove the ride request from each driver
             drivers.clear(); // Clear the list of drivers in RideRequest
 
             // Save the changes to the repositories
@@ -354,7 +297,6 @@ public class DriverServiceImpl implements DriverService {
         } else throw new RuntimeException("RideRequest is already confirmed");
 
         return modelMapper.map(rideRequest, RideRequestDTO.class);
-
     }
 
     // List All the rides of the driver
@@ -372,21 +314,14 @@ public class DriverServiceImpl implements DriverService {
 
     @Override
     public Page<RatingDTO> getReviewsForDriver(PageRequest pageRequest) {
-
         Driver currentDriver = getCurrentDriver();
-
-        if (currentDriver == null)
-            throw new ResourceNotFoundException("Driver not found");
-
         return ratingService.getReviewsForDriver(currentDriver, pageRequest);
     }
 
     @Override
     public List<VehicleDTO> getVehiclesByDriverId() {
         Driver currentDriver = getCurrentDriver();
-
         Set<Vehicle> vehicles = currentDriver.getVehicles();
-
         return vehicles.stream()
                 .map(vehicle -> modelMapper.map(vehicle, VehicleDTO.class))
                 .toList();
@@ -422,20 +357,64 @@ public class DriverServiceImpl implements DriverService {
 
         Page<Driver> drivers = driverRepository
                 .findByUserNameContainingIgnoreCase(name, pageRequest);
-
         if (drivers.isEmpty())
             throw new ResourceNotFoundException("No driver found with name: " + name);
-
         return drivers.map(driver -> modelMapper.map(driver, DriverDTO.class));
     }
 
     private Driver getCurrentDriver() {
         User currentUser = userService.getCurrentUser();
-
         return driverRepository
                 .findByUser(currentUser)
                 .orElseThrow(() -> new ResourceNotFoundException("Driver not Associated with the current user id: " + currentUser.getUserId()));
     }
 
+    private Ride validateRideStart(Long rideId, String otp) {
+        Ride ride = rideService.getRideById(rideId);
+        Driver driver = getCurrentDriver();
 
+        if (!driver.getDriverId().equals(ride.getDriver().getDriverId()))
+            throw new RuntimeException("Driver not associated with the ride");
+        if (!ride.getOtp().equals(otp))
+            throw new RuntimeException("Otp is not valid, otp: " + otp);
+        if (!ride.getRideStatus().equals(RideStatus.CONFIRMED))
+            throw new RuntimeException("Ride status must be CONFIRMED to start.");
+        return ride;
+    }
+
+    private void validateRideRequestForAcceptance(Driver driver, RideRequest rideRequest) {
+        if (!rideRequest.getRideRequestStatus().equals(RideRequestStatus.PENDING))
+            throw new RuntimeException("RideRequest cannot be accepted, status is " + rideRequest.getRideRequestStatus());
+
+        if (!driver.getAvailable())
+            throw new RuntimeException("Driver cannot accept ride due to unavailability");
+
+        // Check if the current driver is in the list of drivers assigned to the ride request
+        if (!rideRequest.getDrivers().contains(driver))
+            throw new RuntimeException("Driver is not assigned to this RideRequest");
+
+        if (driver.getCurrentVehicle() == null)
+            throw new RuntimeException("Driver does not have any vehicle associated");
+
+        if (driver.getCurrentVehicle().getAvailable()) // if it's already assign to driver with current vehicle
+            throw new RuntimeException("Vehicle is not available");
+    }
+
+    private RideDTO mapRideToDTO(Ride ride, Rating rating) {
+        RideDTO rideDTO = modelMapper.map(ride, RideDTO.class);
+        rideDTO.getDriver().setVehicles(null);
+
+        if ((rating != null)) rideDTO.setRating(modelMapper.map(rating, RatingDTO.class));
+        else rideDTO.setRating(null);
+
+        return rideDTO;
+    }
+
+    private RideDTO mapCancelledRideToDTO(CancelRide cancelRide) {
+        RideDTO rideDTO = mapRideToDTO(cancelRide.getRide(), null);
+        CancelRideDTO cancelRideDTO = modelMapper.map(cancelRide, CancelRideDTO.class);
+        cancelRideDTO.setRide(null);
+        rideDTO.setCancelRide(cancelRideDTO);
+        return rideDTO;
+    }
 }

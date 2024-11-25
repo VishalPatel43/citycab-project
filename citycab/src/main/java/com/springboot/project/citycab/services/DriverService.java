@@ -16,9 +16,9 @@ public interface DriverService {
 
     Driver createDriver(User user, Address address, Vehicle vehicle, OnboardDriverDTO onboardDriverDTO, Point currentLocation);
 
-    DriverDTO getMyProfile();
-
     DriverDTO mapDriverToDTO(Driver driver);
+
+    DriverDTO getMyProfile();
 
     DriverDTO setCurrentDriverVehicle(VehicleDTO vehicleDTO);
 
