@@ -41,6 +41,24 @@ public class AdminController {
         return ResponseEntity.ok(adminService.findDriversByName(name, pageRequest));
     }
 
+    @GetMapping("/getCancelledRidesByRider")
+    public ResponseEntity<Page<CancelRideDTO>> getCancelledRidesByRider(
+            @RequestParam(defaultValue = "0") Integer pageOffset,
+            @RequestParam(defaultValue = "10", required = false) Integer pageSize) {
+        PageRequest pageRequest = PageRequest.of(pageOffset, pageSize,
+                Sort.by(Sort.Direction.ASC, "cancelRideId"));
+        return ResponseEntity.ok(adminService.getCancelledRidesByRider(pageRequest));
+    }
+
+    @GetMapping("/getCancelledRidesByDriver")
+    public ResponseEntity<Page<CancelRideDTO>> getCancelledRidesByDriver(
+            @RequestParam(defaultValue = "0") Integer pageOffset,
+            @RequestParam(defaultValue = "10", required = false) Integer pageSize) {
+        PageRequest pageRequest = PageRequest.of(pageOffset, pageSize,
+                Sort.by(Sort.Direction.ASC, "cancelRideId"));
+        return ResponseEntity.ok(adminService.getCancelledRidesByDriver(pageRequest));
+    }
+
     // On Board ADMIN --> If we make admin then add driver also
     //    @Secured("ROLE_ADMIN")
     @PostMapping(path = "/onBoardNewAdmin/{userId}")

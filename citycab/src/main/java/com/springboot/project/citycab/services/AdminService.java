@@ -24,10 +24,15 @@ public interface AdminService {
 
     DeleteDTO removeVehicle(Long vehicleId);
 
-    List<DriverDTO>  getDriversByVehicleId(Long vehicleId);
+    List<DriverDTO> getDriversByVehicleId(Long vehicleId);
 
     Page<RiderDTO> findRidersByName(String name, PageRequest pageRequest);
 
     Page<DriverDTO> findDriversByName(String name, PageRequest pageRequest);
+
+    Page<CancelRideDTO> getCancelledRidesByRider(PageRequest pageRequest);
+
+    Page<CancelRideDTO> getCancelledRidesByDriver(PageRequest pageRequest);
+
 
 }

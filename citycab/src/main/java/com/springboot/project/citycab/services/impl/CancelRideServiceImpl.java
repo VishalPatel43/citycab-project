@@ -29,7 +29,7 @@ public class CancelRideServiceImpl implements CancelRideService {
     public CancelRide cancelRide(Ride ride, String reason, Role cancelledBy) {
 
         if (!ride.getRideStatus().equals(RideStatus.CONFIRMED))
-            throw new RuntimeException("Ride cannot be cancelled, invalid status: " + ride.getRideStatus());
+            throw new IllegalArgumentException("Ride cannot be cancelled, invalid status: " + ride.getRideStatus());
 
         // update the rideStatus to CANCELLED
         ride.setRideStatus(RideStatus.CANCELLED);
@@ -41,7 +41,7 @@ public class CancelRideServiceImpl implements CancelRideService {
         ride.getRider().setAvailable(true);
         ride.getDriver().setAvailable(true);
 
-        ride = rideService.updateRide(ride);
+        ride = rideService.saveRide(ride);
 
         // Create the CancelRide entity
         CancelRide cancelRide = CancelRide

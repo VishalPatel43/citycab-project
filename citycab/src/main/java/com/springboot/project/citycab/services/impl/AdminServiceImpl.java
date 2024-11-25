@@ -2,10 +2,7 @@ package com.springboot.project.citycab.services.impl;
 
 import com.springboot.project.citycab.constants.enums.Role;
 import com.springboot.project.citycab.dto.*;
-import com.springboot.project.citycab.entities.Address;
-import com.springboot.project.citycab.entities.Driver;
-import com.springboot.project.citycab.entities.User;
-import com.springboot.project.citycab.entities.Vehicle;
+import com.springboot.project.citycab.entities.*;
 import com.springboot.project.citycab.exceptions.RuntimeConflictException;
 import com.springboot.project.citycab.services.*;
 import lombok.RequiredArgsConstructor;
@@ -17,9 +14,7 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.HashSet;
 import java.util.List;
-import java.util.Set;
 import java.util.stream.Collectors;
 
 @Service
@@ -32,6 +27,7 @@ public class AdminServiceImpl implements AdminService {
     private final UserService userService;
     private final AddressService addressService;
     private final VehicleService vehicleService;
+    private final CancelRideService cancelRideService;
 
     private final ModelMapper modelMapper;
 
@@ -52,139 +48,50 @@ public class AdminServiceImpl implements AdminService {
     @Transactional
     @Override
     public DriverDTO onboardNewDriver(Long userId, OnboardDriverDTO onboardDriverDTO) {
-        User user = userService.getUserById(userId);
 
-        if (user.getRoles().contains(Role.ADMIN))
-            throw new RuntimeConflictException("User with id: " + userId + " is an Admin");
+        userService.validateUserForRole(userId, Role.ADMIN, "Admin");
+        User user = userService.validateUserForRole(userId, Role.DRIVER, "Driver");
 
-        if (user.getRoles().contains(Role.DRIVER))
-            throw new RuntimeConflictException("User with id: " + userId + " is already a Driver");
-
-        Address address = modelMapper.map(onboardDriverDTO.getAddress(), Address.class);
-        Address savedAddress = addressService.saveAddress(address); // we get the address id after saving
+        Address address = addressService.saveAddress(onboardDriverDTO.getAddress()); // we get the address id after saving
 
         // Map and save or retrieve the Vehicle (if vehicle already exists)
-        VehicleDTO vehicleDTO = onboardDriverDTO.getVehicle();
-        Vehicle existingVehicle = vehicleService.findByRegistrationNumber(vehicleDTO.getRegistrationNumber());
-
-        Vehicle vehicle = existingVehicle;
-        if (existingVehicle == null) {
-            vehicle = modelMapper.map(vehicleDTO, Vehicle.class);
-            vehicle = vehicleService.saveVehicle(vehicle); // we get the vehicle id after saving
-        }
-
-        log.info("Vehicle1: {}", vehicle);
+        Vehicle vehicle = vehicleService.validateAndCreateVehicle(onboardDriverDTO.getVehicle()); // we get the vehicle id after saving
 
         Point currentLocation = modelMapper.map(onboardDriverDTO.getCurrentLocation(), Point.class);
 
-        Long aadharCardNumber = onboardDriverDTO.getAadharCardNumber();
-        if (driverService.findDriverByAadharCardNumber(aadharCardNumber) != null)
-            throw new RuntimeConflictException("Driver with Aadhar Card Number: " + aadharCardNumber + " already exists");
+        Driver newDriver = driverService.createDriver(user, address, vehicle,
+                onboardDriverDTO, currentLocation);
 
-        String drivingLicenseNumber = onboardDriverDTO.getDrivingLicenseNumber();
-        if (driverService.findDriverByDrivingLicenseNumber(drivingLicenseNumber) != null)
-            throw new RuntimeConflictException("Driver with Driving License Number: " + drivingLicenseNumber + " already exists");
-
-        Driver createDriver = Driver.builder()
-                .user(user)
-                .avgRating(0.0)
-                .available(true)
-                .address(savedAddress)
-//                .vehicles(Set.of(vehicle))
-                .vehicles(new HashSet<>(Set.of(vehicle))) // Convert to mutable set
-                .currentLocation(currentLocation)  // --> set the current location
-                .aadharCardNumber(aadharCardNumber)
-                .drivingLicenseNumber(drivingLicenseNumber)
-                .build();
-
-        user.getRoles().add(Role.DRIVER);
-        userService.saveUser(user);
-
-        Driver savedDriver = driverService.saveDriver(createDriver);
-        log.info("Driver1: {}", savedDriver);
-
-        DriverDTO driverDTO = modelMapper.map(savedDriver, DriverDTO.class);
-        Set<VehicleDTO> vehicleDTOS = savedDriver.getVehicles().stream()
-                .map(v -> modelMapper.map(v, VehicleDTO.class))
-                .collect(Collectors.toSet());
-
-        driverDTO.setVehicles(vehicleDTOS);
-
-        return driverDTO;
+        return driverService.mapDriverToDTO(newDriver);
     }
 
     @Transactional
     @Override
     public DriverDTO onboardNewVehicle(Long driverId, VehicleDTO vehicleDTO) {
 
-//        User currentUser = userService.getCurrentUser();
-//        if (!currentUser.getRoles().contains(Role.ADMIN))
-//            throw new RuntimeException("You are not authorized to onboard a new vehicle");
-
-        Vehicle vehicle = vehicleService.findByRegistrationNumber(vehicleDTO.getRegistrationNumber());
-        if (vehicle != null)
-            throw new RuntimeConflictException("Vehicle with registration number: " + vehicleDTO.getRegistrationNumber() + " already exists");
-
-        vehicle = vehicleService.findByNumberPlate(vehicleDTO.getNumberPlate());
-        if (vehicle != null)
-            throw new RuntimeConflictException("Vehicle with number plate: " + vehicleDTO.getNumberPlate() + " already exists");
-
+        Vehicle vehicle = vehicleService.validateExistingVehicle(vehicleDTO);
         Driver driver = driverService.getDriverById(driverId);
-        log.info("Driver: {}", driver);
-        log.info("Driver Vehicles: {}", driver.getVehicles());
-
-        vehicle = modelMapper.map(vehicleDTO, Vehicle.class);
-        vehicle = vehicleService.saveVehicle(vehicle);
 
         // Add the vehicle to the driver
         driver.getVehicles().add(vehicle);
         driver = driverService.saveDriver(driver);
 
-        log.info("Vehicle Drivers: {}", vehicle.getDrivers());
-
-        DriverDTO driverDTO = modelMapper.map(driver, DriverDTO.class);
-        Set<VehicleDTO> vehicleDTOS = driver.getVehicles().stream()
-                .map(v -> modelMapper.map(v, VehicleDTO.class))
-                .collect(Collectors.toSet());
-        driverDTO.setVehicles(vehicleDTOS);
-
-        return driverDTO;
+        return driverService.mapDriverToDTO(driver);
     }
 
     @Transactional
     @Override
     public DriverDTO assignDriverToVehicle(Long driverId, VehicleDTO vehicleDTO) {
 
-//        User currentUser = userService.getCurrentUser();
-//        if (!currentUser.getRoles().contains(Role.ADMIN))
-//            throw new RuntimeException("You are not authorized to onboard a new vehicle");
-
-        Vehicle vehicleServiceByRegistrationNumber = vehicleService.findByRegistrationNumber(vehicleDTO.getRegistrationNumber());
-        if (vehicleServiceByRegistrationNumber == null)
-            throw new RuntimeConflictException("Vehicle with registration number: " + vehicleDTO.getRegistrationNumber() + " does not exist");
-
-        Vehicle vehicleServiceByNumberPlate = vehicleService.findByNumberPlate(vehicleDTO.getNumberPlate());
-        if (vehicleServiceByNumberPlate == null)
-            throw new RuntimeConflictException("Vehicle with number plate: " + vehicleDTO.getNumberPlate() + " does not exist");
-
-        if (!vehicleServiceByNumberPlate.getVehicleId().equals(vehicleServiceByRegistrationNumber.getVehicleId()))
-            throw new RuntimeConflictException("Vehicle with registration number: " + vehicleDTO.getRegistrationNumber() + " and number plate: " + vehicleDTO.getNumberPlate() + " do not match");
+        Vehicle vehicle = vehicleService.validateExistingVehicle(vehicleDTO);
 
         Driver driver = driverService.getDriverById(driverId);
 
-        // Copy the vehicle object
-        Vehicle vehicle = modelMapper.map(vehicleServiceByRegistrationNumber, Vehicle.class);
         // Add the vehicle to the driver
         driver.getVehicles().add(vehicle);
         driver = driverService.saveDriver(driver);
 
-        DriverDTO driverDTO = modelMapper.map(driver, DriverDTO.class);
-        Set<VehicleDTO> vehicleDTOS = driver.getVehicles().stream()
-                .map(v -> modelMapper.map(v, VehicleDTO.class))
-                .collect(Collectors.toSet());
-        driverDTO.setVehicles(vehicleDTOS);
-
-        return driverDTO;
+        return driverService.mapDriverToDTO(driver);
 
     }
 
@@ -192,43 +99,15 @@ public class AdminServiceImpl implements AdminService {
     @Override
     public DriverDTO deAssignDriverToVehicle(Long driverId, VehicleDTO vehicleDTO) {
 
-//        User currentUser = userService.getCurrentUser();
-//        if (!currentUser.getRoles().contains(Role.ADMIN))
-//            throw new RuntimeException("You are not authorized to onboard a new vehicle");
-
-        Vehicle vehicleServiceByRegistrationNumber = vehicleService.findByRegistrationNumber(vehicleDTO.getRegistrationNumber());
-        if (vehicleServiceByRegistrationNumber == null)
-            throw new RuntimeConflictException("Vehicle with registration number: " + vehicleDTO.getRegistrationNumber() + " does not exist");
-
-        Vehicle vehicleServiceByNumberPlate = vehicleService.findByNumberPlate(vehicleDTO.getNumberPlate());
-        if (vehicleServiceByNumberPlate == null)
-            throw new RuntimeConflictException("Vehicle with number plate: " + vehicleDTO.getNumberPlate() + " does not exist");
-
-        if (!vehicleServiceByNumberPlate.getVehicleId().equals(vehicleServiceByRegistrationNumber.getVehicleId()))
-            throw new RuntimeConflictException("Vehicle with registration number: " + vehicleDTO.getRegistrationNumber() + " and number plate: " + vehicleDTO.getNumberPlate() + " do not match");
+        Vehicle vehicle = vehicleService.validateExistingVehicle(vehicleDTO);
 
         Driver driver = driverService.getDriverById(driverId);
 
-        // Copy the vehicle object
-        Vehicle vehicle = modelMapper.map(vehicleServiceByRegistrationNumber, Vehicle.class);
         // Add the vehicle to the driver
         driver.getVehicles().remove(vehicle);
         driver = driverService.saveDriver(driver);
 
-//        vehicle.getDrivers().add(driver);
-//        vehicle.setDrivers(new HashSet<>(Set.of(driver))); // Convert to mutable set
-
-//        vehicle.setDrivers(new HashSet<>()); // Convert to mutable set
-//        vehicle.getDrivers().add(driver);
-//        vehicleService.saveVehicle(vehicle);
-
-        DriverDTO driverDTO = modelMapper.map(driver, DriverDTO.class);
-        Set<VehicleDTO> vehicleDTOS = driver.getVehicles().stream()
-                .map(v -> modelMapper.map(v, VehicleDTO.class))
-                .collect(Collectors.toSet());
-        driverDTO.setVehicles(vehicleDTOS);
-
-        return driverDTO;
+        return driverService.mapDriverToDTO(driver);
 
     }
 
@@ -236,31 +115,16 @@ public class AdminServiceImpl implements AdminService {
     @Override
     public DriverDTO updateDriverAddress(Long driverId, AddressDTO addressDTO) {
         Driver driver = driverService.getDriverById(driverId);
-//        User currentUser = userService.getCurrentUser();
+        Address existingAddress = driver.getAddress();
 
-//        if (!currentUser.getRoles().contains(Role.ADMIN))
-//            throw new RuntimeException("You are not authorized to update profile for this driver");
-
-        Long addressId = driver.getAddress().getAddressId();
-        Address existingAddress = addressService.findAddressById(addressId);
-        log.info("Existing Address: {}", existingAddress);
         modelMapper.map(addressDTO, existingAddress);
-        log.info("Updated Address: {}", existingAddress);
 
-        existingAddress.setAddressId(addressId);
         addressService.saveAddress(existingAddress);
 
         // for DTO
-        driver.setAddress(existingAddress);
+        driver.setAddress(existingAddress); // we get updated address in the driver DTO
 
-        DriverDTO driverDTO = modelMapper.map(driver, DriverDTO.class);
-
-        Set<VehicleDTO> vehicleDTOS = driver.getVehicles().stream()
-                .map(v -> modelMapper.map(v, VehicleDTO.class))
-                .collect(Collectors.toSet());
-        driverDTO.setVehicles(vehicleDTOS);
-
-        return modelMapper.map(driver, DriverDTO.class);
+        return driverService.mapDriverToDTO(driver);
     }
 
     @Transactional
@@ -268,10 +132,7 @@ public class AdminServiceImpl implements AdminService {
     public DeleteDTO removeVehicle(Long vehicleId) {
         Vehicle vehicle = vehicleService.findVehicleById(vehicleId);
 
-        vehicle.getDrivers().forEach(driver -> {
-            driver.getVehicles().remove(vehicle);
-        });
-
+        vehicle.getDrivers().forEach(driver -> driver.getVehicles().remove(vehicle));
         vehicleService.deleteVehicle(vehicle); // delete from the vehicle table
 
         return new DeleteDTO("Vehicle with id: " + vehicleId + " removed successfully");
@@ -291,7 +152,6 @@ public class AdminServiceImpl implements AdminService {
                 .collect(Collectors.toList());
     }
 
-
     @Override
     public Page<RiderDTO> findRidersByName(String name, PageRequest pageRequest) {
         return riderService.findRidersByName(name, pageRequest);
@@ -300,6 +160,26 @@ public class AdminServiceImpl implements AdminService {
     @Override
     public Page<DriverDTO> findDriversByName(String name, PageRequest pageRequest) {
         return driverService.findDriversByName(name, pageRequest);
+    }
+
+    @Override
+    public Page<CancelRideDTO> getCancelledRidesByRider(PageRequest pageRequest) {
+        return getCancelledRides(Role.RIDER, pageRequest);
+    }
+
+    @Override
+    public Page<CancelRideDTO> getCancelledRidesByDriver(PageRequest pageRequest) {
+        return getCancelledRides(Role.DRIVER, pageRequest);
+    }
+
+    private Page<CancelRideDTO> getCancelledRides(Role role, PageRequest pageRequest) {
+        Page<CancelRide> cancelledRides = cancelRideService.getCancelRideByRole(role, pageRequest);
+
+        return cancelledRides.map(cancelRide -> {
+            CancelRideDTO cancelRideDTO = modelMapper.map(cancelRide, CancelRideDTO.class);
+            cancelRideDTO.getRide().getDriver().setVehicles(null);
+            return cancelRideDTO;
+        });
     }
 
 }

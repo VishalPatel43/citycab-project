@@ -57,23 +57,10 @@ public class RideServiceImpl implements RideService {
         ride.setOtp(generateRandomOTP());
 
         ride.getDriver().setAvailable(false);
-//        ride.setRideId(null); // not required coz we already have different rideId and rideRequestId
 
         // find the time and distance from the driver to the rider
-        DistanceTimeResponseDTO distanceTimeResponseDTO = distanceTimeServiceManager
-                .calculateDistanceTime(rideRequest.getPickupLocation(), driver.getCurrentLocation());
-        ride.setDriverToRiderDistance(distanceTimeResponseDTO.getDistanceKm());
-        ride.setDriverToRiderTime(distanceTimeResponseDTO.getTimeMinutes());
+        ride = setDistanceTimeForRide(ride);
 
-        return rideRepository.save(ride);
-    }
-
-    @Transactional
-    @Override
-    public Ride updateRideStatus(Ride ride, RideStatus rideStatus) {
-        getRideById(ride.getRideId());
-
-        ride.setRideStatus(rideStatus);
         return rideRepository.save(ride);
     }
 
@@ -100,10 +87,23 @@ public class RideServiceImpl implements RideService {
 
     @Override
     @Transactional
-    public Ride updateRide(Ride ride) {
+    public Ride saveRide(Ride ride) {
         getRideById(ride.getRideId());
         return rideRepository.save(ride);
     }
+
+    @Override
+    public Ride setDistanceTimeForRide(Ride ride) {
+
+        DistanceTimeResponseDTO distanceTimeResponseDTO = distanceTimeServiceManager
+                .calculateDistanceTime(ride.getRideRequest().getPickupLocation(), ride.getDriver().getCurrentLocation());
+
+        ride.setDriverToRiderDistance(distanceTimeResponseDTO.getDistanceKm());
+        ride.setDriverToRiderTime(distanceTimeResponseDTO.getTimeMinutes());
+
+        return ride;
+    }
+
 
     private String generateRandomOTP() {
         Random random = new Random();

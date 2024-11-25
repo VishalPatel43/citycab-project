@@ -110,4 +110,7 @@ public class AuthServiceImpl implements AuthService {
         String accessToken = jwtService.generateAccessToken(user);
         return new LoginResponseDTO(accessToken, refreshToken);
     }
+
+    // logout method
+
 }

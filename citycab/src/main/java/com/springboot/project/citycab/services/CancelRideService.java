@@ -8,7 +8,9 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 
 public interface CancelRideService {
+
     CancelRide cancelRide(Ride ride, String reason, Role cancelledBy);
 
     Page<CancelRide> getCancelRideByRole(Role cancelledBy, PageRequest pageRequest);
+
 }

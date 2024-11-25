@@ -1,8 +1,7 @@
 package com.springboot.project.citycab.services;
 
 import com.springboot.project.citycab.dto.*;
-import com.springboot.project.citycab.entities.Driver;
-import com.springboot.project.citycab.entities.RideRequest;
+import com.springboot.project.citycab.entities.*;
 import org.locationtech.jts.geom.Point;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -11,46 +10,47 @@ import java.util.List;
 
 public interface DriverService {
 
-
-    RideDTO acceptRide(Long rideRequestId);
-
-    RideDTO cancelRide(Long rideId, String reason);
-
-    RideDTO startRide(Long rideId, String otp);
-
-    RideDTO endRide(Long rideId);
-
-    DriverDTO getMyProfile();
-
     Driver getDriverById(Long driverId);
-
-    Page<RideDTO> getAllMyRides(PageRequest pageRequest);
-
-    Driver getCurrentDriver();
-
-    Driver updateDriverAvailability(Driver driver, Boolean available);
-
-    Page<CancelRideDTO> getCancelledRidesByDriver(PageRequest pageRequest);
 
     Driver saveDriver(Driver driver);
 
-    Page<RatingDTO> getReviewsForDriver(PageRequest pageRequest);
+    Driver createDriver(User user, Address address, Vehicle vehicle, OnboardDriverDTO onboardDriverDTO, Point currentLocation);
 
-    Page<DriverDTO> findDriversByName(String name, PageRequest pageRequest);
+    DriverDTO getMyProfile();
+
+    DriverDTO mapDriverToDTO(Driver driver);
+
+    DriverDTO setCurrentDriverVehicle(VehicleDTO vehicleDTO);
 
     List<RideRequestDTO> getAvailableRideRequests();
 
-    List<VehicleDTO> getVehiclesByDriverId();
-
-    DriverDTO changeDriverLocation(PointDTO location);
-
-    RideRequestDTO confirmAndClearAssociations(RideRequest request);
+    RideDTO acceptRide(Long rideRequestId);
 
     RideRequestDTO cancelRideRequestByDriver(Long rideRequestId);
 
-    List<Driver> findTenNearestDrivers(Point pickupLocation);
+    RideDTO startRide(Long rideId, String otp);
 
-    List<Driver> findTenNearbyTopRatedDrivers(Point pickupLocation);
+    RideDTO cancelRide(Long rideId, String reason);
+
+    RideDTO endRide(Long rideId);
+
+    DriverDTO changeDriverLocation(PointDTO location);
+
+    DriverDTO freeDriverVehicle();
+
+    DriverDTO updateDriverAddress(AddressDTO addressDTO);
+
+    Driver findDriverByAadhaarCardNumber(Long aadhaarCardNumber);
+
+    Driver findDriverByDrivingLicenseNumber(String drivingLicenseNumber);
+
+    RideRequestDTO confirmAndClearAssociations(RideRequest request);
+
+    Page<RideDTO> getAllMyRides(PageRequest pageRequest);
+
+    Page<RatingDTO> getReviewsForDriver(PageRequest pageRequest);
+
+    List<VehicleDTO> getVehiclesByDriverId();
 
     List<Driver> findTopRatedDriversWithin2Km(Point pickupLocation);
 
@@ -58,13 +58,9 @@ public interface DriverService {
 
     List<Driver> findDriversWithin3To10KmWithLowRating(Point pickupLocation);
 
-    DriverDTO updateDriverAddress(Long driverId, AddressDTO addressDTO);
+    List<Driver> findTenNearestDrivers(Point pickupLocation);
 
-    Driver findDriverByAadharCardNumber(Long aadharCardNumber);
+    List<Driver> findTenNearbyTopRatedDrivers(Point pickupLocation);
 
-    Driver findDriverByDrivingLicenseNumber(String drivingLicenseNumber);
-
-    DriverDTO setCurrentDriverVehicle(VehicleDTO vehicleDTO);
-
-    DriverDTO freeDriverVehicle();
+    Page<DriverDTO> findDriversByName(String name, PageRequest pageRequest);
 }

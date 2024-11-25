@@ -17,7 +17,7 @@ import java.util.Set;
 @Setter
 @Builder
 @Table (indexes = {
-        @Index(name = "driver_aadhar_card_number_index", columnList = "aadharCardNumber", unique = true),
+        @Index(name = "driver_aadhaar_card_number_index", columnList = "aadhaarCardNumber", unique = true),
         @Index(name = "driver_license_number_index", columnList = "drivingLicenseNumber", unique = true)
 })
 public class Driver {
@@ -34,7 +34,7 @@ public class Driver {
     @Column(columnDefinition = "Geometry(Point, 4326)")
     private Point currentLocation;
 
-    private Long aadharCardNumber;
+    private Long aadhaarCardNumber;
 
     private String drivingLicenseNumber;
 

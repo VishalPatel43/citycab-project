@@ -167,9 +167,9 @@ VALUES ('MH01AB1234', 'ABC123', 'Ramesh Sharma', 'Maruti Suzuki Swift', 'HATCHBA
        ('TS19KL3456', 'CDE567', 'Akash Reddy', 'Renault Duster', 'SUV', 5, 'Green', '2022-03-15', TRUE),
        ('CH20MN7890', 'FGH890', 'Manish Arora', 'Kia Carnival', 'MPV', 7, 'Silver', '2022-03-15', TRUE);
 
--- Driver
+-- Driver (default Driver is not available without assigning a current vehicle)
 
-INSERT INTO driver (avg_rating, available, current_location, user_id, address_id, aadhar_card_number,
+INSERT INTO driver (avg_rating, available, current_location, user_id, address_id, aadhaar_card_number,
                     driving_license_number)
 -- VALUES (4.5, TRUE, ST_GeomFromText('POINT(72.8777 19.0760)', 4326), 3, 1, 234567890123, 'MH01A2023456'),
 VALUES (4.5, TRUE, ST_GeomFromText('POINT(74.2313 28.33423)', 4326), 3, 1, 234567890123, 'MH01A2023456'),

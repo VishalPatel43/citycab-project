@@ -16,7 +16,7 @@ public class DriverDTO {
     private UserDTO user;
     private Double avgRating;
     private Boolean available;
-    private Long aadharCardNumber;
+    private Long aadhaarCardNumber;
     private String drivingLicenseNumber;
 
     private PointDTO currentLocation;

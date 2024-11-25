@@ -51,6 +51,31 @@ public class RiderServiceImpl implements RiderService {
     }
 
     @Override
+    public RiderDTO getMyProfile() {
+        Rider currentRider = getCurrentRider();
+        return modelMapper.map(currentRider, RiderDTO.class);
+    }
+
+    @Transactional
+    @Override
+    public Rider saveRider(Rider rider) {
+        return riderRepository.save(rider);
+    }
+
+    @Transactional
+    @Override
+    public Rider createNewRider(User user) {
+        Rider rider = Rider
+                .builder()
+                .user(user)
+                .avgGivenRating(0.0)
+                .available(true)
+                .build();
+
+        return riderRepository.save(rider);
+    }
+
+    @Override
     @Transactional
     public RideRequestDTO requestRide(RideRequestDTO rideRequestDTO) {
 
@@ -61,7 +86,6 @@ public class RiderServiceImpl implements RiderService {
 
         RideRequest rideRequest = modelMapper.map(rideRequestDTO, RideRequest.class);
         rideRequest.setRider(rider);
-
         rideRequest.setRideRequestStatus(RideRequestStatus.PENDING);
 
         RideDistanceTimeFareCalculationStrategy rideDistanceTimeFareCalculationStrategy = rideStrategyManager.rideFareCalculationStrategy();
@@ -72,164 +96,20 @@ public class RiderServiceImpl implements RiderService {
         rideRequest.setFare(distanceTimeFare.getFare());
 
         // For this we have to create the RideRequestService to save the rideRequest
-        RideRequest savedRideRequest = rideRequestService.saveRideRequest(rideRequest);
+//        RideRequest savedRideRequest = rideRequestService.saveRideRequest(rideRequest);
 
         DriverMatchingStrategy driverMatchingStrategy = rideStrategyManager
                 .driverMatchingStrategy();
 
-        List<Driver> drivers = driverMatchingStrategy.findMatchingDriver(savedRideRequest);
+//        List<Driver> drivers = driverMatchingStrategy.findMatchingDriver(savedRideRequest);
+        List<Driver> drivers = driverMatchingStrategy.findMatchingDriver(rideRequest);
 
         rideRequest.setDrivers(drivers);
         rideRequest.getRider().setAvailable(false);
-        savedRideRequest = rideRequestService.saveRideRequest(rideRequest);
+//        savedRideRequest = rideRequestService.saveRideRequest(rideRequest);
+        RideRequest savedRideRequest = rideRequestService.saveRideRequest(rideRequest);
 
         return modelMapper.map(savedRideRequest, RideRequestDTO.class);
-    }
-
-    @Override
-    @Transactional
-    public RideDTO cancelRide(Long rideId, String reason) {
-
-        Rider rider = getCurrentRider();
-        Ride ride = rideService.getRideById(rideId);
-
-        if (!rider.equals(ride.getRider()))
-            throw new RuntimeException(("Rider does not own this ride with id: " + rideId));
-
-        if (!ride.getRideStatus().equals(RideStatus.CONFIRMED))
-            throw new RuntimeException("Ride cannot be cancelled, invalid status: " + ride.getRideStatus());
-
-        CancelRide cancelRide = cancelRideService.cancelRide(
-                ride,
-                reason,
-                Role.RIDER
-        );
-
-        driverService.confirmAndClearAssociations(ride.getRideRequest());
-        driverService.updateDriverAvailability(ride.getDriver(), true);
-
-        RideDTO rideDTO = modelMapper.map(cancelRide.getRide(), RideDTO.class);
-
-        CancelRideDTO cancelRideDTO = modelMapper.map(cancelRide, CancelRideDTO.class);
-        cancelRideDTO.setRide(null);
-        rideDTO.setCancelRide(cancelRideDTO);
-        rideDTO.setRating(null);
-        return rideDTO;
-    }
-
-    @Override
-    @Transactional
-    public DriverDTO submitRating(Long rideId, RatingDTO ratingDTO) {
-        Ride ride = rideService.getRideById(rideId);
-        Rider rider = getCurrentRider();
-
-        if (!rider.equals(ride.getRider()))
-            throw new RuntimeException("Rider is not the owner of this Ride");
-
-        if (!ride.getRideStatus().equals(RideStatus.ENDED))
-            throw new RuntimeException("Ride status is not Ended hence cannot start rating, status: " + ride.getRideStatus());
-
-        return ratingService.rateDriver(ride, ratingDTO);
-    }
-
-
-    @Override
-    public RiderDTO getMyProfile() {
-        Rider currentRider = getCurrentRider();
-        return modelMapper.map(currentRider, RiderDTO.class);
-    }
-
-    // All the rides of the rider
-    @Override
-    public Page<RideDTO> getAllMyRides(PageRequest pageRequest) {
-        Rider currentRider = getCurrentRider();
-        return rideService
-                .getAllRidesOfRider(currentRider, pageRequest)
-                .map(ride -> modelMapper.map(ride, RideDTO.class));
-    }
-
-    @Override
-    public Page<RatingDTO> getReviewsByRider(PageRequest pageRequest) {
-
-        Rider currentRider = getCurrentRider();
-        if (currentRider == null)
-            throw new ResourceNotFoundException("Rider not found");
-
-        return ratingService.getReviewsByRider(currentRider, pageRequest);
-    }
-
-    @Override
-    @Transactional
-    public Rider createNewRider(User user) {
-        Rider rider = Rider
-                .builder()
-                .user(user)
-                .avgGivenRating(0.0)
-                .available(true)
-                .build();
-        return riderRepository.save(rider);
-    }
-
-    @Override
-    public Rider updateRider(Rider rider) {
-        return riderRepository.save(rider);
-    }
-
-    @Override
-    public OtpDTO getOtp(Long rideId) {
-        return rideService.getOtp(rideId);
-    }
-
-    // Using Spring Security, we get the context of the current user and get the rider
-    @Override
-    public Rider getCurrentRider() {
-        User currentUser = userService.getCurrentUser();
-
-        // currently we are returning with riderId = 1
-        return riderRepository
-                .findByUser(currentUser)
-                .orElseThrow(() -> new ResourceNotFoundException(
-                        "Rider not associated with the current user id: " +
-                                currentUser.getUserId())
-                );
-    }
-
-    @Override
-    public Page<CancelRideDTO> getCancelledRidesByRider(PageRequest pageRequest) {
-        Rider currentRider = getCurrentRider();
-
-        if (currentRider == null)
-            throw new ResourceNotFoundException("Rider not found");
-        // Fetch cancelled rides for the current driver
-        Page<CancelRide> cancelledRides = cancelRideService.getCancelRideByRole(Role.RIDER, pageRequest);
-
-        return cancelledRides.map(cancelRide -> modelMapper.map(cancelRide, CancelRideDTO.class));
-    }
-
-    @Override
-    public Page<RiderDTO> findRidersByName(String name, PageRequest pageRequest) {
-
-        Page<Rider> riders = riderRepository
-                .findByUserNameContainingIgnoreCase(name, pageRequest);
-        // If no riders are found, throw a custom exception
-        if (riders.isEmpty())
-            throw new ResourceNotFoundException("No riders found with name: " + name);
-
-        return riders.map(rider -> modelMapper.map(rider, RiderDTO.class));
-    }
-
-    @Override
-    public List<DriverDTO> getAvailableDriversForRideRequest(Long rideRequestId) {
-        RideRequest rideRequest = rideRequestService.getRideRequestById(rideRequestId);
-        List<Driver> drivers = rideRequest.getDrivers();
-
-        return drivers.stream()
-                .map(driver -> {
-                    DriverDTO driverDTO = modelMapper.map(driver, DriverDTO.class);
-                    driverDTO.setVehicles(null);
-                    return driverDTO;
-                })
-                .toList();
     }
 
     @Transactional
@@ -246,51 +126,115 @@ public class RiderServiceImpl implements RiderService {
         return driverService.confirmAndClearAssociations(rideRequest);
     }
 
+    @Override
+    public List<DriverDTO> getAvailableDriversForRideRequest(Long rideRequestId) {
+        RideRequest rideRequest = rideRequestService.getRideRequestById(rideRequestId);
+        List<Driver> drivers = rideRequest.getDrivers();
+
+        return drivers.stream()
+                .map(driver -> {
+                    DriverDTO driverDTO = modelMapper.map(driver, DriverDTO.class);
+                    driverDTO.setVehicles(null);
+                    return driverDTO;
+                })
+                .toList();
+    }
+
+    @Override
+    public OtpDTO getOtp(Long rideId) {
+        return rideService.getOtp(rideId);
+    }
+
+    @Override
+    @Transactional
+    public RideDTO cancelRide(Long rideId, String reason) {
+
+        Ride ride = validateRideOwnership(rideId, RideStatus.CONFIRMED);
+
+        CancelRide cancelRide = cancelRideService.cancelRide(ride, reason, Role.RIDER);
+
+        driverService.confirmAndClearAssociations(ride.getRideRequest());
+
+        RideDTO rideDTO = modelMapper.map(cancelRide.getRide(), RideDTO.class);
+
+        CancelRideDTO cancelRideDTO = modelMapper.map(cancelRide, CancelRideDTO.class);
+        cancelRideDTO.setRide(null);
+        rideDTO.setCancelRide(cancelRideDTO);
+        rideDTO.setRating(null);
+        return rideDTO;
+    }
+
+    @Override
+    @Transactional
+    public DriverDTO submitRating(Long rideId, RatingDTO ratingDTO) {
+        Ride ride = validateRideOwnership(rideId, RideStatus.ENDED);
+        return ratingService.rateDriver(ride, ratingDTO);
+
+    }
+
     @Transactional
     @Override
     public DistanceTimeResponseDTO driverToRiderDistanceTime(Long rideId, PointDTO driverLocation) {
-        Rider rider = getCurrentRider();
-
-        Ride ride = rideService.getRideById(rideId);
-//        Driver driver = ride.getDriver();
-
-        if (!ride.getRider().getRiderId().equals(rider.getRiderId()))
-            throw new RuntimeException("Rider is not the owner of this Ride");
-
-        if (!ride.getRideStatus().equals(RideStatus.CONFIRMED))
-            throw new RuntimeException("Ride status is not Confirmed hence cannot start the ride, status: " + ride.getRideStatus());
-
-        Point currentLocation = modelMapper.map(driverLocation, Point.class);
-        DistanceTimeResponseDTO responseDTO = calculateTimeDistance(currentLocation, ride.getRideRequest().getPickupLocation());
-
-        log.info("Driver to Rider Remaining: Distance={} km, Time={} min", responseDTO.getDistanceKm(), responseDTO.getTimeMinutes());
-        return responseDTO;
+        Ride ride = validateRideOwnership(rideId, RideStatus.CONFIRMED);
+        return calculateDistanceTime(driverLocation, ride.getRideRequest().getPickupLocation());
     }
 
     @Transactional
     @Override
     public DistanceTimeResponseDTO riderToDestinationDistanceTime(Long rideId, PointDTO driverLocation) {
-        Rider rider = getCurrentRider();
-
-        Ride ride = rideService.getRideById(rideId);
-
-        if (!ride.getRider().getRiderId().equals(rider.getRiderId()))
-            throw new RuntimeException("Rider is not the owner of this Ride");
-
-        if (!ride.getRideStatus().equals(RideStatus.ONGOING))
-            throw new RuntimeException("Ride status is not Started hence cannot calculate the distance and time to the destination, status: " + ride.getRideStatus());
-
-        Point currentLocation = modelMapper.map(driverLocation, Point.class);
-        DistanceTimeResponseDTO responseDTO = calculateTimeDistance(currentLocation, ride.getDropOffLocation());
-
-        log.info("Rider to Destination Remaining: Distance={} km, Time={} min", responseDTO.getDistanceKm(), responseDTO.getTimeMinutes());
-        return responseDTO;
+        Ride ride = validateRideOwnership(rideId, RideStatus.ONGOING);
+        return calculateDistanceTime(driverLocation, ride.getDropOffLocation());
     }
 
-    @Transactional
-    public DistanceTimeResponseDTO calculateTimeDistance(Point source, Point destination) {
+    // All the rides of the rider
+    @Override
+    public Page<RideDTO> getAllMyRides(PageRequest pageRequest) {
+        Rider currentRider = getCurrentRider();
+        return rideService
+                .getAllRidesOfRider(currentRider, pageRequest)
+                .map(ride -> modelMapper.map(ride, RideDTO.class));
+    }
 
-        return distanceTimeServiceManager
-                .calculateDistanceTime(source, destination);
+    @Override
+    public Page<RatingDTO> getReviewsByRider(PageRequest pageRequest) {
+        Rider currentRider = getCurrentRider();
+        return ratingService.getReviewsByRider(currentRider, pageRequest);
+    }
+
+    @Override
+    public Page<RiderDTO> findRidersByName(String name, PageRequest pageRequest) {
+
+        Page<Rider> riders = riderRepository
+                .findByUserNameContainingIgnoreCase(name, pageRequest);
+        // If no riders are found, throw a custom exception
+        if (riders.isEmpty())
+            throw new ResourceNotFoundException("No riders found with name: " + name);
+
+        return riders.map(rider -> modelMapper.map(rider, RiderDTO.class));
+    }
+
+
+    private Rider getCurrentRider() {
+        User currentUser = userService.getCurrentUser();
+        return riderRepository.findByUser(currentUser)
+                .orElseThrow(() -> new ResourceNotFoundException("Rider not found for user ID: " + currentUser.getUserId()));
+    }
+
+    private Ride validateRideOwnership(Long rideId, RideStatus requiredStatus) {
+        Ride ride = rideService.getRideById(rideId);
+        Rider currentRider = getCurrentRider();
+
+        if (!currentRider.equals(ride.getRider()))
+            throw new RuntimeException("Rider does not own this ride");
+
+        if (!ride.getRideStatus().equals(requiredStatus))
+            throw new RuntimeException("Invalid ride status: " + ride.getRideStatus());
+
+        return ride;
+    }
+
+    private DistanceTimeResponseDTO calculateDistanceTime(PointDTO source, Point destination) {
+        Point sourcePoint = modelMapper.map(source, Point.class);
+        return distanceTimeServiceManager.calculateDistanceTime(sourcePoint, destination);
     }
 }

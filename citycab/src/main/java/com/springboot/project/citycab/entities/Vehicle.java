@@ -5,6 +5,7 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.*;
 
+import java.util.Objects;
 import java.util.Set;
 
 @Entity
@@ -64,5 +65,16 @@ public class Vehicle {
                 ", color='" + color + '\'' +
                 ", drivers=" + drivers +
                 '}';
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (!(o instanceof Vehicle vehicle)) return false;
+        return capacity == vehicle.capacity && Objects.equals(vehicleId, vehicle.vehicleId) && Objects.equals(numberPlate, vehicle.numberPlate) && Objects.equals(registrationNumber, vehicle.registrationNumber) && Objects.equals(ownerName, vehicle.ownerName) && Objects.equals(model, vehicle.model) && Objects.equals(type, vehicle.type) && Objects.equals(color, vehicle.color) && Objects.equals(available, vehicle.available) && Objects.equals(registrationDate, vehicle.registrationDate);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(vehicleId, numberPlate, registrationNumber, ownerName, model, type, capacity, color, available, registrationDate);
     }
 }

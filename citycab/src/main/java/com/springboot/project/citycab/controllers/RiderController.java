@@ -59,15 +59,6 @@ public class RiderController {
         return ResponseEntity.ok(riderService.getAllMyRides(pageRequest));
     }
 
-    @GetMapping("/getCancelledRides")
-    public ResponseEntity<Page<CancelRideDTO>> getCancelledRides(
-            @RequestParam(defaultValue = "0") Integer pageOffset,
-            @RequestParam(defaultValue = "10", required = false) Integer pageSize) {
-        PageRequest pageRequest = PageRequest.of(pageOffset, pageSize,
-                Sort.by(Sort.Direction.ASC, "cancelRideId"));
-        return ResponseEntity.ok(riderService.getCancelledRidesByRider(pageRequest));
-    }
-
     @GetMapping("/getOtp/{rideId}")
     public ResponseEntity<OtpDTO> getOtp(@PathVariable Long rideId) {
         return ResponseEntity.ok(riderService.getOtp(rideId));

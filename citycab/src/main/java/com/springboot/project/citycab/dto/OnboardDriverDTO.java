@@ -5,7 +5,7 @@ import lombok.Data;
 @Data
 public class OnboardDriverDTO {
 
-    private Long aadharCardNumber;
+    private Long aadhaarCardNumber;
     private String drivingLicenseNumber;
 
     private AddressDTO address;

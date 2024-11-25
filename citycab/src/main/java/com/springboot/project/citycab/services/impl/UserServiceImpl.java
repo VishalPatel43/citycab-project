@@ -5,6 +5,7 @@ import com.springboot.project.citycab.dto.RolesDTO;
 import com.springboot.project.citycab.dto.UpdatePasswordDTO;
 import com.springboot.project.citycab.dto.UserDTO;
 import com.springboot.project.citycab.entities.User;
+import com.springboot.project.citycab.exceptions.RuntimeConflictException;
 import com.springboot.project.citycab.repositories.UserRepository;
 import com.springboot.project.citycab.services.UserService;
 import lombok.RequiredArgsConstructor;
@@ -83,6 +84,14 @@ public class UserServiceImpl implements UserDetailsService, UserService {
 
         userRepository.deleteById(userId);
 
+    }
+
+    @Override
+    public User validateUserForRole(Long userId, Role role, String roleName) {
+        User user = getUserById(userId);
+        if (user.getRoles().contains(role))
+            throw new RuntimeConflictException("User with id: " + userId + " is already a " + roleName);
+        return user;
     }
 
     @Override

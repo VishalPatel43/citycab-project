@@ -40,8 +40,8 @@ public class RatingServiceImpl implements RatingService {
         this.driverService = driverService;
     }
 
-    @Override
     @Transactional
+    @Override
     public DriverDTO rateDriver(Ride ride, RatingDTO ratingDTO) {
 
         Driver driver = ride.getDriver();
@@ -60,22 +60,11 @@ public class RatingServiceImpl implements RatingService {
 
         ratingRepository.save(ratingObj);
 
-        Double newRating = ratingRepository.findAllByDriver(driver)
-                .stream()
-                .mapToDouble(Rating::getDriverRating)
-                .average()
-                .orElse(0.0);
-        driver.setAvgRating(newRating);
-
+        driver.setAvgRating(calculateAvgDriverRating(driver));
         Driver savedDriver = driverService.saveDriver(driver);
-//        Driver savedDriver = driverRatingService.updateDriverRating(driver, newRating);
 
-
-        // Update rider's average given rating
-        Rider saveRider = updateRiderRating(rider);
-
-        // Save the updated rider with the new average rating
-        riderService.updateRider(rider);  // Ensure `save` method is available in `RiderService`
+        rider.setAvgGivenRating(calculateAvgRatingGivenByRider(rider));
+        riderService.saveRider(rider);
 
         return modelMapper.map(savedDriver, DriverDTO.class);
     }
@@ -88,6 +77,7 @@ public class RatingServiceImpl implements RatingService {
                 .driver(ride.getDriver())
                 .ride(ride)
                 .build();
+
         return ratingRepository.save(rating);
     }
 
@@ -95,10 +85,6 @@ public class RatingServiceImpl implements RatingService {
     public Page<RatingDTO> getReviewsByRider(Rider rider, Pageable pageable) {
 
         Page<Rating> ratings = ratingRepository.findByRider(rider, pageable);
-
-        if (ratings.isEmpty())
-            throw new ResourceNotFoundException("No ratings found for rider with id: " + rider.getRiderId());
-
         return ratings.map(rating -> modelMapper.map(rating, RatingDTO.class));
     }
 
@@ -106,9 +92,6 @@ public class RatingServiceImpl implements RatingService {
     public Page<RatingDTO> getReviewsForDriver(Driver driver, Pageable pageable) {
 
         Page<Rating> ratings = ratingRepository.findByDriver(driver, pageable);
-
-        if (ratings.isEmpty())
-            throw new ResourceNotFoundException("No ratings found for driver with id: " + driver.getDriverId());
 
         return ratings.map(rating -> modelMapper.map(rating, RatingDTO.class));
     }
@@ -119,25 +102,19 @@ public class RatingServiceImpl implements RatingService {
                 .orElseThrow(() -> new ResourceNotFoundException("Rating not found for ride with id: " + ride.getRideId()));
     }
 
-    private Driver updateDriverRating(Driver driver) {
-        double newRating = ratingRepository.findAllByDriver(driver)
+    private double calculateAvgDriverRating(Driver driver) {
+        return ratingRepository.findAllByDriver(driver)
                 .stream()
                 .mapToDouble(Rating::getDriverRating)
                 .average()
                 .orElse(0.0);
-
-        driver.setAvgRating(newRating);
-        return driverService.saveDriver(driver);
     }
 
-    private Rider updateRiderRating(Rider rider) {
-        double newRiderGivenRating = ratingRepository.findAllByRider(rider)
+    private double calculateAvgRatingGivenByRider(Rider rider) {
+        return ratingRepository.findAllByRider(rider)
                 .stream()
                 .mapToDouble(Rating::getDriverRating)
                 .average()
                 .orElse(0.0);
-
-        rider.setAvgGivenRating(newRiderGivenRating);
-        return riderService.updateRider(rider);
     }
 }

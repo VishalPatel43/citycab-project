@@ -66,15 +66,6 @@ public class DriverController {
         return ResponseEntity.ok(driverService.getAllMyRides(pageRequest));
     }
 
-    @GetMapping("/getCancelledRides")
-    public ResponseEntity<Page<CancelRideDTO>> getCancelledRides(
-            @RequestParam(defaultValue = "0") Integer pageOffset,
-            @RequestParam(defaultValue = "10", required = false) Integer pageSize) {
-        PageRequest pageRequest = PageRequest.of(pageOffset, pageSize,
-                Sort.by(Sort.Direction.ASC, "cancelRideId"));
-        return ResponseEntity.ok(driverService.getCancelledRidesByDriver(pageRequest));
-    }
-
     @GetMapping("/getReceivedReviews")
     public ResponseEntity<Page<RatingDTO>> getReviewsForDriver(
             @RequestParam(defaultValue = "0") Integer pageOffset,
@@ -85,8 +76,8 @@ public class DriverController {
     }
 
     @PostMapping("/updateAddress/{driverId}")
-    public ResponseEntity<DriverDTO> updateAddress(@PathVariable Long driverId, @RequestBody AddressDTO addressDTO) {
-        return ResponseEntity.ok(driverService.updateDriverAddress(driverId, addressDTO));
+    public ResponseEntity<DriverDTO> updateAddress(@RequestBody AddressDTO addressDTO) {
+        return ResponseEntity.ok(driverService.updateDriverAddress(addressDTO));
     }
 
     @GetMapping("/getVehicles")

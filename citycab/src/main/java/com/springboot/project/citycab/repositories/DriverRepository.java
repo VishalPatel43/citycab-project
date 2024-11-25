@@ -63,6 +63,7 @@ public interface DriverRepository extends JpaRepository<Driver, Long> {
             "AND d.avg_rating < 4 " +
             "ORDER BY driverDistanceFromRider ASC, d.avg_rating DESC " +
             "LIMIT 10", nativeQuery = true)
+//    List<Driver> findNearestDriversFrom3To10KmWithLowRatingAndAvailable(Point pickupLocation, Boolean available);
     List<Driver> findNearestDriversFrom3To10KmWithLowRating(Point pickupLocation);
 
     //    @RestResource(exported = false)
@@ -96,5 +97,5 @@ public interface DriverRepository extends JpaRepository<Driver, Long> {
 
     Optional<Driver> findByDrivingLicenseNumber(String drivingLicenseNumber);
 
-    Optional<Driver> findByAadharCardNumber(Long aadharCardNumber);
+    Optional<Driver> findByAadhaarCardNumber(Long aadhaarCardNumber);
 }

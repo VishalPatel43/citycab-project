@@ -1,7 +1,6 @@
 package com.springboot.project.citycab.services;
 
 
-import com.springboot.project.citycab.constants.enums.RideStatus;
 import com.springboot.project.citycab.dto.OtpDTO;
 import com.springboot.project.citycab.entities.Driver;
 import com.springboot.project.citycab.entities.Ride;
@@ -17,14 +16,14 @@ public interface RideService {
 
     Ride createNewRide(RideRequest rideRequest, Driver driver);
 
-    Ride updateRideStatus(Ride ride, RideStatus rideStatus);
-
     Page<Ride> getAllRidesOfRider(Rider rider, PageRequest pageRequest);
 
     Page<Ride> getAllRidesOfDriver(Driver driver, PageRequest pageRequest);
 
     OtpDTO getOtp(Long rideId);
 
-    Ride updateRide(Ride ride);
+    Ride saveRide(Ride ride);
+
+    Ride setDistanceTimeForRide(Ride ride);
 
 }

@@ -1,5 +1,6 @@
 package com.springboot.project.citycab.services;
 
+import com.springboot.project.citycab.constants.enums.Role;
 import com.springboot.project.citycab.dto.RolesDTO;
 import com.springboot.project.citycab.dto.UpdatePasswordDTO;
 import com.springboot.project.citycab.dto.UserDTO;
@@ -18,6 +19,8 @@ public interface UserService {
     User saveUser(User newUser);
 
     void deleteUser(Long userId);
+
+    User validateUserForRole(Long userId, Role role, String roleName);
 
     UserDTO updateUserProfile(Long userId, UserDTO userDTO);
 

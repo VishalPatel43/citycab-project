@@ -10,35 +10,32 @@ import java.util.List;
 
 public interface RiderService {
 
+    RiderDTO getMyProfile();
+
+    Rider saveRider(Rider rider);
+
+    Rider createNewRider(User user);
+
     RideRequestDTO requestRide(RideRequestDTO rideRequestDTO);
+
+    RideRequestDTO cancelRideRequestByRider(Long rideRequestId);
+
+    List<DriverDTO> getAvailableDriversForRideRequest(Long rideRequestId);
+
+    OtpDTO getOtp(Long rideId);
 
     RideDTO cancelRide(Long rideId, String reason);
 
     DriverDTO submitRating(Long rideId, RatingDTO ratingDTO);
 
-    RiderDTO getMyProfile();
+    DistanceTimeResponseDTO driverToRiderDistanceTime(Long rideId, PointDTO driverLocation);
+
+    DistanceTimeResponseDTO riderToDestinationDistanceTime(Long rideId, PointDTO driverLocation);
 
     Page<RideDTO> getAllMyRides(PageRequest pageRequest);
 
     Page<RatingDTO> getReviewsByRider(PageRequest pageRequest);
 
-    Rider createNewRider(User user);
-
-    Rider updateRider(Rider rider);
-
-    OtpDTO getOtp(Long rideId);
-
-    Rider getCurrentRider();
-
-    Page<CancelRideDTO> getCancelledRidesByRider(PageRequest pageRequest);
-
     Page<RiderDTO> findRidersByName(String name, PageRequest pageRequest);
 
-    List<DriverDTO> getAvailableDriversForRideRequest(Long rideRequestId);
-
-    RideRequestDTO cancelRideRequestByRider(Long rideRequestId);
-
-    DistanceTimeResponseDTO driverToRiderDistanceTime(Long rideId, PointDTO driverLocation);
-
-    DistanceTimeResponseDTO riderToDestinationDistanceTime(Long rideId, PointDTO driverLocation);
 }
