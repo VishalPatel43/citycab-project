@@ -21,4 +21,12 @@ public interface RatingService {
 
     Rating getRatingByRide(Ride ride);
 
+    Rating getRatingById(Long ratingId);
+
+    RatingDTO findRatingById(Long ratingId);
+
+    Page<RatingDTO> getAllRatings(Pageable pageable);
+
+    RatingDTO updateRating(Long ratingId, RatingDTO ratingDTO);
+
 }

@@ -1,7 +1,6 @@
 package com.springboot.project.citycab.services;
 
 import com.springboot.project.citycab.dto.*;
-import com.springboot.project.citycab.entities.Driver;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 

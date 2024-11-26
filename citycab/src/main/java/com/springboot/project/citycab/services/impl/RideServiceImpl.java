@@ -4,6 +4,8 @@ import com.springboot.project.citycab.constants.enums.RideRequestStatus;
 import com.springboot.project.citycab.constants.enums.RideStatus;
 import com.springboot.project.citycab.dto.DistanceTimeResponseDTO;
 import com.springboot.project.citycab.dto.OtpDTO;
+import com.springboot.project.citycab.dto.RideDTO;
+import com.springboot.project.citycab.dto.RiderDTO;
 import com.springboot.project.citycab.entities.Driver;
 import com.springboot.project.citycab.entities.Ride;
 import com.springboot.project.citycab.entities.RideRequest;
@@ -40,6 +42,27 @@ public class RideServiceImpl implements RideService {
     public Ride getRideById(Long rideId) {
         return rideRepository.findById(rideId)
                 .orElseThrow(() -> new RuntimeException("Ride not found with id: " + rideId));
+    }
+
+    @Override
+    public RideDTO getRideDTOById(Long rideId) {
+        Ride ride = getRideById(rideId);
+        return modelMapper.map(ride, RideDTO.class);
+    }
+
+    @Override
+    public Page<RiderDTO> getAllRides(PageRequest pageRequest) {
+        return rideRepository.findAll(pageRequest)
+                .map(ride -> modelMapper.map(ride, RiderDTO.class));
+    }
+
+    @Transactional
+    @Override
+    public RideDTO updateRide(Long rideId, RideDTO rideDTO) {
+        getRideById(rideId);
+        Ride ride = modelMapper.map(rideDTO, Ride.class);
+        ride.setRideId(rideId);
+        return modelMapper.map(saveRide(modelMapper.map(rideDTO, Ride.class)), RideDTO.class);
     }
 
     @Transactional

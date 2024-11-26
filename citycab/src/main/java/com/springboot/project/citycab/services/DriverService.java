@@ -12,7 +12,13 @@ public interface DriverService {
 
     Driver getDriverById(Long driverId);
 
+    DriverDTO findDriverById(Long driverId);
+
     Driver saveDriver(Driver driver);
+
+    DriverDTO saveDriver(Long driverId, DriverDTO driverDTO);
+
+    Page<DriverDTO> findAllDrivers(PageRequest pageRequest);
 
     Driver createDriver(User user, Address address, Vehicle vehicle, OnboardDriverDTO onboardDriverDTO, Point currentLocation);
 
@@ -63,4 +69,6 @@ public interface DriverService {
     List<Driver> findTenNearbyTopRatedDrivers(Point pickupLocation);
 
     Page<DriverDTO> findDriversByName(String name, PageRequest pageRequest);
+
+
 }

@@ -27,7 +27,7 @@ public class Rider {
     public String toString() {
         return "Rider{" +
                 "riderId=" + riderId + "\n" +
-//                ", available=" + available +
+                ", available=" + available +
                 ", user=" + user +
                 '}';
     }

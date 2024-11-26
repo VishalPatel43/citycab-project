@@ -11,6 +11,8 @@ import com.springboot.project.citycab.services.UserService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.modelmapper.ModelMapper;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.core.Authentication;
@@ -62,10 +64,38 @@ public class UserServiceImpl implements UserDetailsService, UserService {
     }
 
     @Override
+    public UserDTO findUserById(Long userId) {
+        User user = getUserById(userId);
+        return modelMapper.map(user, UserDTO.class);
+    }
+
+    @Override
+    public Page<UserDTO> getAllUsers(PageRequest pageRequest) {
+        return userRepository.findAll(pageRequest)
+                .map(user -> modelMapper.map(user, UserDTO.class));
+    }
+
+    @Transactional
+    @Override
+    public UserDTO saveUser(Long userId, UserDTO userDTO) {
+        getUserById(userId);
+        User user = modelMapper.map(userDTO, User.class);
+        user.setUserId(userId);
+        return modelMapper.map(saveUser(user), UserDTO.class);
+    }
+
+    @Override
     public User getUserByEmail(String email) {
         return userRepository.findByEmail(email)
 //                .orElseThrow(() -> new UsernameNotFoundException("User not found with email: " + email));
-                .orElse(null); // it will help in the OAuth2 implementation
+                .orElse(null); // Supports OAuth2 use cases
+
+    }
+
+    @Override
+    public User getUserByMobileNumber(String mobileNumber) {
+        return userRepository.findByMobileNumber(mobileNumber)
+                .orElse(null);
     }
 
     @Transactional
@@ -74,16 +104,11 @@ public class UserServiceImpl implements UserDetailsService, UserService {
         return userRepository.save(newUser);
     }
 
+    @Transactional
+    @Override
     public void deleteUser(Long userId) {
-        User user = getUserById(userId);
-
-        User currentUser = getCurrentUser();
-
-        if (!currentUser.getUserId().equals(userId) && !currentUser.getRoles().contains(Role.ADMIN))
-            throw new AccessDeniedException("You are not authorized to update password for this user");
-
+        validateUserAccess(userId);
         userRepository.deleteById(userId);
-
     }
 
     @Override
@@ -96,11 +121,7 @@ public class UserServiceImpl implements UserDetailsService, UserService {
 
     @Override
     public UserDTO updateUserProfile(Long userId, UserDTO userDTO) {
-        User user = getUserById(userId);
-        User currentUser = getCurrentUser();
-
-        if (!currentUser.getUserId().equals(userId) && !currentUser.getRoles().contains(Role.ADMIN))
-            throw new AccessDeniedException("You are not authorized to update profile for this user");
+        User user = validateUserAccess(userId);
 
         user.setName(userDTO.getName());
         user.setEmail(userDTO.getEmail());
@@ -129,11 +150,7 @@ public class UserServiceImpl implements UserDetailsService, UserService {
     @Override
     public UserDTO updatePassword(Long userId, UpdatePasswordDTO updatePasswordDTO) {
 
-        User user = getUserById(userId);
-        User currentUser = getCurrentUser();
-
-        if (!currentUser.getUserId().equals(userId) && !currentUser.getRoles().contains(Role.ADMIN))
-            throw new AccessDeniedException("You are not authorized to update password for this user");
+        User user = validateUserAccess(userId);
 
         if (!passwordEncoder.matches(updatePasswordDTO.getCurrentPassword(), user.getPassword()))
             throw new BadCredentialsException("Current password is incorrect");
@@ -142,4 +159,15 @@ public class UserServiceImpl implements UserDetailsService, UserService {
         return modelMapper.map(userRepository.save(user), UserDTO.class);
 
     }
+
+    private User validateUserAccess(Long userId) {
+        User user = getUserById(userId);
+        User currentUser = getCurrentUser();
+
+        if (!currentUser.getUserId().equals(userId) && !currentUser.getRoles().contains(Role.ADMIN))
+            throw new AccessDeniedException("You are not authorized to access this user.");
+
+        return user;
+    }
 }
+

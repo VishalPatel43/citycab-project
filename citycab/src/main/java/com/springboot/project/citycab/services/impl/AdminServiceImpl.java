@@ -52,7 +52,8 @@ public class AdminServiceImpl implements AdminService {
         userService.validateUserForRole(userId, Role.ADMIN, "Admin");
         User user = userService.validateUserForRole(userId, Role.DRIVER, "Driver");
 
-        Address address = addressService.saveAddress(onboardDriverDTO.getAddress()); // we get the address id after saving
+        Address tempAddress = modelMapper.map(onboardDriverDTO.getAddress(), Address.class);
+        Address address = addressService.saveAddress(tempAddress); // we get the address id after saving
 
         // Map and save or retrieve the Vehicle (if vehicle already exists)
         Vehicle vehicle = vehicleService.validateAndCreateVehicle(onboardDriverDTO.getVehicle()); // we get the vehicle id after saving
@@ -173,13 +174,7 @@ public class AdminServiceImpl implements AdminService {
     }
 
     private Page<CancelRideDTO> getCancelledRides(Role role, PageRequest pageRequest) {
-        Page<CancelRide> cancelledRides = cancelRideService.getCancelRideByRole(role, pageRequest);
-
-        return cancelledRides.map(cancelRide -> {
-            CancelRideDTO cancelRideDTO = modelMapper.map(cancelRide, CancelRideDTO.class);
-            cancelRideDTO.getRide().getDriver().setVehicles(null);
-            return cancelRideDTO;
-        });
+        return cancelRideService.getCancelRideByRole(role, pageRequest);
     }
 
 }

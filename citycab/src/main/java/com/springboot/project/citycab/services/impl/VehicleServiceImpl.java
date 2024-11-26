@@ -7,6 +7,8 @@ import com.springboot.project.citycab.repositories.VehicleRepository;
 import com.springboot.project.citycab.services.VehicleService;
 import lombok.RequiredArgsConstructor;
 import org.modelmapper.ModelMapper;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -72,5 +74,26 @@ public class VehicleServiceImpl implements VehicleService {
             throw new RuntimeConflictException("Vehicle with registration number: " + vehicleDTO.getRegistrationNumber() + " does not exist");
 
         return vehicle;
+    }
+
+    @Transactional
+    @Override
+    public VehicleDTO updateVehicle(Long vehicleId, VehicleDTO vehicleDTO) {
+        findVehicleById(vehicleId);
+        Vehicle vehicle = modelMapper.map(vehicleDTO, Vehicle.class);
+        vehicle.setVehicleId(vehicleId);
+        return modelMapper.map(saveVehicle(modelMapper.map(vehicleDTO, Vehicle.class)), VehicleDTO.class);
+    }
+
+    @Override
+    public VehicleDTO getVehicleById(Long vehicleId) {
+        Vehicle vehicle = findVehicleById(vehicleId);
+        return modelMapper.map(vehicle, VehicleDTO.class);
+    }
+
+    @Override
+    public Page<VehicleDTO> getAllVehicles(PageRequest pageRequest) {
+        return vehicleRepository.findAll(pageRequest)
+                .map(vehicle -> modelMapper.map(vehicle, VehicleDTO.class));
     }
 }

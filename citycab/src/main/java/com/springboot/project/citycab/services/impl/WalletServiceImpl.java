@@ -2,6 +2,7 @@ package com.springboot.project.citycab.services.impl;
 
 import com.springboot.project.citycab.constants.enums.TransactionMethod;
 import com.springboot.project.citycab.constants.enums.TransactionType;
+import com.springboot.project.citycab.dto.WalletDTO;
 import com.springboot.project.citycab.entities.Ride;
 import com.springboot.project.citycab.entities.User;
 import com.springboot.project.citycab.entities.Wallet;
@@ -11,6 +12,9 @@ import com.springboot.project.citycab.repositories.WalletRepository;
 import com.springboot.project.citycab.services.WalletService;
 import com.springboot.project.citycab.services.WalletTransactionService;
 import lombok.RequiredArgsConstructor;
+import org.modelmapper.ModelMapper;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -22,6 +26,9 @@ public class WalletServiceImpl implements WalletService {
     private final WalletRepository walletRepository;
     // Service
     private final WalletTransactionService walletTransactionService;
+
+    // Mapper
+    private final ModelMapper modelMapper;
 
     @Override
     @Transactional
@@ -91,6 +98,27 @@ public class WalletServiceImpl implements WalletService {
     public Wallet findByUser(User user) {
         return walletRepository.findByUser(user)
                 .orElseThrow(() -> new ResourceNotFoundException("Wallet not found for user with id: " + user.getUserId()));
+    }
+
+    @Transactional
+    @Override
+    public WalletDTO updateWallet(Long walletId, WalletDTO walletDTO) {
+        findWalletById(walletId);
+        Wallet wallet = modelMapper.map(walletDTO, Wallet.class);
+        wallet.setWalletId(walletId);
+        return modelMapper.map(walletRepository.save(wallet), WalletDTO.class);
+    }
+
+    @Override
+    public WalletDTO getWalletById(Long walletId) {
+        Wallet wallet = findWalletById(walletId);
+        return modelMapper.map(wallet, WalletDTO.class);
+    }
+
+    @Override
+    public Page<WalletDTO> getAllWallets(PageRequest pageRequest) {
+        return walletRepository.findAll(pageRequest)
+                .map(wallet -> modelMapper.map(wallet, WalletDTO.class));
     }
 
 }

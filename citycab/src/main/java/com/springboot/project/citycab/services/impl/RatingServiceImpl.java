@@ -102,6 +102,37 @@ public class RatingServiceImpl implements RatingService {
                 .orElseThrow(() -> new ResourceNotFoundException("Rating not found for ride with id: " + ride.getRideId()));
     }
 
+    @Override
+    public RatingDTO findRatingById(Long ratingId) {
+        Rating rating = getRatingById(ratingId);
+        return modelMapper.map(rating, RatingDTO.class);
+    }
+
+    @Override
+    public Rating getRatingById(Long ratingId) {
+        return ratingRepository.findById(ratingId)
+                .orElseThrow(() -> new ResourceNotFoundException("Rating not found with id: " + ratingId));
+    }
+
+    @Override
+    public Page<RatingDTO> getAllRatings(Pageable pageable) {
+        Page<Rating> ratings = ratingRepository.findAll(pageable);
+        return ratings.map(rating -> modelMapper.map(rating, RatingDTO.class));
+    }
+
+    @Transactional
+    @Override
+    public RatingDTO updateRating(Long ratingId, RatingDTO ratingDTO) {
+        Rating rating = getRatingById(ratingId);
+
+        rating.setDriverRating(ratingDTO.getDriverRating().intValue());
+        rating.setComment(ratingDTO.getComment());
+        rating.setRatingDate(LocalDateTime.now());
+
+        Rating updatedRating = ratingRepository.save(rating);
+        return modelMapper.map(updatedRating, RatingDTO.class);
+    }
+
     private double calculateAvgDriverRating(Driver driver) {
         return ratingRepository.findAllByDriver(driver)
                 .stream()

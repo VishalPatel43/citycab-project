@@ -64,6 +64,32 @@ public class RiderServiceImpl implements RiderService {
 
     @Transactional
     @Override
+    public RiderDTO updateRider(Long riderId, RiderDTO riderDTO) {
+        getRiderById(riderId);
+        Rider rider = modelMapper.map(riderDTO, Rider.class);
+        rider.setRiderId(riderId);
+        return modelMapper.map(saveRider(modelMapper.map(riderDTO, Rider.class)), RiderDTO.class);
+    }
+
+    @Override
+    public Rider getRiderById(Long riderId) {
+        return riderRepository.findById(riderId)
+                .orElseThrow(() -> new ResourceNotFoundException("Rider not found with id: " + riderId));
+    }
+
+    @Override
+    public RiderDTO findRiderById(Long riderId) {
+        Rider rider = getRiderById(riderId);
+        return modelMapper.map(rider, RiderDTO.class);
+    }
+
+    @Override
+    public Page<RiderDTO> getAllRiders(PageRequest pageRequest) {
+        return null;
+    }
+
+    @Transactional
+    @Override
     public Rider createNewRider(User user) {
         Rider rider = Rider
                 .builder()

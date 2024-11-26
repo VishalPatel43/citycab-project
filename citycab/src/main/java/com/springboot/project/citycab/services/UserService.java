@@ -5,6 +5,8 @@ import com.springboot.project.citycab.dto.RolesDTO;
 import com.springboot.project.citycab.dto.UpdatePasswordDTO;
 import com.springboot.project.citycab.dto.UserDTO;
 import com.springboot.project.citycab.entities.User;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 
 public interface UserService {
 
@@ -14,7 +16,15 @@ public interface UserService {
 
     User getUserById(Long userId);
 
+    UserDTO findUserById(Long userId);
+
+    Page<UserDTO> getAllUsers(PageRequest pageRequest);
+
+    UserDTO saveUser(Long userId, UserDTO userDTO);
+
     User getUserByEmail(String email);
+
+    User getUserByMobileNumber(String mobileNumber);
 
     User saveUser(User newUser);
 

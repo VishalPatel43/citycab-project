@@ -47,6 +47,8 @@ public class RideDTO {
 
     private RiderDTO rider;
 
+    private RideRequestDTO rideRequest;
+
     private RatingDTO rating;
 
     private CancelRideDTO cancelRide;

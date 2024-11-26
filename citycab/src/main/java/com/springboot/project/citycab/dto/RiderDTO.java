@@ -13,5 +13,4 @@ public class RiderDTO {
     private UserDTO user;
     private Double avgGivenRating;
     private Boolean available;
-//    private Double rating;
 }

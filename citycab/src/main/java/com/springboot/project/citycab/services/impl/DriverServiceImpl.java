@@ -56,10 +56,31 @@ public class DriverServiceImpl implements DriverService {
                 .orElseThrow(() -> new ResourceNotFoundException("Driver not found with id: " + driverId));
     }
 
+    @Override
+    public DriverDTO findDriverById(Long driverId) {
+        Driver driver = getDriverById(driverId);
+        return mapDriverToDTO(driver);
+    }
+
     @Transactional
     @Override
     public Driver saveDriver(Driver driver) {
         return driverRepository.save(driver);
+    }
+
+    @Override
+    public DriverDTO saveDriver(Long driverId, DriverDTO driverDTO) {
+        findDriverById(driverId);
+        Driver driver = modelMapper.map(driverDTO, Driver.class);
+        driver.setDriverId(driverId);
+        return mapDriverToDTO(driverRepository.save(driver));
+    }
+
+    @Override
+    public Page<DriverDTO> findAllDrivers(PageRequest pageRequest) {
+        return driverRepository
+                .findAll(pageRequest)
+                .map(this::mapDriverToDTO);
     }
 
     @Transactional

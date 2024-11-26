@@ -14,6 +14,14 @@ public interface RiderService {
 
     Rider saveRider(Rider rider);
 
+    RiderDTO updateRider(Long riderId, RiderDTO riderDTO);
+
+    Rider getRiderById(Long riderId);
+
+    RiderDTO findRiderById(Long riderId);
+
+    Page<RiderDTO> getAllRiders(PageRequest pageRequest);
+
     Rider createNewRider(User user);
 
     RideRequestDTO requestRide(RideRequestDTO rideRequestDTO);
